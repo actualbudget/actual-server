@@ -11,7 +11,7 @@ jobs:
   build:
     name: Build and publish Docker image
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    #if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
 
@@ -28,8 +28,8 @@ jobs:
     - name: Build container image
       run: |
         docker build \
-        --tag ghcr.io/m3nu/actual-server:${{ env.RELEASE_VERSION }} \
-        --tag ghcr.io/m3nu/actual-server:latest \
+        --tag ghcr.io/actualbudget/actual-server:${{ env.RELEASE_VERSION }} \
+        --tag ghcr.io/actualbudget/actual-server:latest \
         .
     - name: Container registry login
       run: |
@@ -37,5 +37,5 @@ jobs:
       
     - name: Push image to GitHub
       run: |
-        docker push ghcr.io/m3nu/actual-server:${{ env.RELEASE_VERSION }}
-        docker push ghcr.io/m3nu/actual-server:latest
+        docker push ghcr.io/actualbudget/actual-server:${{ env.RELEASE_VERSION }}
+        docker push ghcr.io/actualbudget/actual-server:latest
