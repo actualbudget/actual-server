@@ -28,8 +28,8 @@ jobs:
     - name: Build container image
       run: |
         docker build \
-        --tag ghcr.io/pikapods/actual-server:${{ env.RELEASE_VERSION }} \
-        --tag ghcr.io/pikapods/actual-server:latest \
+        --tag ghcr.io/m3nu/actual-server:${{ env.RELEASE_VERSION }} \
+        --tag ghcr.io/m3nu/actual-server:latest \
         .
     - name: Container registry login
       run: |
@@ -37,5 +37,5 @@ jobs:
       
     - name: Push image to GitHub
       run: |
-        docker push ghcr.io/pikapods/actual-server:${{ env.RELEASE_VERSION }}
-        docker push ghcr.io/pikapods/actual-server:latest
+        docker push ghcr.io/m3nu/actual-server:${{ env.RELEASE_VERSION }}
+        docker push ghcr.io/m3nu/actual-server:latest
