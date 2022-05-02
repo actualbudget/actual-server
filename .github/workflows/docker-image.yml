@@ -33,4 +33,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/actualbudget/dashboard:latest
+            ghcr.io/actualbudget/actual-server:latest
