@@ -1,12 +1,13 @@
-FROM alpine as base
+# syntax=docker/dockerfile:1
+FROM alpine:3 as base
 RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
 WORKDIR /app
 ENV NODE_ENV=production
-ADD yarn.lock package.json ./
-RUN npm rebuild bcrypt --build-from-source
-RUN yarn install --production
+COPY yarn.lock package.json ./
+RUN npm rebuild bcrypt --build-from-source && \
+    yarn install --production
 
-FROM alpine as prod
+FROM alpine:3 as prod
 RUN apk add --no-cache nodejs yarn openssl tini
 WORKDIR /app
 COPY --from=base /app /app
