@@ -9,6 +9,7 @@
     "dev": "ts-node app",
     "lint": "eslint .",
     "build": "tsc",
+    "clean": "rm -rf build",
     "types": "tsc --noEmit --incremental",
     "verify": "yarn -s lint && yarn types"
   },
