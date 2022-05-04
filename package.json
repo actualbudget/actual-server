@@ -20,6 +20,7 @@
     "express-actuator": "^1.8.1",
     "express-response-size": "^0.0.3",
     "node-fetch": "^2.2.0",
+    "open": "^8.4.0",
     "uuid": "^3.3.2"
   },
   "eslintConfig": {
