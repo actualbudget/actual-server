@@ -50,7 +50,9 @@ async function run() {
   console.log('Listening on http://' + config.hostname + ':' + config.port);
   app.listen(config.port, config.hostname);
 
-  await open(`http://${config.hostname}:${config.port}`);
+  try {
+    open(`http://${config.hostname}:${config.port}`);
+  } catch (err) { }
 
 }
 
