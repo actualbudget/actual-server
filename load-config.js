@@ -9,7 +9,7 @@ try {
   config = {
     mode: 'development',
     port: 5006,
-    hostname: '0.0.0.0',
+    hostname: 'localhost',
     serverFiles: join(root, 'server-files'),
     userFiles: join(root, 'user-files')
   };

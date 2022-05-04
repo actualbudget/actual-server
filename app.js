@@ -1,4 +1,5 @@
 const fs = require('fs');
+const open = require('open');
 const express = require('express');
 const actuator = require('express-actuator');
 const bodyParser = require('body-parser');
@@ -46,8 +47,11 @@ async function run() {
   await accountApp.init();
   await syncApp.init();
 
-  console.log('Listening on ' + config.hostname + ':' + config.port + '...');
+  console.log('Listening on http://' + config.hostname + ':' + config.port);
   app.listen(config.port, config.hostname);
+
+  await open(`http://${config.hostname}:${config.port}`);
+
 }
 
 run().catch(err => {
