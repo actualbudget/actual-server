@@ -5,7 +5,7 @@
   "description": "actual syncing server",
   "main": "index.js",
   "scripts": {
-    "start": "node app",
+    "start": "node build/app",
     "dev": "ts-node app",
     "lint": "eslint .",
     "build": "tsc",
