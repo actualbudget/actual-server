@@ -14,7 +14,7 @@ It's very easy to get started. Clone this repo, install deps, and start it:
 git clone https://github.com/actualbudget/actual-server.git
 cd actual-server
 yarn install
-yarn start
+yarn dev
 ```
 
 Go to https://localhost:5006 in your browser and you'll see Actual.
