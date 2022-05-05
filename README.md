@@ -24,10 +24,7 @@ Go to https://localhost:5006 in your browser and you'll see Actual.
 To run using a Docker container you can use following commands;
 
 ```
-git clone https://github.com/actualbudget/actual-server.git
-cd actual-server
-docker build -t actual-server .
-docker run -p 5006:5006 actual-server
+docker run -p 5006:5006 ghcr.io/actualbudget/actual-server:latest
 ```
 
 
