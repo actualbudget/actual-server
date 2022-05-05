@@ -1,0 +1,67 @@
+name: Create and publish images
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - README.md
+      - LICENSE.txt
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract alpine metadata
+        id: alpine-meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=alpine,priority=50
+            type=sha,suffix=-alpine,prefix=
+
+      - name: Extract bullseye metadata
+        id: bullseye-meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,priority=50
+            type=raw,value=bullseye,priority=60
+            type=sha,suffix=-bullseye,prefix=
+
+      - name: Build and push alpine image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile.alpine
+          push: true
+          tags: ${{ steps.alpine-meta.outputs.tags }}
+          labels: ${{ steps.alpine-meta.outputs.labels }}
+
+      - name: Build and push bullseye image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.bullseye-meta.outputs.tags }}
+          labels: ${{ steps.bullseye-meta.outputs.labels }}
