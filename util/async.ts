@@ -1,4 +1,4 @@
-function sequential(fn) {
+export function sequential<T>(fn) {
   let sequenceState = {
     running: null,
     queue: []
@@ -17,18 +17,18 @@ function sequential(fn) {
     sequenceState.running = fn(...args);
 
     sequenceState.running.then(
-      val => {
+      (val) => {
         pump();
         resolve(val);
       },
-      err => {
+      (err) => {
         pump();
         reject(err);
       }
     );
   }
 
-  return (...args) => {
+  return (...args): Promise<T> => {
     if (!sequenceState.running) {
       return new Promise((resolve, reject) => {
         return run(args, resolve, reject);
@@ -41,4 +41,4 @@ function sequential(fn) {
   };
 }
 
-module.exports = { sequential };
+export default { sequential };
