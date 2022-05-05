@@ -1,6 +1,7 @@
-let { getAccountDb } = require('../account-db');
+import { Request, Response } from 'express';
+import { getAccountDb } from '../account-db';
 
-function validateUser(req, res) {
+export function validateUser(req: Request, res: Response) {
   let { token } = req.body || {};
 
   if (!token) {
@@ -23,4 +24,4 @@ function validateUser(req, res) {
   return rows[0];
 }
 
-module.exports = { validateUser };
+export default { validateUser };
