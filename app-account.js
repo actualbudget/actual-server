@@ -1,7 +1,7 @@
 let express = require('express');
 let bcrypt = require('bcrypt');
 let uuid = require('uuid');
-let errorMiddleware = require('./util/error-middleware');
+let errorMiddleware = require('./util/error-middleware').default;
 let { validateUser } = require('./util/validate-user');
 let { getAccountDb } = require('./account-db');
 

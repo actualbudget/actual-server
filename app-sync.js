@@ -4,7 +4,7 @@ let express = require('express');
 let uuid = require('uuid');
 let AdmZip = require('adm-zip');
 let { validateUser } = require('./util/validate-user');
-let errorMiddleware = require('./util/error-middleware');
+let errorMiddleware = require('./util/error-middleware').default;
 let config = require('./load-config');
 let { getAccountDb } = require('./account-db');
 
