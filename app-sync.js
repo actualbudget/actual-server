@@ -228,12 +228,14 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   let accountDb = getAccountDb();
+  // @ts-expect-error TS2345: we're apparently confident this is not an array
   let name = decodeURIComponent(req.headers['x-actual-name']);
   let fileId = req.headers['x-actual-file-id'];
   let groupId = req.headers['x-actual-group-id'] || null;
   let encryptMeta = req.headers['x-actual-encrypt-meta'] || null;
   let syncFormatVersion = req.headers['x-actual-format'] || null;
 
+  // @ts-expect-error TS2345: we're apparently confident this is not an array
   let keyId = encryptMeta ? JSON.parse(encryptMeta).keyId : null;
 
   if (!fileId) {
@@ -282,6 +284,7 @@ app.post('/upload-user-file', async (req, res) => {
   let zip = new AdmZip(req.body);
 
   try {
+    // @ts-expect-error TS2345: we're apparently confident this is not an array
     zip.extractAllTo(join(config.userFiles, fileId), true);
   } catch (err) {
     console.log('Error writing file', err);
@@ -337,6 +340,7 @@ app.get('/download-user-file', async (req, res) => {
 
   let zip = new AdmZip();
   try {
+    // @ts-expect-error TS2345: we're apparently confident this is not an array
     zip.addLocalFolder(join(config.userFiles, fileId), '/');
   } catch (e) {
     res.status(500).send('Error reading files');
