@@ -9,6 +9,9 @@ module.exports = {
   plugins: ['@typescript-eslint', 'prettier'],
   extends: ['eslint:recommended', "plugin:@typescript-eslint/recommended"],
   rules: {
-    "@typescript-eslint/no-var-requires": "off"
+    // TODO: currently set to match the existing code, though i recommend revisiting
+    'prefer-const': 'off',
+    '@typescript-eslint/no-var-requires': 'warn',
+    '@typescript-eslint/no-empty-function': 'warn'
   }
 };
