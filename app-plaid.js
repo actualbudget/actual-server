@@ -7,6 +7,7 @@ const { handleError } = require('./util/handle-error');
 const { validateSubscribedUser } = require('./util/validate-user');
 const config = require('./load-config');
 const { getPlaidDb } = require('./plaid-db');
+const { access } = require('fs');
 
 const app = express();
 
@@ -16,10 +17,15 @@ let plaidDb;
 function init() {
   plaidDb = getPlaidDb();
   let rows = plaidDb.all('SELECT * FROM plaid_config');
+
+  config.plaid.plaid_client_id = rows[0].plaid_client_id;
+  config.plaid.plaid_secret = rows[0].plaid_secret;
+  config.plaid.plaid_env = rows[0].plaid_env;
+
   plaidClient = new plaid.Client({
-    clientID: rows[0].plaid_client_id,
-    secret: rows[0].plaid_secret,
-    env: plaid.environments[rows[0].plaid_env],
+    clientID: config.plaid.plaid_client_id,
+    secret: config.plaid.plaid_secret,
+    env: plaid.environments[config.plaid.plaid_env],
     options: { version: '2019-05-29' }
   });
 }
@@ -91,7 +97,7 @@ app.post(
 
     let { data } = req.body;
 
-    // await plaidDb.mutate('UPDATE webTokens SET contents = ? WHERE token_id = ?', [JSON.stringify(data), data.token.token_id]);
+    await plaidDb.mutate('UPDATE webTokens SET contents = ? WHERE user_id = ?', [JSON.stringify(data), '0']);
     res.send(
       JSON.stringify({
         status: 'ok',
@@ -110,12 +116,12 @@ app.post(
       return;
     }
 
-    let token = await validateToken(req, res);
-    if (!token) {
-      return;
-    }
+    // let token = await validateToken(req, res);
+    // if (!token) {
+    //   return;
+    // }
 
-    let rows = await plaidDb.all('SELECT * FROM webTokens WHERE user_id = ? AND token_id = ?', [user.id, token.token_id]);
+    let rows = await plaidDb.all('SELECT * FROM webTokens WHERE user_id = ?', ['0']);
 
     if (rows.length === 0) {
       res.send(
@@ -167,23 +173,15 @@ app.post(
     }
     let { item_id, public_token } = req.body;
 
-    let url = config.plaid.env + '/item/public_token/exchange';
-    let resData = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        client_id: config.plaid.client_id,
-        secret: config.plaid.secret,
-        public_token: public_token
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Actual Budget'
+    plaidClient.exchangePublicToken(public_token, async function (error, tokenResponse) {
+      if (error != null) {
+        console.error(error);
+        process.exit(1);
       }
-    }).then(res => res.json());
+      await plaidDb.mutate('INSERT INTO access_tokens (item_id, user_id, access_token, deleted) VALUES (?, ?, ?, ?)', [item_id, user.id, tokenResponse.access_token, 'FALSE']);
 
-    await plaidDb.mutate('INSERT INTO access_tokens (item_id, user_id, access_token) VALUES (?, ?, ?)', [item_id, user.id, resData.access_token]);
-
-    res.send(JSON.stringify({ status: 'ok' }));
+      res.send(JSON.stringify({ status: 'ok' }));
+    });
   })
 );
 
@@ -197,37 +195,25 @@ app.post(
     }
     let { item_id } = req.body;
 
-    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ?', [user.id, item_id]);
+    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE item_id = ?', [item_id]);
 
     if (rows.length === 0) {
       throw new Error('access token not found');
     }
-    const { access_token } = rows[0];
+    const access_token = rows[0].access_token;
 
-    const url = config.plaid.env + '/item/remove';
-    const resData = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        client_id: config.plaid.client_id,
-        secret: config.plaid.secret,
-        access_token: access_token
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Actual Budget'
-      }
-    }).then(res => res.json());
+    let response = await plaidClient.removeItem(access_token);
 
-    if (resData.removed !== true) {
+    if (response.removed !== true) {
       console.log('[Error] Item not removed: ' + access_token.slice(0, 3));
     }
 
-    await plaidDb.mutate('UPDATE access_tokens SET deleted = TRUE WHERE access_token = ?', [access_token]);
+    await plaidDb.mutate('UPDATE access_tokens SET deleted = ? WHERE access_token = ?', ['TRUE', access_token]);
 
     res.send(
       JSON.stringify({
         status: 'ok',
-        data: resData
+        data: response
       })
     );
   })
@@ -243,33 +229,21 @@ app.post(
     }
     const { item_id } = req.body;
 
-    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ?', [user.id, item_id]);
+    const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE item_id = ?', [item_id]);
 
     if (rows.length === 0) {
       throw new Error('access token not found');
     }
-    const { access_token } = rows[0];
+    const access_token = rows[0].access_token;
 
-    const url = config.plaid.env + '/accounts/get';
-    const resData = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        client_id: config.plaid.client_id,
-        secret: config.plaid.secret,
-        access_token: access_token
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Actual Budget'
-      }
-    }).then(res => res.json());
-
-    res.send(
-      JSON.stringify({
-        status: 'ok',
-        data: resData
-      })
-    );
+    plaidClient.getAccounts(access_token, async (error, { accounts, item }) => {
+      res.send(
+        JSON.stringify({
+          status: 'ok',
+          data: accounts
+        })
+      );
+    });
   })
 );
 
@@ -283,9 +257,7 @@ app.post(
     }
     let { item_id, start_date, end_date, account_id, count, offset } = req.body;
 
-    let resData;
-
-    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ? AND deleted = FALSE', [user.id, item_id]);
+    const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE item_id = ? AND deleted = ?', [item_id, 'FALSE']);
 
     if (rows.length === 0) {
       res.status(400);
@@ -293,33 +265,14 @@ app.post(
       return;
     }
 
-    const { access_token } = rows[0];
+    const access_token = rows[0].access_token;
 
-    const url = config.plaid.env + '/transactions/get';
-    resData = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        client_id: config.plaid.client_id,
-        secret: config.plaid.secret,
-        access_token: access_token,
-        start_date: start_date,
-        end_date: end_date,
-        options: {
-          account_ids: [account_id],
-          count: count,
-          offset: offset
-        }
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Actual Budget'
-      }
-    }).then(res => res.json());
+    let transactions = await plaidClient.getTransactions(access_token, start_date, end_date);
 
     res.send(
       JSON.stringify({
         status: 'ok',
-        data: resData
+        data: transactions
       })
     );
   })
