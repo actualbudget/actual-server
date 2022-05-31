@@ -18,14 +18,10 @@ function init() {
   plaidDb = getPlaidDb();
   let rows = plaidDb.all('SELECT * FROM plaid_config');
 
-  config.plaid.plaid_client_id = rows[0].plaid_client_id;
-  config.plaid.plaid_secret = rows[0].plaid_secret;
-  config.plaid.plaid_env = rows[0].plaid_env;
-
   plaidClient = new plaid.Client({
-    clientID: config.plaid.plaid_client_id,
-    secret: config.plaid.plaid_secret,
-    env: plaid.environments[config.plaid.plaid_env],
+    clientID: rows[0].plaid_client_id,
+    secret: rows[0].plaid_secret,
+    env: plaid.environments[rows[0].plaid_env],
     options: { version: '2019-05-29' }
   });
 }
