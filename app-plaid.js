@@ -191,13 +191,14 @@ app.post(
     if (!user) {
       return;
     }
-    let { item_id } = req.body;
+    let item_id = req.body.item_id;
 
-    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE item_id = ?', [item_id]);
+    const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE item_id = ?', [item_id]);
 
     if (rows.length === 0) {
       throw new Error('access token not found');
     }
+
     const access_token = rows[0].access_token;
 
     let response = await plaidClient.removeItem(access_token);
