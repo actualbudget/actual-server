@@ -31,9 +31,14 @@ function init() {
 }
 
 async function validateToken(req, res) {
-  let { token } = req.body;
-
-  const rows = await plaidDb.all('SELECT * FROM webTokens WHERE token_id = ?', [token.webToken]);
+  var token;
+  if (req.body.token.webToken === undefined) {
+    token = req.body.token;
+  } else {
+    token = req.body.token.webToken;
+  }
+  const rows = await plaidDb.all('SELECT * FROM webTokens WHERE token_id = ?', [token]);
+  // console.log(rows);
   if (rows.length === 0) {
     res.send(JSON.stringify({ status: 'error', reason: 'not-found' }));
     return null;
@@ -44,17 +49,16 @@ async function validateToken(req, res) {
   let row = rows[0];
   let timeCreated = new Date(row.time_created);
 
-  // if (Date.now() - timeCreated.getTime() >= validTime) {
-  //   res.send(JSON.stringify({ status: 'error', reason: 'expired' }));
-  //   return null;
-  // }
+  if (Date.now() - timeCreated.getTime() >= validTime) {
+    res.send(JSON.stringify({ status: 'error', reason: 'expired' }));
+    return null;
+  }
 
   return row;
 }
 
 app.post(
   '/create-web-token',
-  // connectDb,
   handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
@@ -75,12 +79,11 @@ app.post(
 
 app.post(
   '/validate-web-token',
-  // connectDb,
   handleError(async (req, res) => {
-    // let token = await validateToken(req, res);
-    // if (!token) {
-    //   return;
-    // }
+    let token = await validateToken(req, res);
+    if (!token) {
+      return;
+    }
 
     res.send(JSON.stringify({ status: 'ok' }));
   })
@@ -88,12 +91,11 @@ app.post(
 
 app.post(
   '/put-web-token-contents',
-  // connectDb,
   handleError(async (req, res) => {
-    // let token = await validateToken(req, res);
-    // if (!token) {
-    //   return;
-    // }
+    let token = await validateToken(req, res);
+    if (!token) {
+      return;
+    }
 
     let { data } = req.body;
 
@@ -109,17 +111,16 @@ app.post(
 
 app.post(
   '/get-web-token-contents',
-  // connectDb,
   handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
       return;
     }
 
-    // let token = await validateToken(req, res);
-    // if (!token) {
-    //   return;
-    // }
+    let token = await validateToken(req, res);
+    if (!token) {
+      return;
+    }
 
     let rows = await plaidDb.all('SELECT * FROM webTokens WHERE user_id = ?', ['0']);
 
@@ -143,12 +144,11 @@ app.post(
 
 app.post(
   '/make_link_token',
-  // connectDb,
   handleError(async (req, res) => {
-    // let token = await validateToken(req, res);
-    // if (!token) {
-    //   return;
-    // }
+    let token = await validateToken(req, res);
+    if (!token) {
+      return;
+    }
 
     let result = await plaidClient.createLinkToken({
       user: {
@@ -165,7 +165,6 @@ app.post(
 
 app.post(
   '/handoff_public_token',
-  // connectDb,
   handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
@@ -187,7 +186,6 @@ app.post(
 
 app.post(
   '/remove-access-token',
-  // connectDb,
   handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
@@ -221,7 +219,6 @@ app.post(
 
 app.post(
   '/accounts',
-  // connectDb,
   handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
@@ -249,7 +246,6 @@ app.post(
 
 app.post(
   '/transactions',
-  // connectDb,
   handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
@@ -280,7 +276,6 @@ app.post(
 
 app.post(
   '/make-public-token',
-  // connectDb,
   handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
