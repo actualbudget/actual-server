@@ -38,7 +38,6 @@ async function validateToken(req, res) {
     token = req.body.token.webToken;
   }
   const rows = await plaidDb.all('SELECT * FROM webTokens WHERE token_id = ?', [token]);
-  // console.log(rows);
   if (rows.length === 0) {
     res.send(JSON.stringify({ status: 'error', reason: 'not-found' }));
     return null;
@@ -57,9 +56,7 @@ async function validateToken(req, res) {
   return row;
 }
 
-app.post(
-  '/create-web-token',
-  handleError(async (req, res) => {
+app.post('/create-web-token', handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
       return;
@@ -77,9 +74,7 @@ app.post(
   })
 );
 
-app.post(
-  '/validate-web-token',
-  handleError(async (req, res) => {
+app.post('/validate-web-token', handleError(async (req, res) => {
     let token = await validateToken(req, res);
     if (!token) {
       return;
@@ -89,16 +84,13 @@ app.post(
   })
 );
 
-app.post(
-  '/put-web-token-contents',
-  handleError(async (req, res) => {
+app.post('/put-web-token-contents', handleError(async (req, res) => {
     let token = await validateToken(req, res);
     if (!token) {
       return;
     }
 
     let { data } = req.body;
-
     await plaidDb.mutate('UPDATE webTokens SET contents = ? WHERE user_id = ?', [JSON.stringify(data), '0']);
     res.send(
       JSON.stringify({
@@ -109,9 +101,7 @@ app.post(
   })
 );
 
-app.post(
-  '/get-web-token-contents',
-  handleError(async (req, res) => {
+app.post('/get-web-token-contents', handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
       return;
@@ -142,9 +132,7 @@ app.post(
   })
 );
 
-app.post(
-  '/make_link_token',
-  handleError(async (req, res) => {
+app.post('/make_link_token', handleError(async (req, res) => {
     let token = await validateToken(req, res);
     if (!token) {
       return;
@@ -163,9 +151,7 @@ app.post(
   })
 );
 
-app.post(
-  '/handoff_public_token',
-  handleError(async (req, res) => {
+app.post('/handoff_public_token', handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
       return;
@@ -184,9 +170,7 @@ app.post(
   })
 );
 
-app.post(
-  '/remove-access-token',
-  handleError(async (req, res) => {
+app.post('/remove-access-token', handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
       return;
@@ -218,9 +202,7 @@ app.post(
   })
 );
 
-app.post(
-  '/accounts',
-  handleError(async (req, res) => {
+app.post('/accounts', handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
       return;
@@ -245,9 +227,7 @@ app.post(
   })
 );
 
-app.post(
-  '/transactions',
-  handleError(async (req, res) => {
+app.post('/transactions', handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
       return;
@@ -275,9 +255,7 @@ app.post(
   })
 );
 
-app.post(
-  '/make-public-token',
-  handleError(async (req, res) => {
+app.post('/make-public-token', handleError(async (req, res) => {
     let user = await validateSubscribedUser(req, res);
     if (!user) {
       return;
