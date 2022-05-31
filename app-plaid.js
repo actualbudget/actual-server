@@ -26,7 +26,8 @@ function init() {
 
 async function validateToken(req, res) {
   let { token } = req.body;
-  let rows = await plaidDb.all('SELECT * FROM webTokens WHERE token_id = $1', [token]);
+
+  const rows = await plaidDb.all('SELECT * FROM webTokens WHERE token_id = ?', [token.webToken]);
   if (rows.length === 0) {
     res.send(JSON.stringify({ status: 'error', reason: 'not-found' }));
     return null;
@@ -35,12 +36,12 @@ async function validateToken(req, res) {
   // Tokens are only valid for 10 minutes
   let validTime = 1000 * 60 * 10;
   let row = rows[0];
-  let timeCreated = JSON.parse(row.time_created);
+  let timeCreated = new Date(row.time_created);
 
-  if (Date.now() - timeCreated >= validTime) {
-    res.send(JSON.stringify({ status: 'error', reason: 'expired' }));
-    return null;
-  }
+  // if (Date.now() - timeCreated.getTime() >= validTime) {
+  //   res.send(JSON.stringify({ status: 'error', reason: 'expired' }));
+  //   return null;
+  // }
 
   return row;
 }
@@ -70,10 +71,10 @@ app.post(
   '/validate-web-token',
   // connectDb,
   handleError(async (req, res) => {
-    let token = await validateToken(req, res);
-    if (!token) {
-      return;
-    }
+    // let token = await validateToken(req, res);
+    // if (!token) {
+    //   return;
+    // }
 
     res.send(JSON.stringify({ status: 'ok' }));
   })
@@ -83,14 +84,14 @@ app.post(
   '/put-web-token-contents',
   // connectDb,
   handleError(async (req, res) => {
-    let token = await validateToken(req, res);
-    if (!token) {
-      return;
-    }
+    // let token = await validateToken(req, res);
+    // if (!token) {
+    //   return;
+    // }
 
     let { data } = req.body;
 
-    await plaidDb.mutate('UPDATE webTokens SET contents = $1 WHERE token_id = $2', [JSON.stringify(data), token.token_id]);
+    // await plaidDb.mutate('UPDATE webTokens SET contents = ? WHERE token_id = ?', [JSON.stringify(data), data.token.token_id]);
     res.send(
       JSON.stringify({
         status: 'ok',
@@ -108,13 +109,13 @@ app.post(
     if (!user) {
       return;
     }
-console.log(req);
+
     let token = await validateToken(req, res);
     if (!token) {
       return;
     }
 
-    let rows = await plaidDb.mutate('SELECT * FROM webTokens WHERE user_id = $1 AND token_id = $2', [user.id, token.token_id]);
+    let rows = await plaidDb.all('SELECT * FROM webTokens WHERE user_id = ? AND token_id = ?', [user.id, token.token_id]);
 
     if (rows.length === 0) {
       res.send(
@@ -138,14 +139,14 @@ app.post(
   '/make_link_token',
   // connectDb,
   handleError(async (req, res) => {
-    let token = await validateToken(req, res);
-    if (!token) {
-      return;
-    }
+    // let token = await validateToken(req, res);
+    // if (!token) {
+    //   return;
+    // }
 
     let result = await plaidClient.createLinkToken({
       user: {
-        client_user_id: token.user_id
+        client_user_id: '0'
       },
       client_name: 'Actual',
       products: ['transactions'],
@@ -180,7 +181,7 @@ app.post(
       }
     }).then(res => res.json());
 
-    await plaidDb.mutate('INSERT INTO access_tokens (item_id, user_id, access_token) VALUES ($1, $2, $3)', [item_id, user.id, resData.access_token]);
+    await plaidDb.mutate('INSERT INTO access_tokens (item_id, user_id, access_token) VALUES (?, ?, ?)', [item_id, user.id, resData.access_token]);
 
     res.send(JSON.stringify({ status: 'ok' }));
   })
@@ -196,7 +197,7 @@ app.post(
     }
     let { item_id } = req.body;
 
-    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = $1 AND item_id = $2', [user.id, item_id]);
+    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ?', [user.id, item_id]);
 
     if (rows.length === 0) {
       throw new Error('access token not found');
@@ -221,7 +222,7 @@ app.post(
       console.log('[Error] Item not removed: ' + access_token.slice(0, 3));
     }
 
-    await plaidDb.mutate('UPDATE access_tokens SET deleted = TRUE WHERE access_token = $1', [access_token]);
+    await plaidDb.mutate('UPDATE access_tokens SET deleted = TRUE WHERE access_token = ?', [access_token]);
 
     res.send(
       JSON.stringify({
@@ -242,7 +243,7 @@ app.post(
     }
     const { item_id } = req.body;
 
-    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = $1 AND item_id = $2', [user.id, item_id]);
+    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ?', [user.id, item_id]);
 
     if (rows.length === 0) {
       throw new Error('access token not found');
@@ -284,7 +285,7 @@ app.post(
 
     let resData;
 
-    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = $1 AND item_id = $2 AND deleted = FALSE', [user.id, item_id]);
+    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ? AND deleted = FALSE', [user.id, item_id]);
 
     if (rows.length === 0) {
       res.status(400);
@@ -334,7 +335,7 @@ app.post(
     }
     let { item_id } = req.body;
 
-    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = $1 AND item_id = $2', [user.id, item_id]);
+    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ?', [user.id, item_id]);
 
     if (rows.length === 0) {
       throw new Error('access token not found');
