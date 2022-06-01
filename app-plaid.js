@@ -18,12 +18,14 @@ function init() {
   plaidDb = getPlaidDb();
   let rows = plaidDb.all('SELECT * FROM plaid_config');
 
-  plaidClient = new plaid.Client({
-    clientID: rows[0].plaid_client_id,
-    secret: rows[0].plaid_secret,
-    env: plaid.environments[rows[0].plaid_env],
-    options: { version: '2019-05-29' }
-  });
+  if (rows.length !== 0) {
+    plaidClient = new plaid.Client({
+      clientID: rows[0].plaid_client_id,
+      secret: rows[0].plaid_secret,
+      env: plaid.environments[rows[0].plaid_env],
+      options: { version: '2019-05-29' }
+    });
+  }
 }
 
 async function validateToken(req, res) {
