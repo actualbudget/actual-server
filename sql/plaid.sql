@@ -15,4 +15,4 @@ CREATE TABLE access_tokens
    access_token TEXT,
    deleted BOOLEAN);
 
-INSERT INTO plaid_config (plaid_client_id, plaid_secret, plaid_env) VALUES ('', '', 'development');
+-- INSERT INTO plaid_config (plaid_client_id, plaid_secret, plaid_env) VALUES ('', '', 'development');

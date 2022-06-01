@@ -55,8 +55,6 @@ async function run() {
     fs.mkdirSync(config.userFiles);
   }
 
-  getPlaidDb();
-
   await accountApp.init();
   await syncApp.init();
   await plaidApp.init();
