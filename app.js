@@ -4,6 +4,7 @@ const actuator = require('express-actuator');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const config = require('./load-config');
+const { getPlaidDb } = require('./plaid-db');
 
 const accountApp = require('./app-account');
 const syncApp = require('./app-sync');
@@ -53,6 +54,8 @@ async function run() {
   if (!fs.existsSync(config.userFiles)) {
     fs.mkdirSync(config.userFiles);
   }
+
+  getPlaidDb();
 
   await accountApp.init();
   await syncApp.init();
