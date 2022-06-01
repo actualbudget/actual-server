@@ -12,7 +12,12 @@ try {
     port: 5006,
     hostname: '0.0.0.0',
     serverFiles: join(root, 'server-files'),
-    userFiles: join(root, 'user-files')
+    userFiles: join(root, 'user-files'),
+    plaid: {
+      plaid_client_id: '',
+      plaid_secret: '',
+      plaid_env: ''
+    }
   };
 }
 
