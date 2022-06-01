@@ -53,13 +53,11 @@ async function validateToken(req, res) {
 }
 
 app.post('/add-plaid-client-id', handleError(async (req, res) => {
-  console.log(req.body.clientID);
   await plaidDb.mutate('UPDATE plaid_config SET plaid_client_id = ?', [req.body.clientID]);
 })
 );
 
 app.post('/add-plaid-secret', handleError(async (req, res) => {
-  console.log(req.body.secret);
   await plaidDb.mutate('UPDATE plaid_config SET plaid_secret = ?', [req.body.secret]);
 })
 );
