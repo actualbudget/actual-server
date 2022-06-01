@@ -52,236 +52,248 @@ async function validateToken(req, res) {
   return row;
 }
 
-app.post('/create-web-token', handleError(async (req, res) => {
-    let user = await validateSubscribedUser(req, res);
-    if (!user) {
-      return;
-    }
+app.post('/add-plaid-client-id', handleError(async (req, res) => {
+  console.log(req.body.clientID);
+  await plaidDb.mutate('UPDATE plaid_config SET plaid_client_id = ?', [req.body.clientID]);
+})
+);
 
-    let token = uuid.v4();
-    await plaidDb.mutate('DELETE FROM webTokens WHERE user_id = ?', [user.id]);
-    await plaidDb.mutate('INSERT INTO webTokens (user_id, token_id, time_created) VALUES (?, ?, ?)', [user.id, token, Date.now()]);
-    res.send(
-      JSON.stringify({
-        status: 'ok',
-        data: token
-      })
-    );
-  })
+app.post('/add-plaid-secret', handleError(async (req, res) => {
+  console.log(req.body.secret);
+  await plaidDb.mutate('UPDATE plaid_config SET plaid_secret = ?', [req.body.secret]);
+})
+);
+
+app.post('/create-web-token', handleError(async (req, res) => {
+  let user = await validateSubscribedUser(req, res);
+  if (!user) {
+    return;
+  }
+
+  let token = uuid.v4();
+  await plaidDb.mutate('DELETE FROM webTokens WHERE user_id = ?', [user.id]);
+  await plaidDb.mutate('INSERT INTO webTokens (user_id, token_id, time_created) VALUES (?, ?, ?)', [user.id, token, Date.now()]);
+  res.send(
+    JSON.stringify({
+      status: 'ok',
+      data: token
+    })
+  );
+})
 );
 
 app.post('/validate-web-token', handleError(async (req, res) => {
-    let token = await validateToken(req, res);
-    if (!token) {
-      return;
-    }
+  let token = await validateToken(req, res);
+  if (!token) {
+    return;
+  }
 
-    res.send(JSON.stringify({ status: 'ok' }));
-  })
+  res.send(JSON.stringify({ status: 'ok' }));
+})
 );
 
 app.post('/put-web-token-contents', handleError(async (req, res) => {
-    let token = await validateToken(req, res);
-    if (!token) {
-      return;
-    }
+  let token = await validateToken(req, res);
+  if (!token) {
+    return;
+  }
 
-    let { data } = req.body;
-    await plaidDb.mutate('UPDATE webTokens SET contents = ? WHERE user_id = ?', [JSON.stringify(data), '0']);
-    res.send(
-      JSON.stringify({
-        status: 'ok',
-        data: null
-      })
-    );
-  })
+  let { data } = req.body;
+  await plaidDb.mutate('UPDATE webTokens SET contents = ? WHERE user_id = ?', [JSON.stringify(data), '0']);
+  res.send(
+    JSON.stringify({
+      status: 'ok',
+      data: null
+    })
+  );
+})
 );
 
 app.post('/get-web-token-contents', handleError(async (req, res) => {
-    let user = await validateSubscribedUser(req, res);
-    if (!user) {
-      return;
-    }
+  let user = await validateSubscribedUser(req, res);
+  if (!user) {
+    return;
+  }
 
-    let token = await validateToken(req, res);
-    if (!token) {
-      return;
-    }
+  let token = await validateToken(req, res);
+  if (!token) {
+    return;
+  }
 
-    let rows = await plaidDb.all('SELECT * FROM webTokens WHERE user_id = ?', ['0']);
+  let rows = await plaidDb.all('SELECT * FROM webTokens WHERE user_id = ?', ['0']);
 
-    if (rows.length === 0) {
-      res.send(
-        JSON.stringify({
-          status: 'error',
-          reason: 'not-found'
-        })
-      );
-    }
-
+  if (rows.length === 0) {
     res.send(
       JSON.stringify({
-        status: 'ok',
-        data: JSON.parse(rows[0].contents)
+        status: 'error',
+        reason: 'not-found'
       })
     );
-  })
+  }
+
+  res.send(
+    JSON.stringify({
+      status: 'ok',
+      data: JSON.parse(rows[0].contents)
+    })
+  );
+})
 );
 
 app.post('/make_link_token', handleError(async (req, res) => {
-    let token = await validateToken(req, res);
-    if (!token) {
-      return;
-    }
+  let token = await validateToken(req, res);
+  if (!token) {
+    return;
+  }
 
-    let result = await plaidClient.createLinkToken({
-      user: {
-        client_user_id: '0'
-      },
-      client_name: 'Actual',
-      products: ['transactions'],
-      country_codes: ['US'],
-      language: 'en'
-    });
-    res.send(JSON.stringify({ status: 'ok', data: result.link_token }));
-  })
+  let result = await plaidClient.createLinkToken({
+    user: {
+      client_user_id: '0'
+    },
+    client_name: 'Actual',
+    products: ['transactions'],
+    country_codes: ['US'],
+    language: 'en'
+  });
+  res.send(JSON.stringify({ status: 'ok', data: result.link_token }));
+})
 );
 
 app.post('/handoff_public_token', handleError(async (req, res) => {
-    let user = await validateSubscribedUser(req, res);
-    if (!user) {
-      return;
+  let user = await validateSubscribedUser(req, res);
+  if (!user) {
+    return;
+  }
+  let { item_id, public_token } = req.body;
+
+  plaidClient.exchangePublicToken(public_token, async function (error, tokenResponse) {
+    if (error != null) {
+      console.error(error);
+      process.exit(1);
     }
-    let { item_id, public_token } = req.body;
+    await plaidDb.mutate('INSERT INTO access_tokens (item_id, user_id, access_token, deleted) VALUES (?, ?, ?, ?)', [item_id, user.id, tokenResponse.access_token, 'FALSE']);
 
-    plaidClient.exchangePublicToken(public_token, async function (error, tokenResponse) {
-      if (error != null) {
-        console.error(error);
-        process.exit(1);
-      }
-      await plaidDb.mutate('INSERT INTO access_tokens (item_id, user_id, access_token, deleted) VALUES (?, ?, ?, ?)', [item_id, user.id, tokenResponse.access_token, 'FALSE']);
-
-      res.send(JSON.stringify({ status: 'ok' }));
-    });
-  })
+    res.send(JSON.stringify({ status: 'ok' }));
+  });
+})
 );
 
 app.post('/remove-access-token', handleError(async (req, res) => {
-    let user = await validateSubscribedUser(req, res);
-    if (!user) {
-      return;
-    }
-    let item_id = req.body.item_id;
+  let user = await validateSubscribedUser(req, res);
+  if (!user) {
+    return;
+  }
+  let item_id = req.body.item_id;
 
-    const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE item_id = ?', [item_id]);
+  const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE item_id = ?', [item_id]);
 
-    if (rows.length === 0) {
-      throw new Error('access token not found');
-    }
+  if (rows.length === 0) {
+    throw new Error('access token not found');
+  }
 
-    const access_token = rows[0].access_token;
+  const access_token = rows[0].access_token;
 
-    let response = await plaidClient.removeItem(access_token);
+  let response = await plaidClient.removeItem(access_token);
 
-    if (response.removed !== true) {
-      console.log('[Error] Item not removed: ' + access_token.slice(0, 3));
-    }
+  if (response.removed !== true) {
+    console.log('[Error] Item not removed: ' + access_token.slice(0, 3));
+  }
 
-    await plaidDb.mutate('UPDATE access_tokens SET deleted = ? WHERE access_token = ?', ['TRUE', access_token]);
+  await plaidDb.mutate('UPDATE access_tokens SET deleted = ? WHERE access_token = ?', ['TRUE', access_token]);
 
-    res.send(
-      JSON.stringify({
-        status: 'ok',
-        data: response
-      })
-    );
-  })
+  res.send(
+    JSON.stringify({
+      status: 'ok',
+      data: response
+    })
+  );
+})
 );
 
 app.post('/accounts', handleError(async (req, res) => {
-    let user = await validateSubscribedUser(req, res);
-    if (!user) {
-      return;
-    }
-    const { item_id } = req.body;
+  let user = await validateSubscribedUser(req, res);
+  if (!user) {
+    return;
+  }
+  const { item_id } = req.body;
 
-    const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE item_id = ?', [item_id]);
+  const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE item_id = ?', [item_id]);
 
-    if (rows.length === 0) {
-      throw new Error('access token not found');
-    }
-    const access_token = rows[0].access_token;
+  if (rows.length === 0) {
+    throw new Error('access token not found');
+  }
+  const access_token = rows[0].access_token;
 
-    plaidClient.getAccounts(access_token, async (error, { accounts, item }) => {
-      res.send(
-        JSON.stringify({
-          status: 'ok',
-          data: accounts
-        })
-      );
-    });
-  })
+  plaidClient.getAccounts(access_token, async (error, { accounts, item }) => {
+    res.send(
+      JSON.stringify({
+        status: 'ok',
+        data: accounts
+      })
+    );
+  });
+})
 );
 
 app.post('/transactions', handleError(async (req, res) => {
-    let user = await validateSubscribedUser(req, res);
-    if (!user) {
-      return;
-    }
-    let { item_id, start_date, end_date, account_id, count, offset } = req.body;
+  let user = await validateSubscribedUser(req, res);
+  if (!user) {
+    return;
+  }
+  let { item_id, start_date, end_date, account_id, count, offset } = req.body;
 
-    const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE item_id = ? AND deleted = ?', [item_id, 'FALSE']);
+  const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE item_id = ? AND deleted = ?', [item_id, 'FALSE']);
 
-    if (rows.length === 0) {
-      res.status(400);
-      res.send('access-token-not-found');
-      return;
-    }
+  if (rows.length === 0) {
+    res.status(400);
+    res.send('access-token-not-found');
+    return;
+  }
 
-    const access_token = rows[0].access_token;
+  const access_token = rows[0].access_token;
 
-    let transactions = await plaidClient.getTransactions(access_token, start_date, end_date);
+  let transactions = await plaidClient.getTransactions(access_token, start_date, end_date);
 
-    res.send(
-      JSON.stringify({
-        status: 'ok',
-        data: transactions
-      })
-    );
-  })
+  res.send(
+    JSON.stringify({
+      status: 'ok',
+      data: transactions
+    })
+  );
+})
 );
 
 app.post('/make-public-token', handleError(async (req, res) => {
-    let user = await validateSubscribedUser(req, res);
-    if (!user) {
-      return;
-    }
-    let { item_id } = req.body;
+  let user = await validateSubscribedUser(req, res);
+  if (!user) {
+    return;
+  }
+  let { item_id } = req.body;
 
-    const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ?', [user.id, item_id]);
+  const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ?', [user.id, item_id]);
 
-    if (rows.length === 0) {
-      throw new Error('access token not found');
-    }
-    const { access_token } = rows[0];
+  if (rows.length === 0) {
+    throw new Error('access token not found');
+  }
+  const { access_token } = rows[0];
 
-    let result = await plaidClient.createLinkToken({
-      user: {
-        client_user_id: user.id
-      },
-      client_name: 'Actual',
-      country_codes: ['US'],
-      language: 'en',
-      access_token: access_token
-    });
+  let result = await plaidClient.createLinkToken({
+    user: {
+      client_user_id: user.id
+    },
+    client_name: 'Actual',
+    country_codes: ['US'],
+    language: 'en',
+    access_token: access_token
+  });
 
-    res.send(
-      JSON.stringify({
-        status: 'ok',
-        data: result
-      })
-    );
-  })
+  res.send(
+    JSON.stringify({
+      status: 'ok',
+      data: result
+    })
+  );
+})
 );
 
 module.exports.handlers = app;
