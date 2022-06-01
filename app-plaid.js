@@ -14,7 +14,7 @@ const app = express();
 let plaidClient;
 let plaidDb;
 
-function init() {
+async function init() {
   plaidDb = getPlaidDb();
   let rows = plaidDb.all('SELECT * FROM plaid_config');
 
