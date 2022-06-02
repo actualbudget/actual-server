@@ -61,7 +61,6 @@ async function run() {
 
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
   app.listen(config.port, config.hostname);
-  console.log(process.env);
 }
 
 run().catch(err => {
