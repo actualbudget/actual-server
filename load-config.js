@@ -16,7 +16,7 @@ try {
     plaid: {
       plaid_client_id: '',
       plaid_secret: '',
-      plaid_env: ''
+      plaid_env: 'sandbox'
     }
   };
 }

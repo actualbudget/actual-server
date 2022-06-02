@@ -16,16 +16,16 @@ let plaidDb;
 
 async function init() {
   plaidDb = getPlaidDb();
-  let rows = plaidDb.all('SELECT * FROM plaid_config');
+  // let rows = plaidDb.all('SELECT * FROM plaid_config');
 
-  if (rows.length !== 0) {
+  // if (rows.length !== 0) {
     plaidClient = new plaid.Client({
-      clientID: rows[0].plaid_client_id,
-      secret: rows[0].plaid_secret,
-      env: plaid.environments[rows[0].plaid_env],
+      clientID: process.env.PLAID_CLIENT_ID,
+      secret: process.env.PLAID_SECRET,
+      env: plaid.environments[process.env.PLAID_ENV],
       options: { version: '2019-05-29' }
     });
-  }
+  // }
 }
 
 async function validateToken(req, res) {
