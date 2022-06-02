@@ -15,14 +15,14 @@ let plaidClient;
 let plaidDb;
 
 async function init() {
-  // plaidDb = getPlaidDb();
+  plaidDb = getPlaidDb();
 
-  // plaidClient = new plaid.Client({
-  //   clientID: process.env.PLAID_CLIENT_ID,
-  //   secret: process.env.PLAID_SECRET,
-  //   env: plaid.environments[process.env.PLAID_ENV],
-  //   options: { version: '2019-05-29' }
-  // });
+  plaidClient = new plaid.Client({
+    clientID: process.env.PLAID_CLIENT_ID,
+    secret: process.env.PLAID_SECRET,
+    env: plaid.environments[process.env.PLAID_ENV],
+    options: { version: '2019-05-29' }
+  });
 }
 
 async function validateToken(req, res) {

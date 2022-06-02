@@ -8,6 +8,5 @@ services:
     ports:
       - "5006:5006"
     volumes:
-      - ./server-files:/app/server-files
-      - ./user-files:/app/user-files
+      - ./data:/data
     restart: unless-stopped
