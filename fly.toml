@@ -7,7 +7,7 @@ kill_timeout = 5
 processes = []
 
 [env]
-  PORT = "5006"
+  PORT = "8080"
 
 [experimental]
   allowed_public_ports = []

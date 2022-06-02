@@ -1,7 +1,3 @@
-CREATE TABLE plaid_config
-  (plaid_client_id TEXT PRIMARY KEY,
-   plaid_secret TEXT,
-   plaid_env TEXT);
 
 CREATE TABLE webTokens
    (user_id TEXT PRIMARY KEY,
