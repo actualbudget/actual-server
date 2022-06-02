@@ -11,5 +11,5 @@ RUN apk add --no-cache nodejs yarn openssl tini
 WORKDIR /app
 COPY --from=base /app /app
 ADD . .
-ENTRYPOINT ["/sbin/tini","-g",  "--"]
+# ENTRYPOINT ["/sbin/tini","-g",  "--"]
 CMD ["node", "app.js"]
