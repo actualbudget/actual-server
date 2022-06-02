@@ -6,7 +6,7 @@ const { openDatabase: connectDb } = require('./db');
 const { handleError } = require('./util/handle-error');
 const { validateSubscribedUser } = require('./util/validate-user');
 const config = require('./load-config');
-const { getPlaidDb } = require('./plaid-db');
+const { getPlaidDb, insertPlaidTables } = require('./plaid-db');
 const { access } = require('fs');
 
 const app = express();
@@ -16,6 +16,7 @@ let plaidDb;
 
 async function init() {
   plaidDb = getPlaidDb();
+  insertPlaidTables();
 
   plaidClient = new plaid.Client({
     clientID: process.env.PLAID_CLIENT_ID,
@@ -51,15 +52,15 @@ async function validateToken(req, res) {
   return row;
 }
 
-app.post('/add-plaid-client-id', handleError(async (req, res) => {
-  await plaidDb.mutate('UPDATE plaid_config SET plaid_client_id = ?', [req.body.clientID]);
-})
-);
+// app.post('/add-plaid-client-id', handleError(async (req, res) => {
+//   await plaidDb.mutate('UPDATE plaid_config SET plaid_client_id = ?', [req.body.clientID]);
+// })
+// );
 
-app.post('/add-plaid-secret', handleError(async (req, res) => {
-  await plaidDb.mutate('UPDATE plaid_config SET plaid_secret = ?', [req.body.secret]);
-})
-);
+// app.post('/add-plaid-secret', handleError(async (req, res) => {
+//   await plaidDb.mutate('UPDATE plaid_config SET plaid_secret = ?', [req.body.secret]);
+// })
+// );
 
 app.post('/create-web-token', handleError(async (req, res) => {
   let user = await validateSubscribedUser(req, res);
