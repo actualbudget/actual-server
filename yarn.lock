@@ -2,19 +2,17 @@
 # yarn lockfile v1
 
 
-"@actual-app/api@4.1.0":
+"@actual-app/api@file:actual-app-api-4.1.0.tgz":
   version "4.1.0"
-  resolved "https://registry.npmjs.org/@actual-app/api/-/api-4.1.0.tgz"
-  integrity sha512-8tLuA6zDnN0NjD9wui5fB/cSe0hr/iYWOHGyW/ikJoGPrCu8N8zIITz2FhfplD2QDszgAsTRt48H2YtPmR9plg==
+  resolved "file:actual-app-api-4.1.0.tgz#b6981801d27d37e2a4d702c5f244fa29b34553a1"
   dependencies:
     better-sqlite3 "^7.5.0"
     node-fetch "^1.6.3"
     uuid "3.3.2"
 
-"@actual-app/web@4.1.0":
+"@actual-app/web@file:actual-app-web-4.1.0.tgz":
   version "4.1.0"
-  resolved "https://registry.npmjs.org/@actual-app/web/-/web-4.1.0.tgz"
-  integrity sha512-QgxrHBUoDXsUCRzQTD4PmDkTt27UUcPfFJMqXPHtk2lP0ey7iVsZIW7AUeYkEs1+ghmqVVqk+jw3OAD4XQzbRA==
+  resolved "file:actual-app-web-4.1.0.tgz#c076c2cc8423a64dc173c627833192d3644c4b49"
 
 "@eslint/eslintrc@^1.2.3":
   version "1.2.3"
