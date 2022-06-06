@@ -25,4 +25,12 @@ function getPlaidDb() {
   return plaidDb;
 }
 
-module.exports = { getPlaidDb };
+function insertPlaidTables() {
+  let tableWebTokens = 'CREATE TABLE IF NOT EXISTS webTokens (user_id TEXT PRIMARY KEY, token_id TEXT, time_created TEXT, contents TEXT);'
+  plaidDb.exec(tableWebTokens);
+
+  let tableAccessTokens = 'CREATE TABLE IF NOT EXISTS access_tokens (item_id TEXT PRIMARY KEY, user_id TEXT, access_token TEXT, deleted BOOLEAN);'
+  plaidDb.exec(tableAccessTokens);
+}
+
+module.exports = { getPlaidDb, insertPlaidTables };

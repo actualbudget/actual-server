@@ -11,5 +11,5 @@ RUN apt-get update && apt-get install openssl tini && apt-get clean -y && rm -rf
 WORKDIR /app
 COPY --from=base /app /app
 ADD . .
-# ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
+ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 CMD ["node", "app.js"]
