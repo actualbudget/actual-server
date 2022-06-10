@@ -10,9 +10,9 @@
     node-fetch "^1.6.3"
     uuid "3.3.2"
 
-"@actual-app/web@file:actual-app-web-4.1.0.tgz":
+"@actual-app/web@file:actual-app-web-v4.1.0.tgz":
   version "4.1.0"
-  resolved "file:actual-app-web-4.1.0.tgz#c076c2cc8423a64dc173c627833192d3644c4b49"
+  resolved "file:actual-app-web-v4.1.0.tgz#3a3a4506be758d18f2088560bf2d7282a30612af"
 
 "@eslint/eslintrc@^1.2.3":
   version "1.2.3"

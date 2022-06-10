@@ -250,12 +250,15 @@ app.post('/transactions', handleError(async (req, res) => {
 
   const access_token = rows[0].access_token;
 
-  let transactions = await plaidClient.getTransactions(access_token, start_date, end_date);
+  let transactionsData = await plaidClient.getTransactions(access_token, start_date, end_date);
+
+  //Filter by account id
+  transactionsData.transactions = transactionsData.transactions.filter(p => p.account_id === account_id);
 
   res.send(
     JSON.stringify({
       status: 'ok',
-      data: transactions
+      data: transactionsData
     })
   );
 })
