@@ -284,7 +284,7 @@ app.post('/make-public-token', handleError(async (req, res) => {
   }
   let { item_id } = req.body;
 
-  const rows = await plaidDb.mutate('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ?', [user.id, item_id]);
+  const rows = await plaidDb.all('SELECT * FROM access_tokens WHERE user_id = ? AND item_id = ?', [user.id, item_id]);
 
   if (rows.length === 0) {
     throw new Error('access token not found');
