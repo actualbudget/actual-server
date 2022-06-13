@@ -291,22 +291,36 @@ app.post('/make-public-token', handleError(async (req, res) => {
   }
   const { access_token } = rows[0];
 
-  let result = await plaidClient.createLinkToken({
-    user: {
-      client_user_id: user.id
-    },
-    client_name: 'Actual',
-    country_codes: ['US'],
-    language: 'en',
-    access_token: access_token
-  });
+  try {
+    let result = await plaidClient.createLinkToken({
+      user: {
+        client_user_id: user.id
+      },
+      client_name: 'Actual',
+      country_codes: ['US'],
+      language: 'en',
+      access_token: access_token
+    });
 
-  res.send(
-    JSON.stringify({
-      status: 'ok',
-      data: result
-    })
-  );
+    res.send(
+      JSON.stringify({
+        status: 'ok',
+        data: result
+      })
+    );
+    return;
+  } catch (err) {
+    res.send(
+      JSON.stringify({
+        status: 'error',
+        data: {
+          error_code: err.error_code,
+          error_type: err.error_type
+        }
+      })
+    );
+    return;
+  }
 })
 );
 
