@@ -265,7 +265,6 @@ app.post('/transactions', handleError(async (req, res) => {
 
     return;
   } catch (err) {
-    // console.log(err);
     res.send(
       JSON.stringify({
         error_code: err.error_code,
