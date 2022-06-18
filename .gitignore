@@ -10,3 +10,4 @@ server-files
 build/
 *.conf
 *.toml
+.github/workflows/main.yml
