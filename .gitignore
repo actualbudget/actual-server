@@ -9,3 +9,4 @@ user-files
 server-files
 build/
 *.conf
+*.toml

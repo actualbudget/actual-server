@@ -323,5 +323,29 @@ app.post('/make-public-token', handleError(async (req, res) => {
 })
 );
 
+app.post('/plaid-webhook', handleError(async (req, res) => {
+  console.log('webhook');
+  const {
+    webhook_code: webhookCode,
+    item_id: plaidItemId,
+  } = req.body;
+
+  switch (webhookCode) {
+    case 'SYNC_UPDATES_AVAILABLE': {
+      // Fired when new transactions data becomes available.
+    }
+    case 'DEFAULT_UPDATE':
+    case 'INITIAL_UPDATE':
+    case 'HISTORICAL_UPDATE':
+      /* ignore - not needed if using sync endpoint + webhook */
+      break;
+    case 'TRANSACTIONS_REMOVED':
+      break;
+    default:
+      //Unhandled webhook type received
+  }
+})
+);
+
 module.exports.handlers = app;
 module.exports.init = init;
