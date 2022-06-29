@@ -27,11 +27,23 @@ const sync = sequential(async function syncAPI(messages, since, fileId) {
     };
   });
 
-  let newMessages = actual.internal.syncAndReceiveMessages(messages, since);
+  const newMessages = await actual.internal.syncAndReceiveMessages(messages, since);
 
   return {
     trie: actual.internal.timestamp.getClock().merkle,
-    newMessages: newMessages
+    newMessages: newMessages.map(msg => {
+      const envelopePb = new SyncPb.MessageEnvelope();
+
+      const messagePb = new SyncPb.Message();
+      messagePb.setDataset(msg.dataset);
+      messagePb.setRow(msg.row);
+      messagePb.setColumn(msg.column);
+      messagePb.setValue(msg.value);
+      envelopePb.setTimestamp(msg.timestamp);
+
+      envelopePb.setContent(messagePb.serializeBinary());
+      return envelopePb;
+    })
   };
 });
 
