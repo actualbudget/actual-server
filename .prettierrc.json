@@ -1,6 +1,6 @@
 {
-    "singleQuote": true,
-    "trailingComma": "none",
+  "singleQuote": true,
+  "trailingComma": "none",
   "overrides": [
     {
       "files": ["*.yml", "*.yaml"],
