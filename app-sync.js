@@ -136,14 +136,7 @@ app.post('/sync', async (req, res) => {
   let responsePb = new SyncPb.SyncResponse();
   responsePb.setMerkle(JSON.stringify(trie));
 
-  for (let i = 0; i < newMessages.length; i++) {
-    let msg = newMessages[i];
-    let envelopePb = new SyncPb.MessageEnvelope();
-    envelopePb.setTimestamp(msg.timestamp);
-    envelopePb.setIsencrypted(msg.is_encrypted === 1);
-    envelopePb.setContent(msg.content);
-    responsePb.addMessages(envelopePb);
-  }
+  newMessages.forEach(msg => responsePb.addMessages(msg));
 
   res.set('Content-Type', 'application/actual-sync');
   res.send(Buffer.from(responsePb.serializeBinary()));
