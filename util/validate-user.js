@@ -23,4 +23,11 @@ function validateUser(req, res) {
   return rows[0];
 }
 
-module.exports = { validateUser };
+function validateSubscribedUser(req, res) {
+  let user = {
+    id: '0'
+  };
+  return user;
+}
+
+module.exports = { validateUser, validateSubscribedUser };

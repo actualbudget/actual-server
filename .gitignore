@@ -7,5 +7,7 @@ supervise
 bin/large-sync-data.txt
 user-files
 server-files
-fly.toml
 build/
+*.conf
+*.toml
+.github/workflows/main.yml

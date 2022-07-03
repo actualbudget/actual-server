@@ -4,9 +4,11 @@ const actuator = require('express-actuator');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const config = require('./load-config');
+const { getPlaidDb } = require('./plaid-db');
 
 const accountApp = require('./app-account');
 const syncApp = require('./app-sync');
+const plaidApp = require('./app-plaid');
 
 const app = express();
 
@@ -21,6 +23,7 @@ app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
 
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
+app.use('/plaid', plaidApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.mode);
@@ -30,8 +33,10 @@ app.use(actuator()); // Provides /health, /metrics, /info
 
 // The web frontend
 app.use((req, res, next) => {
-  res.set('Cross-Origin-Opener-Policy', 'same-origin');
-  res.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  // res.set('Cross-Origin-Opener-Policy', 'same-origin');
+  // res.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
 app.use(
@@ -54,6 +59,7 @@ async function run() {
 
   await accountApp.init();
   await syncApp.init();
+  await plaidApp.init();
 
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
   app.listen(config.port, config.hostname);

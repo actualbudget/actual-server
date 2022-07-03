@@ -3,6 +3,10 @@ RUN apt-get update && apt-get install -y openssl
 WORKDIR /app
 ENV NODE_ENV=production
 ADD yarn.lock package.json ./
+COPY actual-app-api-v4.1.0.tgz /app
+COPY actual-app-web-v4.1.0.tgz /app
+RUN yarn add file:actual-app-web-v4.1.0.tgz
+RUN yarn add file:actual-app-api-v4.1.0.tgz
 RUN npm rebuild bcrypt --build-from-source
 RUN yarn install --production
 
