@@ -29,7 +29,7 @@ docker build -t actual-server .
 docker run -p 5006:5006 actual-server
 ```
 
-## Deploying
+## Deploying on cloud
 
 You should deploy your server so it's always running. We recommend [fly.io](https://fly.io) which makes it incredibly easy and provides a free plan.
 
@@ -44,13 +44,6 @@ Copy `fly.template.toml` to `fly.toml`. Open `fly.toml` and customize the app na
 Now, run `flyctl launch` from `actual-server`. You should have a running app now!
 
 Whenever you want to update Actual, update the versions of `@actual-app/api` and `@actual-app/web` in `package.json` and run `flyctl  deploy`.
-
-### Using a custom Docker setup
-
-Actual is also available as a Docker image ready to be run in your own custom environment.
-
-- Docker Hub: `jlongster/actual-server`
-- Github Registry: `ghcr.io/actualbudget/actual-server`
 
 ### Persisting server data
 
@@ -80,6 +73,42 @@ _You can also configure the data dir with the `ACTUAL_USER_FILES` environment va
 These are non-official methods of one-click solutions for running Actual. If you provide a service like this, feel free to open a PR and add it to this list. These run Actual via a Docker image.
 
 * PikaPods: [Run on PikaPods](https://www.pikapods.com/pods?run=actual)
+
+## Deploying on home server
+
+### Using a custom Docker setup
+
+Actual is also available as a Docker image ready to be run in your own custom environment.
+
+- Docker Hub: `jlongster/actual-server`
+- Github Registry: `ghcr.io/actualbudget/actual-server`
+
+### Launch container
+
+A [docker-compose file](docker-compose.yml) is provided together with a [.env file](actual_server.env).
+These are you need to deploy Actual in your server with docker and you **only** need to edit the [.env file](actual_server.env).
+
+To create and run the container:
+```bash
+$ docker-compose --env-file actual_server.env up -d
+```
+
+### Test connection within local network
+
+On another PC within the local network connect to http://*serverIP*:*chosenPort*
+
+### Expose to internet with NGINX
+
+Use the [sample nginx conf file provided](actual.subdomain.conf.sample) and if needed change the line with:
+```text
+set $upstream_port 5006;
+```
+to the chosen port (found [here](actual_server.env)).
+
+Using nginx web UI:
+* Scheme -> http
+* Forward Hostname/IP -> actual_budget
+* Forward Port -> *The chosen port (found [here](actual_server.env))*
 
 ## Configuring the server URL
 
