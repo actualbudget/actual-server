@@ -120,7 +120,7 @@ paths:
                         type: string
               examples:
                 success:
-                  value: { status: "ok", data: { token: "token" } }
+                  $ref: "#/components/examples/token"
         "400":
           description: error
           content:
@@ -137,6 +137,38 @@ paths:
                   value: { status: "error", reason: "already-bootstrapped" }
                 invalid-password:
                   value: { status: "error", reason: "invalid-password" }
+  "/account/login":
+    post:
+      summary: Logs in to the server
+      tags:
+        - account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Login"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        nullable: true
+              examples:
+                success:
+                  $ref: "#/components/examples/token"
+                failure:
+                  value: { status: "ok", data: { token: null } }
 components:
   schemas:
     Info:
@@ -174,6 +206,13 @@ components:
               type: number
         uptime:
           type: number
+    Login:
+      type: object
+      properties:
+        password:
+          type: string
+      required:
+        - password
   examples:
     info:
       value:
@@ -199,3 +238,5 @@ components:
             { "heapTotal": 14659584, "heapUsed": 10615072, "rss": 30093312 },
           "uptime": 19.797
         }
+    token:
+      value: { status: "ok", data: { token: "token" } }
