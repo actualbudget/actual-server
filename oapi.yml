@@ -1,0 +1,128 @@
+openapi: 3.0.0
+info:
+  title: Actual Server
+  version: 1.0.2
+  description: "Actual Budget sync server."
+tags:
+  - name: health-check
+    description: health check endpoints
+paths:
+  "/info":
+    get:
+      summary: Displays application information.
+      tags:
+        - health-check
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Info"
+              examples:
+                success:
+                  $ref: "#/components/examples/info"
+  "/health":
+    get:
+      summary: Shows application health information.
+      tags:
+        - health-check
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+              examples:
+                success:
+                  $ref: "#/components/examples/health"
+  "/metrics":
+    get:
+      summary: Shows metrics information for the current application.
+      tags:
+        - health-check
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Metrics"
+              examples:
+                success:
+                  $ref: "#/components/examples/metrics"
+  "/mode":
+    get:
+      summary: Shows the mode set in the current server configuration.
+      tags:
+        - health-check
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/html:
+              schema:
+                type: string
+components:
+  schemas:
+    Info:
+      type: object
+      properties:
+        build:
+          type: object
+          properties:
+            description:
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+    Metrics:
+      type: object
+      properties:
+        mem:
+          type: object
+          properties:
+            heapTotal:
+              type: number
+            heapUsed:
+              type: number
+            rss:
+              type: number
+            external:
+              type: number
+            arrayBuffers:
+              type: number
+        uptime:
+          type: number
+  examples:
+    info:
+      value:
+        {
+          "build":
+            {
+              "description": "This is my new app",
+              "name": "MyApp",
+              "version": "1.0.0"
+            },
+          "git":
+            {
+              "branch": "master",
+              "commit": { "id": "329a314", "time": "2016-11-18 08:16:39-0500" }
+            }
+        }
+    health:
+      value: { "status": "UP" }
+    metrics:
+      value:
+        {
+          "mem":
+            { "heapTotal": 14659584, "heapUsed": 10615072, "rss": 30093312 },
+          "uptime": 19.797
+        }
