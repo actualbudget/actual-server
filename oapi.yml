@@ -6,6 +6,8 @@ info:
 tags:
   - name: health-check
     description: health check endpoints
+  - name: account
+    description: account
 paths:
   "/info":
     get:
@@ -64,6 +66,29 @@ paths:
             text/html:
               schema:
                 type: string
+  "/account/needs-bootstrap":
+    get:
+      summary: returns bootstrap status
+      tags:
+        - account
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      bootstrapped:
+                        type: boolean
+              examples:
+                success:
+                  value: { status: "ok", data: { bootstrapped: true } }
 components:
   schemas:
     Info:
