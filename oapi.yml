@@ -89,6 +89,54 @@ paths:
               examples:
                 success:
                   value: { status: "ok", data: { bootstrapped: true } }
+  "/account/bootstrap":
+    post:
+      summary: bootstrap the server
+      tags:
+        - account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+              examples:
+                success:
+                  value: { status: "ok", data: { token: "token" } }
+        "400":
+          description: error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  reason:
+                    type: string
+              examples:
+                already-bootstrapped:
+                  value: { status: "error", reason: "already-bootstrapped" }
+                invalid-password:
+                  value: { status: "error", reason: "invalid-password" }
 components:
   schemas:
     Info:
