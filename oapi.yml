@@ -89,6 +89,8 @@ paths:
               examples:
                 success:
                   value: { status: "ok", data: { bootstrapped: true } }
+        "500":
+          $ref: "#/components/responses/error-internal"
   "/account/bootstrap":
     post:
       summary: bootstrap the server
@@ -137,6 +139,8 @@ paths:
                   value: { status: "error", reason: "already-bootstrapped" }
                 invalid-password:
                   value: { status: "error", reason: "invalid-password" }
+        "500":
+          $ref: "#/components/responses/error-internal"
   "/account/login":
     post:
       summary: Logs in to the server
@@ -169,6 +173,8 @@ paths:
                   $ref: "#/components/examples/token"
                 failure:
                   value: { status: "ok", data: { token: null } }
+        "500":
+          $ref: "#/components/responses/error-internal"
   "/account/change-password":
     post:
       summary: Update a user password
@@ -205,6 +211,8 @@ paths:
                   value: { status: "ok", data: {} }
         "401":
           $ref: "#/components/responses/unauth-user"
+        "500":
+          $ref: "#/components/responses/error-internal"
   "/account/validate":
     get:
       summary: Validate account access
@@ -242,6 +250,8 @@ paths:
                   value: { status: "ok", data: { validated: true } }
         "401":
           $ref: "#/components/responses/unauth-user"
+        "500":
+          $ref: "#/components/responses/error-internal"
 components:
   schemas:
     Info:
@@ -343,3 +353,17 @@ components:
                   reason: "unauthorized",
                   details: "token-not-found"
                 }
+    error-internal:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              reason:
+                type: string
+          examples:
+            err:
+              value: { status: "error", reason: "internal-error" }
