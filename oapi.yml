@@ -169,6 +169,66 @@ paths:
                   $ref: "#/components/examples/token"
                 failure:
                   value: { status: "ok", data: { token: null } }
+  "/account/change-password":
+    post:
+      summary: Update a user password
+      tags:
+        - account
+      parameters:
+        - in: header
+          name: x-actual-token
+          description: Session token, if not provided in the request body.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Login"
+                - type: object
+                  properties:
+                    token:
+                      type: string
+                      nullable: true
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: object
+              examples:
+                success:
+                  value: { status: "ok", data: {} }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  reason:
+                    type: string
+                  details:
+                    type: string
+              examples:
+                unauth:
+                  value:
+                    {
+                      status: "error",
+                      reason: "unauthorized",
+                      details: "token-not-found"
+                    }
 components:
   schemas:
     Info:
