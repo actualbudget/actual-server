@@ -175,12 +175,7 @@ paths:
       tags:
         - account
       parameters:
-        - in: header
-          name: x-actual-token
-          description: Session token, if not provided in the request body.
-          required: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/token-header"
       requestBody:
         required: true
         content:
@@ -209,7 +204,27 @@ paths:
                 success:
                   value: { status: "ok", data: {} }
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/unauth-user"
+  "/account/validate":
+    get:
+      summary: Validate account access
+      tags:
+        - account
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+      requestBody:
+        # required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  nullable: true
+      responses:
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
@@ -217,18 +232,16 @@ paths:
                 properties:
                   status:
                     type: string
-                  reason:
-                    type: string
-                  details:
-                    type: string
+                  data:
+                    type: object
+                    properties:
+                      validated:
+                        type: boolean
               examples:
-                unauth:
-                  value:
-                    {
-                      status: "error",
-                      reason: "unauthorized",
-                      details: "token-not-found"
-                    }
+                success:
+                  value: { status: "ok", data: { validated: true } }
+        "401":
+          $ref: "#/components/responses/unauth-user"
 components:
   schemas:
     Info:
@@ -300,3 +313,33 @@ components:
         }
     token:
       value: { status: "ok", data: { token: "token" } }
+  parameters:
+    token-header:
+      name: x-actual-token
+      in: header
+      required: false
+      description: Session token, if not provided in the request body.
+      schema:
+        type: string
+  responses:
+    unauth-user:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              reason:
+                type: string
+              details:
+                type: string
+          examples:
+            unauth:
+              value:
+                {
+                  status: "error",
+                  reason: "unauthorized",
+                  details: "token-not-found"
+                }
