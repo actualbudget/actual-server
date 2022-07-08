@@ -295,6 +295,68 @@ paths:
           $ref: "#/components/responses/unauth-user"
         "500":
           $ref: "#/components/responses/error-internal"
+  "/sync/user-get-key":
+    # TODO why exactly is this a POST and not a GET?
+    post:
+      # summary: TODO
+      tags:
+        - sync
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileId:
+                  type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        nullable: true
+                      salt:
+                        type: string
+                        nullable: true
+                      test:
+                        type: string
+                        nullable: true
+              examples:
+                success:
+                  value:
+                    {
+                      status: "ok",
+                      data:
+                        {
+                          id: encrypt_keyid,
+                          salt: encrypt_salt,
+                          test: encrypt_test
+                        }
+                    }
+        "400":
+          description: Error
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                file-not-found:
+                  value: file-not-found
+        "500":
+          $ref: "#/components/responses/error-internal"
 components:
   schemas:
     Info:
