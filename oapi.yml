@@ -599,6 +599,56 @@ paths:
               examples:
                 err:
                   $ref: "#/components/examples/err-internal"
+  "/sync/get-user-file-info":
+    get:
+      # summary: TODO
+      tags:
+        - sync
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+        - name: x-actual-file-id
+          in: header
+          required: true
+          description: File ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    required: [status, data]
+                    properties:
+                      status:
+                        type: string
+                      data:
+                        $ref: "#/components/schemas/File"
+                  - type: object
+                    additionalProperties: false
+                    properties:
+                      status:
+                        type: string
+              examples:
+                success:
+                  value:
+                    {
+                      status: "ok",
+                      data:
+                        {
+                          deleted: false,
+                          fileId: "row.id",
+                          groupId: "row.group_id",
+                          name: "row.name",
+                          encryptMeta: "row.encrypt_meta"
+                        }
+                    }
+                no-rows:
+                  value: { status: "error" }
+        "500":
+          $ref: "#/components/responses/error-internal"
 components:
   schemas:
     Info:
