@@ -649,6 +649,27 @@ paths:
                   value: { status: "error" }
         "500":
           $ref: "#/components/responses/error-internal"
+  "/sync/delete-user-file":
+    post:
+      # summary: TODO
+      tags:
+        - sync
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileId:
+                  type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/ok-nodata"
+        "500":
+          $ref: "#/components/responses/error-internal"
 components:
   schemas:
     Info:
