@@ -529,6 +529,40 @@ paths:
               examples:
                 err:
                   $ref: "#/components/examples/err-internal"
+  "/sync/list-user-files":
+    get:
+      # summary: TODO
+      tags:
+        - sync
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/FileList"
+        "500":
+          description: Internal Server Error
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                read-err:
+                  value: Error reading files
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrInternal"
+              examples:
+                err:
+                  $ref: "#/components/examples/err-internal"
 components:
   schemas:
     Info:
@@ -585,6 +619,23 @@ components:
           type: string
         reason:
           type: string
+    File:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+        fileId:
+          type: string
+        groupId:
+          type: string
+        name:
+          type: string
+        encryptKeyId:
+          type: string
+    FileList:
+      type: array
+      items:
+        $ref: "#/components/schemas/File"
   examples:
     info:
       value:
