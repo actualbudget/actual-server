@@ -529,6 +529,42 @@ paths:
               examples:
                 err:
                   $ref: "#/components/examples/err-internal"
+  "/sync/update-user-filename":
+    post:
+      # summary: TODO
+      tags:
+        - sync
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileId:
+                  type: string
+                name:
+                  type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/ok-nodata"
+        "500":
+          description: Internal Server Error
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                read-err:
+                  value: User or file not found
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrInternal"
+              examples:
+                err:
+                  $ref: "#/components/examples/err-internal"
   "/sync/list-user-files":
     get:
       # summary: TODO
