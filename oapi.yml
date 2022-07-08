@@ -414,6 +414,79 @@ paths:
                   value: User or file not found
         "500":
           $ref: "#/components/responses/error-internal"
+  "/sync/upload-user-file":
+    post:
+      # summary: TODO
+      tags:
+        - sync
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+        - name: x-actual-file-id
+          in: header
+          required: true
+          description: File ID
+          schema:
+            type: string
+        - name: x-actual-group-id
+          in: header
+          required: false
+          description: Group ID
+          schema:
+            type: string
+        - name: x-actual-encrypt-meta
+          in: header
+          required: false
+          description: Encryption metadata
+          schema:
+            # TODO: actually JSON with shape...?
+            type: string
+        - name: x-actual-format
+          in: header
+          required: false
+          description: Sync format version
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/octet-stream: {}
+      responses:
+        "200":
+          description: Ok or write error
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    required: [status, groupId]
+                    properties:
+                      status:
+                        type: string
+                      groupId:
+                        type: string
+                  - type: object
+                    additionalProperties: false
+                    properties:
+                      status:
+                        type: string
+              examples:
+                success:
+                  value: { status: "ok", groupId: "groupId" }
+                write-err:
+                  value: { status: "error" }
+        "400":
+          description: Error
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                file-has-reset:
+                  value: file-has-reset
+                file-has-new-key:
+                  value: file-has-new-key
+        "500":
+          $ref: "#/components/responses/error-internal"
 components:
   schemas:
     Info:
