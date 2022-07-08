@@ -487,6 +487,48 @@ paths:
                   value: file-has-new-key
         "500":
           $ref: "#/components/responses/error-internal"
+  "/sync/download-user-file":
+    get:
+      # summary: TODO
+      tags:
+        - sync
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+        - name: x-actual-file-id
+          in: header
+          required: true
+          description: File ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/octet-stream: {}
+        "400":
+          description: Error
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                file-not-found:
+                  value: User or file not found
+        "500":
+          description: Internal Server Error
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                read-err:
+                  value: Error reading files
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrInternal"
+              examples:
+                err:
+                  $ref: "#/components/examples/err-internal"
 components:
   schemas:
     Info:
@@ -536,6 +578,13 @@ components:
       properties:
         status:
           type: string
+    ErrInternal:
+      type: object
+      properties:
+        status:
+          type: string
+        reason:
+          type: string
   examples:
     info:
       value:
@@ -563,6 +612,8 @@ components:
         }
     token:
       value: { status: "ok", data: { token: "token" } }
+    err-internal:
+      value: { status: "error", reason: "internal-error" }
   parameters:
     token-header:
       name: x-actual-token
@@ -598,15 +649,10 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              status:
-                type: string
-              reason:
-                type: string
+            $ref: "#/components/schemas/ErrInternal"
           examples:
             err:
-              value: { status: "error", reason: "internal-error" }
+              $ref: "#/components/examples/err-internal"
     ok-nodata:
       description: Ok
       content:
