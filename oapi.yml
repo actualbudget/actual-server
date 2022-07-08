@@ -381,17 +381,37 @@ paths:
                   type: string
       responses:
         "200":
-          description: Ok
+          $ref: "#/components/responses/ok-nodata"
+        "500":
+          $ref: "#/components/responses/error-internal"
+  "/sync/reset-user-file":
+    post:
+      # summary: TODO
+      tags:
+        - sync
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileId:
+                  type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/ok-nodata"
+        "400":
+          description: Error
           content:
-            application/json:
+            text/html:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
+                type: string
               examples:
-                success:
-                  value: { status: "ok" }
+                file-not-found:
+                  value: User or file not found
         "500":
           $ref: "#/components/responses/error-internal"
 components:
@@ -438,6 +458,11 @@ components:
           type: string
       required:
         - password
+    Ok:
+      type: object
+      properties:
+        status:
+          type: string
   examples:
     info:
       value:
@@ -509,3 +534,12 @@ components:
           examples:
             err:
               value: { status: "error", reason: "internal-error" }
+    ok-nodata:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Ok"
+          examples:
+            success:
+              value: { status: "ok" }
