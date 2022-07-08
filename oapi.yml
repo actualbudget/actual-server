@@ -3,6 +3,9 @@ info:
   title: Actual Server
   version: 1.0.2
   description: "Actual Budget sync server."
+servers:
+  - url: http://localhost:5006
+    description: Local development
 tags:
   - name: health-check
     description: health check endpoints
