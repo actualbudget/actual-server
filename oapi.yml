@@ -11,6 +11,8 @@ tags:
     description: health check endpoints
   - name: account
     description: account
+  - name: sync
+    description: sync
 paths:
   "/info":
     get:
@@ -251,6 +253,44 @@ paths:
               examples:
                 success:
                   value: { status: "ok", data: { validated: true } }
+        "401":
+          $ref: "#/components/responses/unauth-user"
+        "500":
+          $ref: "#/components/responses/error-internal"
+  "/sync/sync":
+    post:
+      # summary: TODO
+      tags:
+        - sync
+      parameters:
+        - $ref: "#/components/parameters/token-header"
+      requestBody:
+        description: Protobuf serialized sync request
+        required: true
+        content:
+          application/octet-stream: {}
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/actual-sync: {}
+        "400":
+          description: Error
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                file-not-found:
+                  value: file-not-found
+                file-old-version:
+                  value: file-old-version
+                file-needs-upload:
+                  value: file-needs-upload
+                file-has-reset:
+                  value: file-has-reset
+                file-has-new-key:
+                  value: file-has-new-key
         "401":
           $ref: "#/components/responses/unauth-user"
         "500":
