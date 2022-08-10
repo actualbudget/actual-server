@@ -2,7 +2,7 @@ let express = require('express');
 let bcrypt = require('bcrypt');
 let uuid = require('uuid');
 let errorMiddleware = require('./util/error-middleware');
-let { validateUser } = require('./util/validate-user');
+let { validateUser, DISABLE_PASSWORD } = require('./util/validate-user');
 let { getAccountDb } = require('./account-db');
 
 let app = express();
@@ -24,10 +24,15 @@ function hashPassword(password) {
 app.get('/needs-bootstrap', (req, res) => {
   let accountDb = getAccountDb();
   let rows = accountDb.all('SELECT * FROM auth');
+  let data = { bootstrapped: rows.length > 0 };
+
+  if (DISABLE_PASSWORD) {
+    data.passwordDisabled = true;
+  }
 
   res.send({
     status: 'ok',
-    data: { bootstrapped: rows.length > 0 }
+    data
   });
 });
 
@@ -44,16 +49,27 @@ app.post('/bootstrap', (req, res) => {
     return;
   }
 
-  if (password == null || password === '') {
-    res.status(400).send({ status: 'error', reason: 'invalid-password' });
-    return;
-  }
+  if (DISABLE_PASSWORD) {
+    if (password) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'password-disabled'
+      });
+      return;
+    }
+  } else {
+    if (password == null || password === '') {
+      res.status(400).send({ status: 'error', reason: 'invalid-password' });
+      return;
+    }
 
-  // Hash the password. There's really not a strong need for this
-  // since this is a self-hosted instance owned by the user.
-  // However, just in case we do it.
-  let hashed = hashPassword(password);
-  accountDb.mutate('INSERT INTO auth (password) VALUES (?)', [hashed]);
+    // Hash the password. There's really not a strong need for this
+    // since this is a self-hosted instance owned by the user.
+    // However, just in case we do it.
+
+    let hashed = hashPassword(password);
+    accountDb.mutate('INSERT INTO auth (password) VALUES (?)', [hashed]);
+  }
 
   let token = uuid.v4();
   accountDb.mutate('INSERT INTO sessions (token) VALUES (?)', [token]);
@@ -65,8 +81,13 @@ app.post('/login', (req, res) => {
   let { password } = req.body;
   let accountDb = getAccountDb();
 
-  let row = accountDb.first('SELECT * FROM auth');
-  let confirmed = row && bcrypt.compareSync(password, row.password);
+  let confirmed;
+  if (DISABLE_PASSWORD) {
+    confirmed = true;
+  } else {
+    let row = accountDb.first('SELECT * FROM auth');
+    confirmed = row && bcrypt.compareSync(password, row.password);
+  }
 
   let token = null;
   if (confirmed) {
@@ -87,6 +108,11 @@ app.post('/change-password', (req, res) => {
 
   let accountDb = getAccountDb();
   let { password } = req.body;
+
+  if (DISABLE_PASSWORD) {
+    res.send({ status: 'error', reason: 'password-disabled' });
+    return;
+  }
 
   if (password == null || password === '') {
     res.send({ status: 'error', reason: 'invalid-password' });

@@ -1,5 +1,11 @@
 let { getAccountDb } = require('../account-db');
 
+const DISABLE_PASSWORD = process.env.DANGEROUS_DISABLE_PASSWORD?.toLowerCase() === 'true';
+
+if (DISABLE_PASSWORD) {
+  console.log('Password disabled for this instance');
+}
+
 function validateUser(req, res) {
   let { token } = req.body || {};
 
@@ -23,4 +29,4 @@ function validateUser(req, res) {
   return rows[0];
 }
 
-module.exports = { validateUser };
+module.exports = { validateUser, DISABLE_PASSWORD };
