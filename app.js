@@ -4,6 +4,7 @@ const actuator = require('express-actuator');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const config = require('./load-config');
+const nordigenApp = require('./app-nordigen');
 
 const accountApp = require('./app-account');
 const syncApp = require('./app-sync');
@@ -21,6 +22,7 @@ app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
 
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
+app.use('/nordigen', nordigenApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.mode);
@@ -54,6 +56,7 @@ async function run() {
 
   await accountApp.init();
   await syncApp.init();
+  await nordigenApp.init();
 
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
   app.listen(config.port, config.hostname);

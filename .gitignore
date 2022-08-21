@@ -9,3 +9,5 @@ user-files
 server-files
 fly.toml
 build/
+dist
+.idea
