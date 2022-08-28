@@ -152,14 +152,16 @@ app.post(
       account.institution = institution;
     })
 
-    console.log({detailedAccounts, institutions, institutionIds})
+    const normalizedAccounts = detailedAccounts.map((acc) => normalizeAccount(acc));
+
+    console.log({detailedAccounts, institutions, institutionIds, normalizedAccounts})
 
     res.send(
       JSON.stringify({
         status: 'ok',
         data: {
           ...requisition,
-          accounts: detailedAccounts,
+          accounts: normalizedAccounts,
         }
       })
     );
@@ -205,6 +207,51 @@ app.post('/transactions', handleError(async (req, res) => {
     );
   })
 );
+
+
+const printIban = account => {
+  if (account.iban) {
+    return '(XXX ' + account.iban.slice(-4) + ')';
+  } else {
+    return '';
+  }
+}
+
+// https://nordigen.com/en/docs/account-information/output/accounts/
+// https://docs.google.com/spreadsheets/d/11tAD5cfrlaOZ4HXI6jPpL5hMf8ZuRYc6TUXTxZE84A8/edit#gid=489769432
+function normalizeAccount(account) {
+  switch (account.institution_id) {
+    case 'MBANK_RETAIL_BREXPLPW':
+      return {
+        account_id: account.id,
+        institution: account.institution,
+        mask: account.iban.slice(-4),
+        name: [account.displayName, printIban(account)].join(' '),
+        official_name: account.product,
+        type: 'checking'
+      };
+    case 'SANDBOXFINANCE_SFIN0000':
+      return {
+        account_id: account.id,
+        institution: account.institution,
+        mask: account.iban.slice(-4),
+        name: [account.name, printIban(account)].join(' '),
+        official_name: account.product,
+        type: 'checking'
+      };
+    case 'ING_PL_INGBPLPW':
+    case 'REVOLUT_REVOGB21':
+    default:
+      return {
+        account_id: account.id,
+        institution: account.institution,
+        mask: account.iban.slice(-4),
+        name: [account.product, printIban(account)].join(' '),
+        official_name: account.product,
+        type: 'checking'
+      };
+  }
+}
 
 module.exports.handlers = app;
 module.exports.init = init;
