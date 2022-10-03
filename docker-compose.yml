@@ -8,6 +8,5 @@ services:
     ports:
       - "${externalPort}:5006"
     volumes:
-      - ${serverFilesPath}:/app/server-files
-      - ${userFilesPath}:/app/user-files
+      - ${dataPath}:/data
     restart: unless-stopped
