@@ -1,20 +1,21 @@
-let config;
+let config = {};
+let fs = require('fs');
+let { join } = require('path');
+let root = fs.existsSync('/data') ? '/data' : __dirname;
+
 try {
   // @ts-expect-error TS2307: we expect this file may not exist
   config = require('./config');
-} catch (e) {
-  let fs = require('fs');
-  let { join } = require('path');
-  let root = fs.existsSync('/data') ? '/data' : __dirname;
+} catch (e) {}
 
-  config = {
-    mode: 'development',
-    port: 5006,
-    hostname: '0.0.0.0',
-    serverFiles: join(root, 'server-files'),
-    userFiles: join(root, 'user-files')
-  };
-}
+config = {
+  mode: 'development',
+  port: 5006,
+  hostname: '0.0.0.0',
+  serverFiles: join(root, 'server-files'),
+  userFiles: join(root, 'user-files'),
+  ...config
+};
 
 // The env variable always takes precedence
 config.userFiles = process.env.ACTUAL_USER_FILES || config.userFiles;
