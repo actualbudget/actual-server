@@ -18,9 +18,23 @@ function init() {
 
 async function validateToken(req, res) {
   const { requisitionId } = req.body;
-  const requisition = await nordigenClient.requisition.getRequisitionById(
+  let requisition;
+  try {
+    requisition = await nordigenClient.requisition.getRequisitionById(
     requisitionId
-  );
+  )} catch (error) {
+    res.send(
+      JSON.stringify({
+        status: 'error',
+        data: {
+          error,
+          reason: "Can't fetch data from the Nordigen API"
+        }
+      })
+    );
+    return;
+  };
+
   const { status } = requisition;
   /* eslint-disable no-fallthrough */
   switch (status) {
@@ -209,7 +223,20 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
-    await getNorgigenToken();
+    try {
+      await getNorgigenToken();
+    } catch (error) {
+      res.send(
+        JSON.stringify({
+          status: 'error',
+          data: {
+            error,
+            reason: "Can't fetch data from the Nordigen API"
+          }
+        })
+      );
+      return;
+    }
 
     const { institution_id } = await validateToken(req, res);
     if (!institution_id) {
@@ -225,14 +252,43 @@ app.post(
       nordigenClient.account(accountId).getBalances()
     ]);
 
+    switch(transactions.status_code) {
+      case 429:
+        res.send(
+          JSON.stringify({
+            status: 'ok',
+            data: {
+              error_type: 'SYNC_ERROR',
+              error_code: 'REQUEST_LIMIT_EXCEEDED',
+              status: 'limit exceeded',
+              reason: transactions.detail
+            }
+          })
+        );
+        return;
+      case 401:
+        res.send(
+          JSON.stringify({
+            status: 'ok',
+            data: {
+              error_type: 'SYNC_ERROR',
+              error_code: 'Connection expired',
+              status: 'limit exceeded',
+              reason: transactions.detail
+            }
+          })
+        );
+        return;
+    }
+
     const sortedBookedTransactions = sortTransactions(
       institution_id,
-      transactions.transactions.booked
+      transactions.transactions?.booked ?? []
     );
 
     const sortedPendingTransactions = sortTransactions(
       institution_id,
-      transactions.transactions.pending
+      transactions.transactions?.pending ?? []
     );
 
     const startingBalance = countPreviousBalance(
@@ -326,16 +382,22 @@ function sortTransactions(institution_id, transactions = []) {
 function countPreviousBalance(
   institution_id,
   transactions = [],
-  accountBalances
+  accountBalances = []
 ) {
+
   const oldestTransaction = transactions[transactions.length - 1];
 
   switch (institution_id) {
     case 'ING_PL_INGBPLPW':
-      return (
-        oldestTransaction.balanceAfterTransaction.balanceAmount.amount -
-        oldestTransaction.transactionAmount.amount
-      );
+      if(transactions.length) {
+        return (
+          oldestTransaction.balanceAfterTransaction.balanceAmount.amount -
+          oldestTransaction.transactionAmount.amount
+        );
+      } else {
+        (accountBalances.find((balance) => ['interimBooked'].includes(balance.balanceType))).balanceAmount.amount
+      }
+
     case 'MBANK_RETAIL_BREXPLPW':
     case 'REVOLUT_REVOGB21':
     case 'SANDBOXFINANCE_SFIN0000':
@@ -345,11 +407,16 @@ function countPreviousBalance(
         accountBalances.find((balance) =>
           ['interimBooked', 'interimAvailable'].includes(balance.balanceType)
         ) || accountBalances[0];
-      const accountBalance = balance.balanceAmount.amount;
+      console.log({balance, accountBalances, transactions})
+      if(balance && transactions.length){
+        const accountBalance = balance.balanceAmount.amount;
       /* eslint-enable no-case-declarations */
-      return transactions.reduce((total, trans) => {
-        return total - trans.transactionAmount.amount;
-      }, accountBalance);
+        return transactions.reduce((total, trans) => {
+          return total - trans.transactionAmount.amount;
+        }, accountBalance);
+      }else {
+        return
+      }
   }
 }
 
