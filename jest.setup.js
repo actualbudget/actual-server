@@ -9,7 +9,7 @@ if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 
 // Create path for test user files and delete previous files there
 if (fs.existsSync(config.userFiles))
-	fs.rmdirSync(config.userFiles, { recursive: true });
+  fs.rmdirSync(config.userFiles, { recursive: true });
 fs.mkdirSync(config.userFiles);
 
 // Insert a fake "valid-token" fixture that can be reused
