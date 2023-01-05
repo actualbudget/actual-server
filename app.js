@@ -4,7 +4,7 @@ const actuator = require('express-actuator');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const config = require('./load-config');
-const nordigenApp = require('./app-nordigen');
+const nordigenApp = require('./app-nordigen/app-nordigen');
 
 const accountApp = require('./app-account');
 const syncApp = require('./app-sync');

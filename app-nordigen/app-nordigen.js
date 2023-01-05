@@ -3,7 +3,7 @@ const express = require('express');
 const uuid = require('uuid');
 const NordigenClient = require('./nordigen-node/index').default;
 
-const { handleError } = require('./util/handle-error');
+const { handleError } = require('./../util/handle-error');
 
 const app = express();
 
