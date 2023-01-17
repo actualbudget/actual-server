@@ -1,9 +1,10 @@
 const jwt = require('jws');
 const express = require('express');
-const uuid = require('uuid');
 const NordigenClient = require('./nordigen-node/index').default;
 
-const { handleError } = require('./../util/handle-error');
+const {handleError} = require('./../util/handle-error');
+const nordigenService = require('./services/nordigen-service');
+const BankFactory = require('./banks');
 
 const app = express();
 
@@ -17,12 +18,14 @@ function init() {
 }
 
 async function validateToken(req, res) {
-  const { requisitionId } = req.body;
+  const {requisitionId} = req.body;
   let requisition;
   try {
     requisition = await nordigenClient.requisition.getRequisitionById(
-    requisitionId
-  )} catch (error) {
+      requisitionId
+    )
+  } catch (error) {
+    console.log({requisition})
     res.send(
       JSON.stringify({
         status: 'error',
@@ -33,9 +36,10 @@ async function validateToken(req, res) {
       })
     );
     return;
-  };
+  }
+  ;
 
-  const { status } = requisition;
+  const {status} = requisition;
   /* eslint-disable no-fallthrough */
   switch (status) {
     // { "short": "LN", "long": "LINKED", "description": "Account has been successfully linked to requisition" },
@@ -86,36 +90,43 @@ async function validateToken(req, res) {
   /* eslint-enable no-fallthrough */
 }
 
-async function getNorgigenToken() {
+async function getNordigenToken() {
+  const generateToken = async () => {
+    let tokenData;
+    try {
+      tokenData = await nordigenClient.generateToken();
+    } catch (e) {
+      throw new Error('can not generate token');
+    }
+    nordigenClient.token = tokenData.access;
+  }
+
   if (nordigenClient.token) {
     var decodedToken = jwt.decode(nordigenClient.token);
     var payload = decodedToken.payload;
     var clockTimestamp = Math.floor(Date.now() / 1000);
     if (clockTimestamp >= payload.exp) {
-      const tokenData = await nordigenClient.generateToken();
-      nordigenClient.token = tokenData.access;
+      await generateToken();
     }
   } else {
-    const tokenData = await nordigenClient.generateToken();
-    nordigenClient.token = tokenData.access;
+    await generateToken();
   }
 }
+
+app.use(express.json());
 
 app.post(
   '/create-web-token',
   handleError(async (req, res) => {
-    const { accessValidForDays, institutionId } = req.body;
+    res.type('json')
 
-    const tokenData = await nordigenClient.generateToken();
-    nordigenClient.token = tokenData.access;
-
-    // Initialize new bank session
-    const { link, id: requisitionId } = await nordigenClient.initSession({
-      redirectUrl: req.headers.origin + '/nordigen/link',
+    const {accessValidForDays, institutionId} = req.body;
+    const {origin} = req.headers;
+    const {link, requisitionId} = await nordigenService.createRequisition({
+      accessValidForDays,
       institutionId,
-      referenceId: uuid.v4(),
-      accessValidForDays
-    });
+      host: origin
+    })
 
     res.send(
       JSON.stringify({
@@ -130,77 +141,52 @@ app.post(
 );
 
 app.post(
-  '/get-web-token-contents',
+  '/get-web-token-contents', // TODO: Change endpoint name
   handleError(async (req, res) => {
-    const { requisitionId } = req.body;
-
-    const requisition = await nordigenClient.requisition.getRequisitionById(
-      requisitionId
-    );
-    const { status, accounts } = requisition;
+    const {requisitionId} = req.body;
+    const requisition = await nordigenService.getRequisition(requisitionId);
+    const {status, accounts: accountIds} = requisition;
 
     // LN == Linked - Account has been successfully linked to requisition
     if (status !== 'LN') {
-      res.send(
-        JSON.stringify({
-          status: 'ok'
-        })
+      res.send({
+          status: 'ok',
+          data: {status}
+        }
       );
       return;
     }
 
-    // Fetch accounts
-    const detailedAccounts = await Promise.all(
-      accounts.map(async (accountId) => {
-        const [detailedAccount, metadataAccount] = await Promise.all([
-          nordigenClient.account(accountId).getDetails(),
-          nordigenClient.account(accountId).getMetadata()
-        ]);
+    let institutionIdSet = new Set()
+    const detailedAccounts = await Promise.all(accountIds.map(async (accountId) => {
+      const account = await nordigenService.getDetailedAccount({accountId});
+      institutionIdSet.add(account.institution_id)
+      return account;
+    }));
 
-        return {
-          ...detailedAccount.account,
-          ...metadataAccount
-        };
-      })
-    );
-
-    // Fetch banks
-    const institutionIds = Array.from(
-      new Set(detailedAccounts.map((account) => account.institution_id))
-    );
     const institutions = await Promise.all(
-      institutionIds.map((institutionId) => {
-        return nordigenClient.institution.getInstitutionById(institutionId);
+      Array.from(institutionIdSet).map(async (institutionId) => {
+        return await nordigenService.getInstitution({institutionId});
       })
     );
 
-    // Extend accounts about institution details
-    detailedAccounts.forEach((account) => {
-      const institution = institutions.find(
-        (institution) => institution.id === account.institution_id
-      );
-      account.institution = institution;
+    const extendedAccounts = await nordigenService.extendAccountsAboutInstitutions({
+      accounts: detailedAccounts,
+      institutions
     });
 
-    const normalizedAccounts = detailedAccounts.map((acc) =>
-      normalizeAccount(acc)
-    );
+    extendedAccounts.map((account) => {
+      const bankAccount = BankFactory(account.institution_id);
+      return bankAccount.normalizeAccount(account);
+    })
 
-    console.log({
-      detailedAccounts,
-      institutions,
-      institutionIds,
-      normalizedAccounts
-    });
-
-    res.send(
-      JSON.stringify({
+    res.send({
         status: 'ok',
         data: {
           ...requisition,
-          accounts: normalizedAccounts
+          extendedAccounts
         }
-      })
+      }
     );
   })
 );
@@ -208,15 +194,23 @@ app.post(
 app.post(
   '/remove-account',
   handleError(async (req, res) => {
-    let { requisition_id } = req.body;
+    let {requisitionId} = req.body;
 
-    await nordigenClient.requisition.deleteRequisition(requisition_id);
-
-    res.send(
-      JSON.stringify({
-        status: 'ok'
+    const data = await nordigenService.deleteRequisition(requisitionId);
+    if (data.summary === 'Requisition deleted') {
+      res.send({
+        status: 'ok',
+        data
+      });
+    } else {
+      res.send({
+        status: 'error',
+        data: {
+          data,
+          reason: "Can not delete requisition"
+        }
       })
-    );
+    }
   })
 );
 
@@ -224,38 +218,36 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
     try {
-      await getNorgigenToken();
+      await getNordigenToken();
     } catch (error) {
-      res.send(
-        JSON.stringify({
+      res.send({
           status: 'error',
           data: {
             error,
             reason: "Can't fetch data from the Nordigen API"
           }
-        })
+        }
       );
       return;
     }
-
-    const { institution_id } = await validateToken(req, res);
+    const {institution_id} = await validateToken(req, res);
     if (!institution_id) {
       return;
     }
 
-    const { startDate, endDate, accountId } = req.body;
+    const {startDate, endDate, accountId} = req.body;
 
     const [transactions, accountBalance] = await Promise.all([
       nordigenClient
         .account(accountId)
-        .getTransactions({ dateFrom: startDate, dateTo: endDate }),
+        .getTransactions({dateFrom: startDate, dateTo: endDate}),
       nordigenClient.account(accountId).getBalances()
     ]);
 
-    switch(transactions.status_code) {
+    switch (transactions.status_code) {
       case 429:
         res.send(
-          JSON.stringify({
+          {
             status: 'ok',
             data: {
               error_type: 'SYNC_ERROR',
@@ -263,12 +255,12 @@ app.post(
               status: 'limit exceeded',
               reason: transactions.detail
             }
-          })
+          }
         );
         return;
       case 401:
         res.send(
-          JSON.stringify({
+          {
             status: 'ok',
             data: {
               error_type: 'SYNC_ERROR',
@@ -276,7 +268,7 @@ app.post(
               status: 'limit exceeded',
               reason: transactions.detail
             }
-          })
+          }
         );
         return;
     }
@@ -297,8 +289,7 @@ app.post(
       accountBalance.balances
     );
 
-    res.send(
-      JSON.stringify({
+    res.send({
         status: 'ok',
         data: {
           balances: accountBalance.balances,
@@ -309,54 +300,10 @@ app.post(
             pending: sortedPendingTransactions
           }
         }
-      })
+      }
     );
   })
 );
-
-const printIban = (account) => {
-  if (account.iban) {
-    return '(XXX ' + account.iban.slice(-4) + ')';
-  } else {
-    return '';
-  }
-};
-
-// https://nordigen.com/en/docs/account-information/output/accounts/
-// https://docs.google.com/spreadsheets/d/11tAD5cfrlaOZ4HXI6jPpL5hMf8ZuRYc6TUXTxZE84A8/edit#gid=489769432
-function normalizeAccount(account) {
-  switch (account.institution_id) {
-    case 'MBANK_RETAIL_BREXPLPW':
-      return {
-        account_id: account.id,
-        institution: account.institution,
-        mask: account.iban.slice(-4),
-        name: [account.displayName, printIban(account)].join(' '),
-        official_name: account.product,
-        type: 'checking'
-      };
-    case 'SANDBOXFINANCE_SFIN0000':
-      return {
-        account_id: account.id,
-        institution: account.institution,
-        mask: account.iban.slice(-4),
-        name: [account.name, printIban(account)].join(' '),
-        official_name: account.product,
-        type: 'checking'
-      };
-    case 'ING_PL_INGBPLPW':
-    case 'REVOLUT_REVOGB21':
-    default:
-      return {
-        account_id: account.id,
-        institution: account.institution,
-        mask: account.iban.slice(-4),
-        name: [account.product, printIban(account)].join(' '),
-        official_name: account.product,
-        type: 'checking'
-      };
-  }
-}
 
 function sortTransactions(institution_id, transactions = []) {
   switch (institution_id) {
@@ -389,7 +336,7 @@ function countPreviousBalance(
 
   switch (institution_id) {
     case 'ING_PL_INGBPLPW':
-      if(transactions.length) {
+      if (transactions.length) {
         return (
           oldestTransaction.balanceAfterTransaction.balanceAmount.amount -
           oldestTransaction.transactionAmount.amount
@@ -408,13 +355,13 @@ function countPreviousBalance(
           ['interimBooked', 'interimAvailable'].includes(balance.balanceType)
         ) || accountBalances[0];
       console.log({balance, accountBalances, transactions})
-      if(balance && transactions.length){
+      if (balance && transactions.length) {
         const accountBalance = balance.balanceAmount.amount;
-      /* eslint-enable no-case-declarations */
+        /* eslint-enable no-case-declarations */
         return transactions.reduce((total, trans) => {
           return total - trans.transactionAmount.amount;
         }, accountBalance);
-      }else {
+      } else {
         return
       }
   }

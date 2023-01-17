@@ -1,0 +1,142 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Nordigen get accounts details 1`] = `
+{
+  "data": {
+    "account_selection": false,
+    "accounts": [
+      "7e944232-bda9-40bc-b784-660c7ab5fe78",
+      "99a0bfe2-0bef-46df-bff2-e9ae0c6c5838",
+    ],
+    "agreement": Any<String>,
+    "created": Any<String>,
+    "extendedAccounts": [
+      {
+        "cashAccountType": "CACC",
+        "created": Any<String>,
+        "currency": "EUR",
+        "iban": "GL3343697694912188",
+        "id": "7e944232-bda9-40bc-b784-660c7ab5fe78",
+        "institution": {
+          "bic": "SFIN0000",
+          "countries": [
+            "XX",
+          ],
+          "id": "SANDBOXFINANCE_SFIN0000",
+          "logo": "https://cdn.nordigen.com/ais/SANDBOXFINANCE_SFIN0000.png",
+          "name": "Sandbox Finance",
+          "supported_features": [],
+          "supported_payments": {},
+          "transaction_total_days": "90",
+        },
+        "institution_id": "SANDBOXFINANCE_SFIN0000",
+        "last_accessed": Any<String>,
+        "name": "Main Account",
+        "ownerName": "John Doe",
+        "owner_name": "John Doe",
+        "product": "Checkings",
+        "resourceId": "01F3NS4YV94RA29YCH8R0F6BMF",
+        "status": Any<String>,
+      },
+      {
+        "cashAccountType": "CACC",
+        "created": Any<String>,
+        "currency": "EUR",
+        "iban": "GL0865354374424724",
+        "id": "99a0bfe2-0bef-46df-bff2-e9ae0c6c5838",
+        "institution": {
+          "bic": "SFIN0000",
+          "countries": [
+            "XX",
+          ],
+          "id": "SANDBOXFINANCE_SFIN0000",
+          "logo": "https://cdn.nordigen.com/ais/SANDBOXFINANCE_SFIN0000.png",
+          "name": "Sandbox Finance",
+          "supported_features": [],
+          "supported_payments": {},
+          "transaction_total_days": "90",
+        },
+        "institution_id": "SANDBOXFINANCE_SFIN0000",
+        "last_accessed": Any<String>,
+        "name": "Main Account",
+        "ownerName": "Jane Doe",
+        "owner_name": "Jane Doe",
+        "product": "Checkings",
+        "resourceId": "01F3NS5ASCNMVCTEJDT0G215YE",
+        "status": Any<String>,
+      },
+    ],
+    "id": Any<String>,
+    "institution_id": "SANDBOXFINANCE_SFIN0000",
+    "link": Any<String>,
+    "redirect": "http://localhost:3001/nordigen/link",
+    "redirect_immediate": false,
+    "reference": Any<String>,
+    "ssn": null,
+    "status": "LN",
+  },
+  "status": "ok",
+}
+`;
+
+exports[`Nordigen get transactions 1`] = `
+{
+  "data": {
+    "balances": [
+      {
+        "balanceAmount": {
+          "amount": Any<String>,
+          "currency": "EUR",
+        },
+        "balanceType": "expected",
+        "referenceDate": Any<String>,
+      },
+      {
+        "balanceAmount": {
+          "amount": Any<String>,
+          "currency": "EUR",
+        },
+        "balanceType": "interimAvailable",
+        "referenceDate": Any<String>,
+      },
+    ],
+    "institutionId": "SANDBOXFINANCE_SFIN0000",
+    "startingBalance": Any<Number>,
+    "transactions": {
+      "booked": ArrayContaining [
+        ObjectContaining {
+          "bookingDate": Any<String>,
+          "remittanceInformationUnstructured": Any<String>,
+          "transactionAmount": {
+            "amount": Any<String>,
+            "currency": "EUR",
+          },
+          "transactionId": Any<String>,
+          "valueDate": Any<String>,
+        },
+      ],
+      "pending": ArrayContaining [
+        ObjectContaining {
+          "remittanceInformationUnstructured": Any<String>,
+          "transactionAmount": {
+            "amount": Any<String>,
+            "currency": "EUR",
+          },
+          "valueDate": Any<String>,
+        },
+      ],
+    },
+  },
+  "status": "ok",
+}
+`;
+
+exports[`Nordigen remove requisition 1`] = `
+{
+  "data": {
+    "detail": Any<String>,
+    "summary": "Requisition deleted",
+  },
+  "status": "ok",
+}
+`;

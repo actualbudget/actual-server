@@ -11,3 +11,5 @@ fly.toml
 build/
 dist
 .idea
+/coverage
+/coverage-e2e
