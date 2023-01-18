@@ -8,16 +8,17 @@ const printIban = (account) => {
 };
 //--- END utils
 
-
-// https://nordigen.com/en/docs/account-information/output/accounts/
-// https://docs.google.com/spreadsheets/d/1ogpzydzotOltbssrc3IQ8rhBLlIZbQgm5QCiiNJrkyA/edit#gid=489769432
-
-class MBankRetail{
+class MbankRetailBrexplpw{
   static institutionId = 'MBANK_RETAIL_BREXPLPW';
 
   constructor(options) {
   }
 
+  /**
+   * Returns normalized object with required data for the frontend
+   * @param {DetailedAccount&{institution: Institution}} account
+   * @returns {NormalizedAccountDetails}
+   */
   normalizeAccount = (account) => {
     return {
       account_id: account.id,
@@ -30,12 +31,17 @@ class MBankRetail{
   }
 }
 
-class SandboxFinance {
+class SandboxfinanceSfin0000 {
   static institutionId = 'SANDBOXFINANCE_SFIN0000';
 
   constructor(options) {
   }
 
+  /**
+   * Returns normalized object with required data for the frontend
+   * @param {DetailedAccount&{institution: Institution}} account
+   * @returns {NormalizedAccountDetails}
+   */
   normalizeAccount = (account) => {
     return {
       account_id: account.id,
@@ -48,12 +54,14 @@ class SandboxFinance {
   }
 }
 
-class IngPl {
+class IngPlIngbplpw {
   static institutionId = 'ING_PL_INGBPLPW';
 
-  constructor(options) {
-  }
-
+  /**
+   * Returns normalized object with required data for the frontend
+   * @param {DetailedAccount&{institution: Institution}} account
+   * @returns {NormalizedAccountDetails}
+   */
   normalizeAccount = (account) => {
     return {
       account_id: account.id,
@@ -66,16 +74,38 @@ class IngPl {
   }
 }
 
-const BankFactory = (bankId) => {
-  switch (bankId) {
-    case MBankRetail.institutionId:
-      return new MBankRetail()
-    case SandboxFinance.institutionId:
-      return new SandboxFinance()
-    case IngPl.institutionId:
-      return new IngPl();
+class IntegrationBank {
+  /**
+   * Returns normalized object with required data for the frontend
+   * @param {DetailedAccount&{institution: Institution}} account
+   * @returns {NormalizedAccountDetails}
+   */
+  normalizeAccount = (account) => {
+    console.log(
+      'Available account properties for new institution integration',
+      { account: JSON.stringify(account) }
+    );
+    return {
+      account_id: account.id,
+      institution: account.institution,
+      mask: (account?.iban || '0000').slice(-4),
+      name: `integration-${account.institution_id}`,
+      official_name: `integration-${account.institution_id}`,
+      type: 'checking'
+    }
+  }
+}
+
+const BankFactory = (institutionId) => {
+  switch (institutionId) {
+    // case MbankRetailBrexplpw.institutionId:
+    //   return new MbankRetailBrexplpw()
+    case SandboxfinanceSfin0000.institutionId:
+      return new SandboxfinanceSfin0000()
+    case IngPlIngbplpw.institutionId:
+      return new IngPlIngbplpw();
     default:
-      throw new Error('error');
+      return new IntegrationBank();
   }
 }
 

@@ -151,7 +151,7 @@ app.post(
     if (status !== 'LN') {
       res.send({
           status: 'ok',
-          data: {status}
+          requisitionStatus: status,
         }
       );
       return;
@@ -175,7 +175,7 @@ app.post(
       institutions
     });
 
-    extendedAccounts.map((account) => {
+    const normalizedAccounts = extendedAccounts.map(account => {
       const bankAccount = BankFactory(account.institution_id);
       return bankAccount.normalizeAccount(account);
     })
@@ -184,7 +184,7 @@ app.post(
         status: 'ok',
         data: {
           ...requisition,
-          extendedAccounts
+          accounts: normalizedAccounts
         }
       }
     );
