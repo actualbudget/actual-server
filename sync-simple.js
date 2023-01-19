@@ -1,13 +1,15 @@
 let { existsSync, readFileSync } = require('fs');
 let { join } = require('path');
 let { openDatabase } = require('./db');
+let { getPathForGroupFile } = require('./util/paths');
 
 let actual = require('@actual-app/api');
 let merkle = actual.internal.merkle;
+let SyncPb = actual.internal.SyncProtoBuf;
 let Timestamp = actual.internal.timestamp.Timestamp;
 
 function getGroupDb(groupId) {
-  let path = join(__dirname, `user-files/${groupId}.sqlite`);
+  let path = getPathForGroupFile(groupId);
   let needsInit = !existsSync(path);
 
   let db = openDatabase(path);
@@ -56,8 +58,8 @@ function addMessages(db, messages) {
   return returnValue;
 }
 
-function getMerkle(db, group_id) {
-  let rows = db.all('SELECT * FROM messages_merkles', [group_id]);
+function getMerkle(db) {
+  let rows = db.all('SELECT * FROM messages_merkles');
 
   if (rows.length > 0) {
     return JSON.parse(rows[0].merkle);
@@ -68,8 +70,8 @@ function getMerkle(db, group_id) {
   }
 }
 
-function sync(messages, since, fileId) {
-  let db = getGroupDb(fileId);
+function sync(messages, since, groupId) {
+  let db = getGroupDb(groupId);
   let newMessages = db.all(
     `SELECT * FROM messages_binary
          WHERE timestamp > ?
@@ -79,7 +81,18 @@ function sync(messages, since, fileId) {
 
   let trie = addMessages(db, messages);
 
-  return { trie, newMessages };
+  db.close();
+
+  return {
+    trie,
+    newMessages: newMessages.map((msg) => {
+      const envelopePb = new SyncPb.MessageEnvelope();
+      envelopePb.setTimestamp(msg.timestamp);
+      envelopePb.setIsencrypted(msg.is_encrypted);
+      envelopePb.setContent(msg.content);
+      return envelopePb;
+    })
+  };
 }
 
 module.exports = { sync };
