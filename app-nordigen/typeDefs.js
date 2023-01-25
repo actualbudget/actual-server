@@ -32,7 +32,7 @@
  * @property {string} [linkedAccounts] This data attribute is a field, where an financial institution can name a cash account associated to pending card transactions.
  * @property {string} [msisdn] An alias to a payment account via a registered mobile phone number
  * @property {string} [name] Name of the account, as assigned by the financial institution
- * @property {string} [ownerAddressUnstructured] Address of the legal account owner
+ * @property {Array<string>} [ownerAddressUnstructured] Address of the legal account owner
  * @property {string} [ownerName] Name of the legal account owner. If there is more than one owner, then e.g. two names might be noted here. For a corporate account, the corporate name is used for this attribute.
  * @property {string} [product] Product Name of the Bank for this account, proprietary definition
  * @property {string} [resourceId] The account id of the given account in the financial institution
@@ -82,4 +82,73 @@
  * @property {string} name name of the accounts
  * @property {string} official_name name of the product in the institution
  * @property {string} type type of account
+ */
+
+/**
+ * @typedef Amount
+ * @property {number} amount
+ * @property {string} currency
+ */
+
+// https://nordigen.com/en/docs/account-information/output/transactions/
+/**
+ * @typedef Transaction
+ * @property {string} [additionalInformation] Might be used by the financial institution to transport additional transaction related information
+ * @property {string} [additionalInformation] Is used if and only if the bookingStatus entry equals "information"
+ * @property {number} [balanceAfterTransaction] This is the balance after this transaction. Recommended balance type is interimBooked.
+ * @property {string} [bankTransactionCode] Bank transaction code as used by the financial institution and using the sub elements of this structured code defined by ISO20022. For standing order reports the following codes are applicable:
+ * "PMNT-ICDT-STDO" for credit transfers,
+ * "PMNT-IRCT-STDO" for instant credit transfers,
+ * "PMNT-ICDT-XBST" for cross-border credit transfers,
+ * "PMNT-IRCT-XBST" for cross-border real time credit transfers,
+ * "PMNT-MCOP-OTHR" for specific standing orders which have a dynamical amount to move left funds e.g. on month end to a saving account
+ * @property {string} [bookingDate] The date when an entry is posted to an account on the financial institutions books.
+ * @property {string} [bookingDateTime] The date and time when an entry is posted to an account on the financial institutions books.
+ * @property {string} [checkId] Identification of a Cheque
+ * @property {string} [creditorAccount] Account Reference  Conditional
+ * @property {string} [creditorAgent] BICFI
+ * @property {string} [creditorId] Identification of Creditors, e.g. a SEPA Creditor ID
+ * @property {string} [creditorName] Name of the creditor if a "Debited" transaction
+ * @property {Array<any>} [currencyExchange] Array of Report [Exchange] Rate
+ * @property {string} [debtorAccount] Account Reference  Conditional
+ * @property {string} [debtorAgent] BICFI
+ * @property {string} [debtorName] Name of the debtor if a "Credited" transaction
+ * @property {string} [endToEndId] Unique end to end ID
+ * @property {string} [entryReference] Is the identification of the transaction as used for reference given by financial institution.
+ * @property {string} [internalTransactionId] Transaction identifier given by Nordigen
+ * @property {string} [mandateId] Identification of Mandates, e.g. a SEPA Mandate ID
+ * @property {string} [merchantCategoryCode] Merchant category code as defined by card issuer
+ * @property {string} [proprietaryBank] Proprietary bank transaction code as used within a community or within an financial institution
+ * @property {Object} [purposeCode] Conditional
+ * @property {string} [remittanceInformation] Reference as contained in the structured remittance reference structure
+ * @property {Array<any>} [remittanceInformation] Reference as contained in the structured remittance reference structure
+ * @property {string} [remittanceInformation]
+ * @property {string} [remittanceInformation]
+ * @property {Amount} transactionAmount The amount of the transaction as billed to the account, an object containing:
+ * @property {string} [transactionId] Unique transaction identifier given by financial institution
+ * @property {string} [ultimateCreditor]
+ * @property {string} [ultimateDebtor]
+ * @property {string} [valueDate] The Date at which assets become available to the account owner in case of a credit
+ * @property {string} [valueDateTime] The date and time at which assets become available to the account owner in case of a credit
+ *
+ */
+
+/**
+ * @typedef Transactions
+ * @property {Array<Transaction>} booked
+ * @property {Array<Transaction>} pending
+ */
+
+/**
+ * @typedef {Object} GetTransactionsParams
+ * @property {string} accountId Id of account from the nordigen app
+ * @property {string} startDate Begin date of the period from which we want to download transactions
+ * @property {string} endDate End date of the period from which we want to download transactions
+ */
+
+/**
+ * @typedef {Object} GetTransactionsResponse
+ * @property {number} [status_code]
+ * @property {string} [detail]
+ * @property {Transactions} transactions
  */

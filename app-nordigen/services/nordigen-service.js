@@ -54,10 +54,7 @@ const nordigenService =
   },
 
   /**
-   *  Retrieve an detailed account by account id
-   *  merge of
-   *   - https://nordigen.com/en/docs/account-information/integration/parameters-and-responses/#/accounts/retrieve%20account%20metadata
-   *   - https://nordigen.com/en/docs/account-information/integration/parameters-and-responses/#/accounts/accounts_details_retrieve
+   * Retrieve an detailed account by account id
    * @param accountId
    * @returns {Promise<DetailedAccount>}
    */
@@ -68,8 +65,8 @@ const nordigenService =
     ]);
 
     return {
-      ...detailedAccount.account,
-      ...metadataAccount
+      ...metadataAccount,
+      ...detailedAccount.account
     };
   },
 
@@ -99,6 +96,16 @@ const nordigenService =
       }
     });
   },
+
+   /**
+    *
+    * @param {GetTransactionsParams} params
+    * @returns {Promise<GetTransactionsResponse>}
+    */
+   getTransactions: async ({accountId, startDate, endDate}) =>
+     await nordigenClient.account(accountId).getTransactions({dateFrom: startDate, dateTo: endDate}),
+
+   getBalances: async ({accountId}) => await nordigenClient.account(accountId).getBalances(),
 }
 
 module.exports = nordigenService;
