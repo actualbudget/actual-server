@@ -8,14 +8,25 @@ try {
   config = require('./config');
 } catch (e) {}
 
-config = {
-  mode: 'development',
-  port: 5006,
-  hostname: '0.0.0.0',
-  serverFiles: join(root, 'server-files'),
-  userFiles: join(root, 'user-files'),
-  ...config
-};
+  if (process.env.NODE_ENV === 'test') {
+    config = {
+      mode: 'test',
+      port: 5006,
+      hostname: '0.0.0.0',
+      serverFiles: join(__dirname, 'test-server-files'),
+      userFiles: join(__dirname, 'test-user-files')
+    };
+  } else {
+    config = {
+      mode: 'development',
+      port: 5006,
+      hostname: '0.0.0.0',
+      serverFiles: join(root, 'server-files'),
+      userFiles: join(root, 'user-files'),
+      ...config
+    };
+  }
+}
 
 // The env variable always takes precedence
 config.userFiles = process.env.ACTUAL_USER_FILES || config.userFiles;
