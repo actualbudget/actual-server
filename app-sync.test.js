@@ -74,14 +74,4 @@ describe('/download-user-file', () => {
       );
     });
   });
-
-  // TODO: build the synced-up database support and enable the test cases
-  // Versioning example: https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/locking-api-versions.html
-  describe('TBD-date (2022-11-25) version', () => {
-    it.todo('returns 401 if the user is not authenticated');
-    it.todo('returns 401 if the user is invalid');
-    it.todo('returns 400 error if the file does not exist in the database');
-    it.todo('returns 500 error if the file does not exist on the filesystem');
-    it.todo('returns a synced-up database attachment file');
-  });
 });
