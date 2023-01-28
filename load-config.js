@@ -6,7 +6,9 @@ let root = fs.existsSync('/data') ? '/data' : __dirname;
 try {
   // @ts-expect-error TS2307: we expect this file may not exist
   config = require('./config');
-} catch (e) {}
+} catch (e) {
+  // do nothing
+}
 
 if (process.env.NODE_ENV === 'test') {
   config = {
