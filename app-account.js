@@ -100,7 +100,7 @@ app.post('/change-password', (req, res) => {
   accountDb.mutate('UPDATE auth SET password = ?', [hashed]);
   accountDb.mutate('UPDATE sessions SET token = ?', [token]);
 
-  res.send({ status: 'ok', data: { token } });
+  res.send({ status: 'ok' });
 });
 
 app.get('/validate', (req, res) => {
