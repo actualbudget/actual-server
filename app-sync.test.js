@@ -1,16 +1,24 @@
 const fs = require('fs');
-const request = require('supertest');
-const { handlers: app } = require('./app-sync');
+const fastify = require('fastify');
+const appSync = require('./app-sync');
 const { getAccountDb } = require('./account-db');
 const { getPathForUserFile } = require('./util/paths');
+
+let app;
+beforeEach(() => {
+  app = fastify().register(appSync);
+});
+afterEach(() => {
+  app.close();
+});
 
 describe('/download-user-file', () => {
   describe('default version', () => {
     it('returns 401 if the user is not authenticated', async () => {
-      const res = await request(app).get('/download-user-file');
+      const res = await app.inject().get('/download-user-file').end();
 
       expect(res.statusCode).toEqual(401);
-      expect(res.body).toEqual({
+      expect(JSON.parse(res.body)).toEqual({
         details: 'token-not-found',
         reason: 'unauthorized',
         status: 'error'
@@ -18,12 +26,14 @@ describe('/download-user-file', () => {
     });
 
     it('returns 401 if the user is invalid', async () => {
-      const res = await request(app)
+      const res = await app
+        .inject()
         .get('/download-user-file')
-        .set('x-actual-token', 'invalid-token');
+        .headers({ 'x-actual-token': 'invalid-token' })
+        .end();
 
       expect(res.statusCode).toEqual(401);
-      expect(res.body).toEqual({
+      expect(JSON.parse(res.body)).toEqual({
         details: 'token-not-found',
         reason: 'unauthorized',
         status: 'error'
@@ -31,10 +41,14 @@ describe('/download-user-file', () => {
     });
 
     it('returns 400 error if the file does not exist in the database', async () => {
-      const res = await request(app)
+      const res = await app
+        .inject()
         .get('/download-user-file')
-        .set('x-actual-token', 'valid-token')
-        .set('x-actual-file-id', 'non-existing-file-id');
+        .headers({
+          'x-actual-token': 'valid-token',
+          'x-actual-file-id': 'non-existing-file-id'
+        })
+        .end();
 
       expect(res.statusCode).toEqual(400);
     });
@@ -45,10 +59,14 @@ describe('/download-user-file', () => {
         ['missing-fs-file']
       );
 
-      const res = await request(app)
+      const res = await app
+        .inject()
         .get('/download-user-file')
-        .set('x-actual-token', 'valid-token')
-        .set('x-actual-file-id', 'missing-fs-file');
+        .headers({
+          'x-actual-token': 'valid-token',
+          'x-actual-file-id': 'missing-fs-file'
+        })
+        .end();
 
       expect(res.statusCode).toEqual(500);
     });
@@ -60,10 +78,14 @@ describe('/download-user-file', () => {
         ['file-id']
       );
 
-      const res = await request(app)
+      const res = await app
+        .inject()
         .get('/download-user-file')
-        .set('x-actual-token', 'valid-token')
-        .set('x-actual-file-id', 'file-id');
+        .headers({
+          'x-actual-token': 'valid-token',
+          'x-actual-file-id': 'file-id'
+        })
+        .end();
 
       expect(res.statusCode).toEqual(200);
       expect(res.headers).toEqual(

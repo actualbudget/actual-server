@@ -1,46 +1,79 @@
 const fs = require('fs');
-const express = require('express');
-const actuator = require('express-actuator');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const Fastify = require('fastify');
+const cors = require('@fastify/cors');
+const static = require('@fastify/static');
 const config = require('./load-config');
 
 const accountApp = require('./app-account');
 const syncApp = require('./app-sync');
 
-const app = express();
-
 process.on('unhandledRejection', (reason) => {
   console.log('Rejection:', reason);
 });
 
-app.use(cors());
-app.use(bodyParser.json({ limit: '20mb' }));
-app.use(bodyParser.raw({ type: 'application/actual-sync', limit: '20mb' }));
-app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
+const mb = 1024 * 1024;
 
-app.use('/sync', syncApp.handlers);
-app.use('/account', accountApp.handlers);
-
-app.get('/mode', (req, res) => {
-  res.send(config.mode);
+const fastify = Fastify({
+  logger: {
+    transport: {
+      target: 'pino-pretty'
+    }
+  },
+  http2: true,
+  https: config.https
+    ? {
+        allowHTTP1: true,
+        ...config.https,
+        key: fs.readFileSync(config.https.key),
+        cert: fs.readFileSync(config.https.cert)
+      }
+    : null
 });
 
-app.use(actuator()); // Provides /health, /metrics, /info
+fastify.register(cors);
+fastify.addContentTypeParser(
+  'application/json',
+  { parseAs: 'string', bodyLimit: 20 * mb },
+  (req, /** @type {string} */ payload, done) => {
+    try {
+      const body = JSON.parse(payload);
+      done(null, body);
+    } catch (err) {
+      err.statusCode = 400;
+      done(err);
+    }
+  }
+);
+fastify.addContentTypeParser(
+  'application/actual-sync',
+  { parseAs: 'buffer', bodyLimit: 20 * mb },
+  (req, payload, done) => done(null, payload)
+);
+fastify.addContentTypeParser(
+  'application/encrypted-file',
+  { parseAs: 'buffer', bodyLimit: 50 * mb },
+  (req, payload, done) => done(null, payload)
+);
+
+fastify.register(syncApp, { prefix: '/sync' });
+fastify.register(accountApp, { prefix: '/account' });
+
+fastify.get('/mode', () => config.mode);
+
+fastify.register(require('./app-health'));
 
 // The web frontend
-app.use((req, res, next) => {
-  res.set('Cross-Origin-Opener-Policy', 'same-origin');
-  res.set('Cross-Origin-Embedder-Policy', 'require-corp');
+fastify.addHook('onRequest', (req, res, next) => {
+  res.header('Cross-Origin-Opener-Policy', 'same-origin');
+  res.header('Cross-Origin-Embedder-Policy', 'require-corp');
   next();
 });
-app.use(
-  express.static(__dirname + '/node_modules/@actual-app/web/build', {
-    index: false
-  })
-);
-app.get('/*', (req, res) => {
-  res.sendFile(__dirname + '/node_modules/@actual-app/web/build/index.html');
+fastify.register(static, {
+  root: __dirname + '/node_modules/@actual-app/web/build',
+  index: false
+});
+fastify.setNotFoundHandler((req, res) => {
+  res.sendFile('index.html');
 });
 
 async function run() {
@@ -52,26 +85,11 @@ async function run() {
     fs.mkdirSync(config.userFiles);
   }
 
-  await accountApp.init();
-  await syncApp.init();
-
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
-  if (config.https) {
-    const http2 = require('node:http2');
-    http2
-      .createSecureServer(
-        {
-          allowHTTP1: true,
-          ...config.https,
-          key: fs.readFileSync(config.https.key),
-          cert: fs.readFileSync(config.https.cert)
-        },
-        app
-      )
-      .listen(config.port, config.hostname);
-  } else {
-    app.listen(config.port, config.hostname);
-  }
+  await fastify.listen({
+    port: config.port,
+    host: config.hostname
+  });
 }
 
 run().catch((err) => {
