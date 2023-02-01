@@ -1,4 +1,4 @@
-function handleError(func) {
+export function handleError(func) {
   return (req, res) => {
     func(req, res).catch((err) => {
       console.log('Error', req.originalUrl, err);
@@ -7,5 +7,3 @@ function handleError(func) {
     });
   };
 }
-
-module.exports = { handleError };

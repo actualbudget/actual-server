@@ -1,6 +1,7 @@
+import fs from 'fs';
+import { join } from 'path';
+
 let config = {};
-let fs = require('fs');
-let { join } = require('path');
 let root = fs.existsSync('/data') ? '/data' : __dirname;
 
 try {
@@ -23,8 +24,8 @@ if (process.env.NODE_ENV === 'test') {
     mode: 'development',
     port: 5006,
     hostname: '::',
-    serverFiles: join(root, 'server-files'),
-    userFiles: join(root, 'user-files'),
+    serverFiles: join(root, '../server-files'),
+    userFiles: join(root, '../user-files'),
     ...config
   };
 }
@@ -32,4 +33,4 @@ if (process.env.NODE_ENV === 'test') {
 // The env variable always takes precedence
 config.userFiles = process.env.ACTUAL_USER_FILES || config.userFiles;
 
-module.exports = config;
+export default config;

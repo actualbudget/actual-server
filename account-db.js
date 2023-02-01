@@ -1,10 +1,11 @@
-let fs = require('fs');
-let { join } = require('path');
-let { openDatabase } = require('./db');
-let config = require('./load-config');
+import fs from 'fs';
+import { join } from 'path';
+import { openDatabase } from './db';
+import config from './load-config';
+
 let accountDb = null;
 
-function getAccountDb() {
+export function getAccountDb() {
   if (accountDb == null) {
     if (!fs.existsSync(config.serverFiles)) {
       console.log('MAKING SERVER DIR');
@@ -24,5 +25,3 @@ function getAccountDb() {
 
   return accountDb;
 }
-
-module.exports = { getAccountDb };

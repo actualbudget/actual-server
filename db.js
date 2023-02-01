@@ -1,4 +1,4 @@
-let Database = require('better-sqlite3');
+import Database from 'better-sqlite3';
 
 class WrappedDatabase {
   constructor(db) {
@@ -34,8 +34,6 @@ class WrappedDatabase {
   }
 }
 
-function openDatabase(filename) {
+export function openDatabase(filename) {
   return new WrappedDatabase(new Database(filename));
 }
-
-module.exports = { openDatabase };

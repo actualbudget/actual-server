@@ -1,14 +1,14 @@
 // This app is unused right now. Maybe you could use it as a starting
 // point for Plaid integration!
 
-const express = require('express');
-const uuid = require('uuid');
-const fetch = require('node-fetch');
-const plaid = require('plaid');
-const { middleware: connectDb } = require('./db');
-const { handleError } = require('./util/handle-error');
-const { validateSubscribedUser } = require('./util/validate-user');
-const config = require('./load-config');
+import express from 'express';
+import uuid from 'uuid';
+import fetch from 'node-fetch';
+import plaid from 'plaid';
+import { middleware as connectDb } from './db';
+import { handleError } from './util/handle-error';
+import { validateSubscribedUser } from './util/validate-user';
+import config from './load-config';
 
 const app = express();
 

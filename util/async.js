@@ -1,4 +1,4 @@
-function sequential(fn) {
+export function sequential(fn) {
   let sequenceState = {
     running: null,
     queue: []
@@ -40,5 +40,3 @@ function sequential(fn) {
     }
   };
 }
-
-module.exports = { sequential };

@@ -1,6 +1,7 @@
-let { sequential } = require('./util/async');
+import { sequential } from './util/async';
 
-let actual = require('@actual-app/api');
+import actual from '@actual-app/api';
+
 let SyncPb = actual.internal.SyncProtoBuf;
 
 // This method must be sequential (TODO: document why, because Actual
@@ -50,4 +51,4 @@ const sync = sequential(async function syncAPI(messages, since, fileId) {
   };
 });
 
-module.exports = { sync };
+export default sync;

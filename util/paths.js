@@ -1,12 +1,10 @@
-let { join } = require('path');
-let config = require('../load-config');
+import { join } from 'path';
+import config from '../load-config';
 
-function getPathForUserFile(fileId) {
+export function getPathForUserFile(fileId) {
   return join(config.userFiles, `file-${fileId}.blob`);
 }
 
-function getPathForGroupFile(groupId) {
+export function getPathForGroupFile(groupId) {
   return join(config.userFiles, `group-${groupId}.sqlite`);
 }
-
-module.exports = { getPathForUserFile, getPathForGroupFile };

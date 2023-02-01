@@ -1,12 +1,13 @@
-const fs = require('fs');
-const express = require('express');
-const actuator = require('express-actuator');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const config = require('./load-config');
+import fs from 'fs';
+import path from 'path';
+import express from 'express';
+import actuator from 'express-actuator';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import config from './load-config';
 
-const accountApp = require('./app-account');
-const syncApp = require('./app-sync');
+import * as accountApp from './app-account';
+import * as syncApp from './app-sync';
 
 const app = express();
 
@@ -35,12 +36,19 @@ app.use((req, res, next) => {
   next();
 });
 app.use(
-  express.static(__dirname + '/node_modules/@actual-app/web/build', {
-    index: false
-  })
+  express.static(
+    path.resolve(__dirname + '/../node_modules/@actual-app/web/build'),
+    {
+      index: false
+    }
+  )
 );
 app.get('/*', (req, res) => {
-  res.sendFile(__dirname + '/node_modules/@actual-app/web/build/index.html');
+  res.sendFile(
+    path.resolve(
+      __dirname + '/../node_modules/@actual-app/web/build/index.html'
+    )
+  );
 });
 
 async function run() {

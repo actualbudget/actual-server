@@ -1,8 +1,8 @@
-const fs = require('fs');
-const request = require('supertest');
-const { handlers: app } = require('./app-sync');
-const { getAccountDb } = require('./account-db');
-const { getPathForUserFile } = require('./util/paths');
+import fs from 'fs';
+import request from 'supertest';
+import { handlers as app } from './app-sync';
+import { getAccountDb } from './account-db';
+import { getPathForUserFile } from './util/paths';
 
 describe('/download-user-file', () => {
   describe('default version', () => {

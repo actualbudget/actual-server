@@ -1,9 +1,10 @@
-let { existsSync, readFileSync } = require('fs');
-let { join } = require('path');
-let { openDatabase } = require('./db');
-let { getPathForGroupFile } = require('./util/paths');
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
+import { openDatabase } from './db';
+import { getPathForGroupFile } from './util/paths';
 
-let actual = require('@actual-app/api');
+import actual from '@actual-app/api';
+
 let merkle = actual.internal.merkle;
 let SyncPb = actual.internal.SyncProtoBuf;
 let Timestamp = actual.internal.timestamp.Timestamp;
@@ -15,7 +16,7 @@ function getGroupDb(groupId) {
   let db = openDatabase(path);
 
   if (needsInit) {
-    let sql = readFileSync(join(__dirname, 'sql/messages.sql'), 'utf8');
+    let sql = readFileSync(join(__dirname, '/../sql/messages.sql'), 'utf8');
     db.exec(sql);
   }
 
@@ -70,7 +71,7 @@ function getMerkle(db) {
   }
 }
 
-function sync(messages, since, groupId) {
+export function sync(messages, since, groupId) {
   let db = getGroupDb(groupId);
   let newMessages = db.all(
     `SELECT * FROM messages_binary
@@ -94,5 +95,3 @@ function sync(messages, since, groupId) {
     })
   };
 }
-
-module.exports = { sync };

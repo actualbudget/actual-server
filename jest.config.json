@@ -1,4 +1,10 @@
 {
-	"setupFiles": ["./jest.setup.js"],
-	"testPathIgnorePatterns": ["/node_modules/", "/build/"]
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "transform": {
+    "^.+\\.jsx?$": ["ts-jest"],
+    "^.+\\.tsx?$": ["ts-jest"]
+  },
+  "setupFiles": ["./jest.setup.js"],
+  "testPathIgnorePatterns": ["/node_modules/", "/build/"]
 }
