@@ -5,7 +5,7 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@actual-app/api@npm:^4.1.6":
+"@actual-app/api@npm:4.1.6":
   version: 4.1.6
   resolution: "@actual-app/api@npm:4.1.6"
   dependencies:
@@ -1514,7 +1514,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual-sync@workspace:."
   dependencies:
-    "@actual-app/api": ^4.1.6
+    "@actual-app/api": 4.1.6
     "@actual-app/web": 23.1.12
     "@types/better-sqlite3": ^7.5.0
     "@types/jest": ^29.2.3
