@@ -2,6 +2,7 @@ let bcrypt = require('bcrypt');
 let uuid = require('uuid');
 let { validateUser } = require('./util/validate-user');
 let { getAccountDb } = require('./account-db');
+let { getKey } = require('./util/read-body');
 
 // app.use(errorMiddleware);
 
@@ -29,21 +30,18 @@ module.exports = (fastify, opts, done) => {
   });
 
   fastify.post('/bootstrap', (req, res) => {
-    let { password } = req.body;
+    let password = getKey(req, 'password');
     let accountDb = getAccountDb();
 
     let rows = accountDb.all('SELECT * FROM auth');
     if (rows.length !== 0) {
-      res.status(400).send({
-        status: 'error',
-        reason: 'already-bootstrapped'
-      });
-      return;
+      res.status(400);
+      return { status: 'error', reason: 'already-bootstrapped' };
     }
 
-    if (password == null || password === '') {
-      res.status(400).send({ status: 'error', reason: 'invalid-password' });
-      return;
+    if (!password) {
+      res.status(400);
+      return { status: 'error', reason: 'invalid-password' };
     }
 
     // Hash the password. There's really not a strong need for this
@@ -55,11 +53,11 @@ module.exports = (fastify, opts, done) => {
     let token = uuid.v4();
     accountDb.mutate('INSERT INTO sessions (token) VALUES (?)', [token]);
 
-    res.send({ status: 'ok', data: { token } });
+    return { status: 'ok', data: { token } };
   });
 
   fastify.post('/login', (req, res) => {
-    let { password } = req.body;
+    let password = getKey(req, 'password');
     let accountDb = getAccountDb();
 
     let row = accountDb.first('SELECT * FROM auth');
@@ -75,7 +73,7 @@ module.exports = (fastify, opts, done) => {
       token = row.token;
     }
 
-    res.send({ status: 'ok', data: { token } });
+    return { status: 'ok', data: { token } };
   });
 
   fastify.post('/change-password', (req, res) => {
@@ -83,11 +81,10 @@ module.exports = (fastify, opts, done) => {
     if (!user) return;
 
     let accountDb = getAccountDb();
-    let { password } = req.body;
+    let password = getKey(req, 'password');
 
-    if (password == null || password === '') {
-      res.send({ status: 'error', reason: 'invalid-password' });
-      return;
+    if (!password) {
+      return { status: 'error', reason: 'invalid-password' };
     }
 
     let hashed = hashPassword(password);
@@ -97,16 +94,16 @@ module.exports = (fastify, opts, done) => {
     accountDb.mutate('UPDATE auth SET password = ?', [hashed]);
     accountDb.mutate('UPDATE sessions SET token = ?', [token]);
 
-    res.send({ status: 'ok', data: {} });
+    return { status: 'ok', data: {} };
   });
 
   fastify.get('/validate', (req, res) => {
     let user = validateUser(req, res);
     if (user) {
-      res.send({ status: 'ok', data: { validated: true } });
+      return { status: 'ok', data: { validated: true } };
     }
+    return { status: 'error', reason: 'unauthorized' };
   });
 
-  // app.use(errorMiddleware);
   done();
 };

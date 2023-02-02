@@ -4,6 +4,7 @@ let uuid = require('uuid');
 let { validateUser } = require('./util/validate-user');
 let { getAccountDb } = require('./account-db');
 let { getPathForUserFile, getPathForGroupFile } = require('./util/paths');
+let { getKey } = require('./util/read-body');
 
 let simpleSync = require('./sync-simple');
 
@@ -31,8 +32,7 @@ module.exports = (fastify, opts, done) => {
       requestPb = SyncPb.SyncRequest.deserializeBinary(req.body);
     } catch (e) {
       res.status(500);
-      res.send({ status: 'error', reason: 'internal-error' });
-      return;
+      return { status: 'error', reason: 'internal-error' };
     }
 
     let accountDb = getAccountDb();
@@ -53,8 +53,7 @@ module.exports = (fastify, opts, done) => {
 
     if (currentFiles.length === 0) {
       res.status(400);
-      res.send('file-not-found');
-      return;
+      return 'file-not-found';
     }
 
     let currentFile = currentFiles[0];
@@ -64,16 +63,14 @@ module.exports = (fastify, opts, done) => {
       currentFile.sync_version < SYNC_FORMAT_VERSION
     ) {
       res.status(400);
-      res.send('file-old-version');
-      return;
+      return 'file-old-version';
     }
 
     // When resetting sync state, something went wrong. There is no
     // group id and it's awaiting a file to be uploaded.
     if (currentFile.group_id == null) {
       res.status(400);
-      res.send('file-needs-upload');
-      return;
+      return 'file-needs-upload';
     }
 
     // Check to make sure the uploaded file is valid and has been
@@ -85,16 +82,14 @@ module.exports = (fastify, opts, done) => {
       : null;
     if (uploadedKeyId !== currentFile.encrypt_keyid) {
       res.status(400);
-      res.send('file-key-mismatch');
-      return;
+      return 'file-key-mismatch';
     }
 
     // The changes being synced are part of an old group, which
     // means the file has been reset. User needs to re-download.
     if (group_id !== currentFile.group_id) {
       res.status(400);
-      res.send('file-has-reset');
-      return;
+      return 'file-has-reset';
     }
 
     // The data is encrypted with a different key which is
@@ -103,8 +98,7 @@ module.exports = (fastify, opts, done) => {
     // (which necessitates a sync reset so they need to re-download).
     if (key_id !== currentFile.encrypt_keyid) {
       res.status(400);
-      res.send('file-has-new-key');
-      return false;
+      return 'file-has-new-key';
     }
 
     let { trie, newMessages } = simpleSync.sync(messages, since, group_id);
@@ -114,8 +108,8 @@ module.exports = (fastify, opts, done) => {
     responsePb.setMerkle(JSON.stringify(trie));
     newMessages.forEach((msg) => responsePb.addMessages(msg));
 
-    res.set('Content-Type', 'application/actual-sync');
-    res.set('X-ACTUAL-SYNC-METHOD', 'simple');
+    res.header('Content-Type', 'application/actual-sync');
+    res.header('X-ACTUAL-SYNC-METHOD', 'simple');
     res.send(Buffer.from(responsePb.serializeBinary()));
   });
 
@@ -126,24 +120,22 @@ module.exports = (fastify, opts, done) => {
     }
 
     let accountDb = getAccountDb();
-    let { fileId } = req.body;
+    let fileId = getKey(req, 'fileId');
 
     let rows = accountDb.all(
       'SELECT encrypt_salt, encrypt_keyid, encrypt_test FROM files WHERE id = ?',
       [fileId]
     );
     if (rows.length === 0) {
-      res.status(400).send('file-not-found');
-      return;
+      res.status(400);
+      return 'file-not-found';
     }
     let { encrypt_salt, encrypt_keyid, encrypt_test } = rows[0];
 
-    res.send(
-      JSON.stringify({
-        status: 'ok',
-        data: { id: encrypt_keyid, salt: encrypt_salt, test: encrypt_test }
-      })
-    );
+    return {
+      status: 'ok',
+      data: { id: encrypt_keyid, salt: encrypt_salt, test: encrypt_test }
+    };
   });
 
   fastify.post('/user-create-key', (req, res) => {
@@ -152,14 +144,17 @@ module.exports = (fastify, opts, done) => {
       return;
     }
     let accountDb = getAccountDb();
-    let { fileId, keyId, keySalt, testContent } = req.body;
+    let fileId = getKey(req, 'fileId');
+    let keyId = getKey(req, 'keyId');
+    let keySalt = getKey(req, 'keySalt');
+    let testContent = getKey(req, 'testContent');
 
     accountDb.mutate(
       'UPDATE files SET encrypt_salt = ?, encrypt_keyid = ?, encrypt_test = ? WHERE id = ?',
       [keySalt, keyId, testContent, fileId]
     );
 
-    res.send(JSON.stringify({ status: 'ok' }));
+    return { status: 'ok' };
   });
 
   fastify.post('/reset-user-file', async (req, res) => {
@@ -168,14 +163,14 @@ module.exports = (fastify, opts, done) => {
       return;
     }
     let accountDb = getAccountDb();
-    let { fileId } = req.body;
+    let fileId = getKey(req, 'fileId');
 
     let files = accountDb.all('SELECT group_id FROM files WHERE id = ?', [
       fileId
     ]);
     if (files.length === 0) {
-      res.status(400).send('User or file not found');
-      return;
+      res.status(400);
+      return 'User or file not found';
     }
     let { group_id } = files[0];
 
@@ -189,7 +184,7 @@ module.exports = (fastify, opts, done) => {
       }
     }
 
-    res.send(JSON.stringify({ status: 'ok' }));
+    return { status: 'ok' };
   });
 
   fastify.post('/upload-user-file', async (req, res) => {
@@ -199,13 +194,16 @@ module.exports = (fastify, opts, done) => {
     }
 
     let accountDb = getAccountDb();
-    let name = decodeURIComponent(req.headers['x-actual-name']);
+    let name = decodeURIComponent(req.headers['x-actual-name'].toString());
     let fileId = req.headers['x-actual-file-id'];
     let groupId = req.headers['x-actual-group-id'] || null;
     let encryptMeta = req.headers['x-actual-encrypt-meta'] || null;
     let syncFormatVersion = req.headers['x-actual-format'] || null;
 
-    let keyId = encryptMeta ? JSON.parse(encryptMeta).keyId : null;
+    let keyId =
+      encryptMeta && typeof encryptMeta === 'string'
+        ? JSON.parse(encryptMeta).keyId
+        : null;
 
     if (!fileId) {
       throw new Error('fileId is required');
@@ -224,8 +222,7 @@ module.exports = (fastify, opts, done) => {
       // either reset again or download from the current group.
       if (groupId !== currentFile.group_id) {
         res.status(400);
-        res.send('file-has-reset');
-        return;
+        return 'file-has-reset';
       }
 
       // The key that the file is encrypted with is different than
@@ -238,16 +235,20 @@ module.exports = (fastify, opts, done) => {
       // user download the latest file.
       if (keyId !== currentFile.encrypt_keyid) {
         res.status(400);
-        res.send('file-has-new-key');
-        return;
+        return 'file-has-new-key';
       }
+    }
+
+    if (!(req.body instanceof Buffer)) {
+      res.status(400);
+      return { status: 'error' };
     }
 
     try {
       await fs.writeFile(getPathForUserFile(fileId), req.body);
     } catch (err) {
       console.log('Error writing file', err);
-      res.send(JSON.stringify({ status: 'error' }));
+      return { status: 'error' };
     }
 
     let rows = accountDb.all('SELECT id FROM files WHERE id = ?', [fileId]);
@@ -258,7 +259,7 @@ module.exports = (fastify, opts, done) => {
         'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta) VALUES (?, ?, ?, ?, ?)',
         [fileId, groupId, syncFormatVersion, name, encryptMeta]
       );
-      res.send(JSON.stringify({ status: 'ok', groupId }));
+      return { status: 'ok', groupId };
     } else {
       if (!groupId) {
         // sync state was reset, create new group
@@ -275,7 +276,7 @@ module.exports = (fastify, opts, done) => {
         [syncFormatVersion, encryptMeta, name, fileId]
       );
 
-      res.send(JSON.stringify({ status: 'ok', groupId }));
+      return { status: 'ok', groupId };
     }
   });
 
@@ -293,8 +294,8 @@ module.exports = (fastify, opts, done) => {
       [fileId]
     );
     if (rows.length === 0) {
-      res.status(400).send('User or file not found');
-      return;
+      res.status(400);
+      return 'User or file not found';
     }
 
     let buffer;
@@ -302,12 +303,12 @@ module.exports = (fastify, opts, done) => {
       buffer = await fs.readFile(getPathForUserFile(fileId));
     } catch (e) {
       console.log(`Error: file does not exist: ${getPathForUserFile(fileId)}`);
-      res.status(500).send('File does not exist on server');
-      return;
+      res.status(500);
+      return 'File does not exist on server';
     }
 
     res.header('Content-Disposition', `attachment;filename=${fileId}`);
-    res.send(buffer);
+    return buffer;
   });
 
   fastify.post('/update-user-filename', (req, res) => {
@@ -316,7 +317,8 @@ module.exports = (fastify, opts, done) => {
       return;
     }
     let accountDb = getAccountDb();
-    let { fileId, name } = req.body;
+    let fileId = getKey(req, 'fileId');
+    let name = getKey(req, 'name');
 
     // Do some authentication
     let rows = accountDb.all(
@@ -324,13 +326,16 @@ module.exports = (fastify, opts, done) => {
       [fileId]
     );
     if (rows.length === 0) {
-      res.status(500).send('User or file not found');
-      return;
+      // res.status(500).send('User or file not found');
+      // return;
+      res.status(500);
+      return 'User or file not found';
     }
 
     accountDb.mutate('UPDATE files SET name = ? WHERE id = ?', [name, fileId]);
 
-    res.send(JSON.stringify({ status: 'ok' }));
+    // res.send(JSON.stringify({ status: 'ok' }));
+    return { status: 'ok' };
   });
 
   fastify.get('/list-user-files', (req, res) => {
@@ -342,18 +347,16 @@ module.exports = (fastify, opts, done) => {
     let accountDb = getAccountDb();
     let rows = accountDb.all('SELECT * FROM files');
 
-    res.send(
-      JSON.stringify({
-        status: 'ok',
-        data: rows.map((row) => ({
-          deleted: row.deleted,
-          fileId: row.id,
-          groupId: row.group_id,
-          name: row.name,
-          encryptKeyId: row.encrypt_keyid
-        }))
-      })
-    );
+    return {
+      status: 'ok',
+      data: rows.map((row) => ({
+        deleted: row.deleted,
+        fileId: row.id,
+        groupId: row.group_id,
+        name: row.name,
+        encryptKeyId: row.encrypt_keyid
+      }))
+    };
   });
 
   fastify.get('/get-user-file-info', (req, res) => {
@@ -374,18 +377,16 @@ module.exports = (fastify, opts, done) => {
     }
     let row = rows[0];
 
-    res.send(
-      JSON.stringify({
-        status: 'ok',
-        data: {
-          deleted: row.deleted,
-          fileId: row.id,
-          groupId: row.group_id,
-          name: row.name,
-          encryptMeta: row.encrypt_meta ? JSON.parse(row.encrypt_meta) : null
-        }
-      })
-    );
+    return {
+      status: 'ok',
+      data: {
+        deleted: row.deleted,
+        fileId: row.id,
+        groupId: row.group_id,
+        name: row.name,
+        encryptMeta: row.encrypt_meta ? JSON.parse(row.encrypt_meta) : null
+      }
+    };
   });
 
   fastify.post('/delete-user-file', (req, res) => {
@@ -394,10 +395,10 @@ module.exports = (fastify, opts, done) => {
       return;
     }
     let accountDb = getAccountDb();
-    let { fileId } = req.body;
+    let fileId = getKey(req, 'fileId');
 
     accountDb.mutate('UPDATE files SET deleted = TRUE WHERE id = ?', [fileId]);
-    res.send(JSON.stringify({ status: 'ok' }));
+    return { status: 'ok' };
   });
 
   done();
