@@ -1,11 +1,6 @@
 let { getAccountDb } = require('../account-db');
 
-/**
- * @param {import('fastify').FastifyRequest} req
- * @param {import('fastify').FastifyReply} res
- */
 function validateUser(req, res) {
-  /** @type {any} */
   let { token } = req.body || {};
 
   if (!token) {

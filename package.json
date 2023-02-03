@@ -15,13 +15,13 @@
   "dependencies": {
     "@actual-app/api": "4.1.5",
     "@actual-app/web": "23.1.12",
-    "@fastify/cors": "^8.2.0",
-    "@fastify/static": "^6.8.0",
     "bcrypt": "^5.0.1",
     "better-sqlite3": "^7.5.0",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "4.17",
+    "express-actuator": "^1.8.1",
     "express-response-size": "^0.0.3",
-    "fastify": "^4.12.0",
-    "pino-pretty": "^9.1.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
