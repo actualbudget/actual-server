@@ -34,13 +34,9 @@ app.use((req, res, next) => {
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
   next();
 });
-app.use(
-  express.static(__dirname + '/node_modules/@actual-app/web/build', {
-    index: false
-  })
-);
+app.use(express.static(config.webRoot, { index: false }));
 app.get('/*', (req, res) => {
-  res.sendFile(__dirname + '/node_modules/@actual-app/web/build/index.html');
+  res.sendFile(config.webRoot + '/index.html');
 });
 
 async function run() {

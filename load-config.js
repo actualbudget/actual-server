@@ -10,21 +10,22 @@ try {
   // do nothing
 }
 
+let defaultConfig = {
+  port: 5006,
+  hostname: '::',
+  serverFiles: join(root, 'server-files'),
+  userFiles: join(root, 'user-files'),
+  webRoot: join(__dirname, 'node_modules', '@actual-app', 'web', 'build')
+};
 if (process.env.NODE_ENV === 'test') {
   config = {
     mode: 'test',
-    port: 5006,
-    hostname: '::',
-    serverFiles: join(__dirname, 'test-server-files'),
-    userFiles: join(__dirname, 'test-user-files')
+    ...defaultConfig
   };
 } else {
   config = {
     mode: 'development',
-    port: 5006,
-    hostname: '::',
-    serverFiles: join(root, 'server-files'),
-    userFiles: join(root, 'user-files'),
+    ...defaultConfig,
     ...config
   };
 }
