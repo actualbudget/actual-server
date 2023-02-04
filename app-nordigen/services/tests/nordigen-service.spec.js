@@ -127,7 +127,7 @@ describe('nordigenService', () => {
       accounts: [mockDetailedAccountExample1.id, mockDetailedAccountExample2.id]
     };
 
-    it('returns assembled data', async () => {
+    it('returns combined data', async () => {
       jest
         .spyOn(nordigenService, 'getRequisition')
         .mockResolvedValue(mockRequisitionWithExampleAccounts);
