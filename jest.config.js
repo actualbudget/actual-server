@@ -5,11 +5,9 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'json'],
   testEnvironment: 'node',
   collectCoverage: true,
-  collectCoverageFrom: [
-    '<rootDir>/src/**/*.{js,ts,tsx}',
-  ],
-  coveragePathIgnorePatterns: [
-    "/node_modules/"
-  ],
+  collectCoverageFrom: ['<rootDir>/src/**/*.{js,ts,tsx}'],
+  coveragePathIgnorePatterns: ['/node_modules/'],
   coverageReporters: ['html', 'lcov', 'text', 'text-summary'],
+  resetMocks: true,
+  restoreMocks: true
 };

@@ -1,9 +1,10 @@
-const BankFactory = require('../banks');
+const BankFactory = require('../bank-factory');
 
 describe('Banks', () => {
+  let bank;
+
   describe('MbankRetailBrexplpw', () => {
     const institutionId = 'MBANK_RETAIL_BREXPLPW';
-    let bank;
 
     beforeEach(() => (bank = BankFactory(institutionId)));
 
@@ -144,7 +145,6 @@ describe('Banks', () => {
 
   describe('SandboxfinanceSfin0000', () => {
     const institutionId = 'SANDBOXFINANCE_SFIN0000';
-    let bank;
 
     beforeEach(() => (bank = BankFactory(institutionId)));
 
@@ -303,7 +303,6 @@ describe('Banks', () => {
 
   describe('IngPlIngbplpw', () => {
     const institutionId = 'ING_PL_INGBPLPW';
-    let bank;
 
     beforeEach(() => (bank = BankFactory(institutionId)));
 
@@ -412,15 +411,21 @@ describe('Banks', () => {
         const sortedTransactions = [
           {
             transactionAmount: { amount: '-100.00', currency: 'USD' },
-            balanceAfterTransaction: {balanceAmount: { amount: '400.00', currency: 'USD' }}
+            balanceAfterTransaction: {
+              balanceAmount: { amount: '400.00', currency: 'USD' }
+            }
           },
           {
             transactionAmount: { amount: '50.00', currency: 'USD' },
-            balanceAfterTransaction: {balanceAmount: { amount: '450.00', currency: 'USD' }}
+            balanceAfterTransaction: {
+              balanceAmount: { amount: '450.00', currency: 'USD' }
+            }
           },
           {
             transactionAmount: { amount: '-25.00', currency: 'USD' },
-            balanceAfterTransaction: {balanceAmount: { amount: '475.00', currency: 'USD' }}
+            balanceAfterTransaction: {
+              balanceAmount: { amount: '475.00', currency: 'USD' }
+            }
           }
         ];
         const balances = [
@@ -448,7 +453,7 @@ describe('Banks', () => {
           {
             balanceType: 'interimBooked',
             balanceAmount: { amount: '500.00', currency: 'USD' }
-          },
+          }
         ];
         expect(bank.calculateStartingBalance(transactions, balances)).toEqual(
           50000

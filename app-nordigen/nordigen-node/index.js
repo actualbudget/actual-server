@@ -1,22 +1,28 @@
-"use strict";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+'use strict';
 
-Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, '__esModule', {
   value: true
 });
 exports.default = void 0;
 
-var _index = require("./api/index.js");
+const { AccountApi } = require('./api/index.js');
+var _index = require('./api/index.js');
+const { HttpMethod } = require('./httpMethod.js');
 
-var _httpMethod = require("./httpMethod.js");
+var _httpMethod = require('./httpMethod.js');
 
-var _utils = require("./utils.js");
+var _utils = require('./utils.js');
 
-var _nodeFetch = _interopRequireDefault(require("node-fetch"));
+var _nodeFetch = _interopRequireDefault(require('node-fetch'));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
 
 class NordigenClient {
-  #endpoint = "token";
+  #endpoint = 'token';
   #token = null;
   /**
    *
@@ -25,17 +31,14 @@ class NordigenClient {
    * @param {string} params.secretKey
    */
 
-  constructor({
-    secretId,
-    secretKey
-  }) {
+  constructor({ secretId, secretKey }) {
     this.baseUrl = `https://ob.nordigen.com/api/v2`;
     this.secretKey = secretKey;
     this.secretId = secretId;
     this.headers = {
-      "accept": "application/json",
-      "Content-Type": "application/json",
-      "User-Agent": "Nordigen-Node-v2"
+      accept: 'application/json',
+      'Content-Type': 'application/json',
+      'User-Agent': 'Nordigen-Node-v2'
     };
     this.institution = new _index.InstitutionApi({
       client: this
@@ -50,18 +53,16 @@ class NordigenClient {
   /**
    * Token setter
    * @param {string} token
-  */
-
+   */
 
   set token(token) {
     this.#token = token;
-    this.headers["Authorization"] = `Bearer ${token}`;
+    this.headers['Authorization'] = `Bearer ${token}`;
   }
   /**
    * Token getter
    * @returns {string} token
-  */
-
+   */
 
   get token() {
     return this.#token;
@@ -71,7 +72,6 @@ class NordigenClient {
    * @param {string} accountId
    * @returns {AccountApi}
    */
-
 
   account(accountId) {
     return new _index.AccountApi({
@@ -86,47 +86,46 @@ class NordigenClient {
    * @param {string} params.parameters for Post or Get request
    * @param {HttpMethod} [params.method] HTTP method
    * @returns Request object
-  */
+   */
 
-
-  async request({
-    endpoint,
-    parameters,
-    method = _httpMethod.HttpMethod.GET
-  }) {
+  async request({ endpoint, parameters, method = _httpMethod.HttpMethod.GET }) {
     const url = new URL(`${this.baseUrl}/${endpoint}`);
     const validParams = (0, _utils.filterObject)(parameters);
 
-    if (method === _httpMethod.HttpMethod.GET && Object.keys(validParams).length > 0) {
+    if (
+      method === _httpMethod.HttpMethod.GET &&
+      Object.keys(validParams).length > 0
+    ) {
       url.search = new URLSearchParams(validParams);
     }
 
     const response = await (0, _nodeFetch.default)(url, {
       method,
       headers: this.headers,
-      ...(method !== _httpMethod.HttpMethod.GET ? {
-        body: JSON.stringify(parameters)
-      } : {})
+      ...(method !== _httpMethod.HttpMethod.GET
+        ? {
+            body: JSON.stringify(parameters)
+          }
+        : {})
     });
     return response.json();
   }
   /**
    * Generate new access token
    * @returns Object with token details
-  */
-
+   */
 
   async generateToken() {
     const payload = {
-      "secret_key": this.secretKey,
-      "secret_id": this.secretId
+      secret_key: this.secretKey,
+      secret_id: this.secretId
     };
     const response = await this.request({
       endpoint: `${this.#endpoint}/new/`,
       parameters: payload,
       method: _httpMethod.HttpMethod.POST
     });
-    this.headers["Authorization"] = `Bearer ${response.access}`;
+    this.headers['Authorization'] = `Bearer ${response.access}`;
     return response;
   }
   /**
@@ -134,14 +133,11 @@ class NordigenClient {
    * @param {Object} params
    * @param {string} params.refreshToken
    * @returns Object with new access token
-  */
+   */
 
-
-  exchangeToken({
-    refreshToken
-  }) {
+  exchangeToken({ refreshToken }) {
     const payload = {
-      "refresh": refreshToken
+      refresh: refreshToken
     };
     const response = this.request({
       endpoint: `${this.#endpoint}/refresh/`,
@@ -165,9 +161,8 @@ class NordigenClient {
    * @returns Requisitions object
   */
 
-
   async initSession({
-    accessValidForDays =  90,
+    accessValidForDays = 90,
     redirectUrl,
     institutionId,
     referenceId,
@@ -188,7 +183,6 @@ class NordigenClient {
     });
     return requisition;
   }
-
 }
 
 exports.default = NordigenClient;

@@ -11,8 +11,8 @@
  * @property {string} user_language "strin",
  * @property {string} link "https://ob.nordigen.com/psd2/start/3fa85f64-5717-4562-b3fc-2c963f66afa6/{$INSTITUTION_ID}",
  * @property {string} ssn "string",
- * @property {string} account_selection false,
- * @property {string} redirect_immediate false
+ * @property {boolean} account_selection false,
+ * @property {boolean} redirect_immediate false
  */
 
 // https://nordigen.com/en/docs/account-information/output/accounts/
@@ -45,8 +45,7 @@
  * @property {string} [usage] Specifies the usage of the account
  * PRIV: private personal account
  * ORGA: professional account
-*/
-
+ */
 
 /**
  * @typedef {Object} NordigenAccountMetadata
@@ -57,7 +56,7 @@
  * @property {string} institution_id
  * @property {string} status DISCOVERED -> "User has successfully authenticated and account is discovered", "PROCESSING" -> "Account is being processed by the Institution", "ERROR" -> "An error was encountered when processing account", "EXPIRED" -> "Access to account has expired as set in End User Agreement", "READY" -> "Account has been successfully processed", "SUSPENDED" -> "Account has been suspended (more than 10 consecutive failed attempts to access the account)"
  * @property {string} owner_name
-*/
+ */
 
 /**
  * @typedef {NordigenAccountDetails & NordigenAccountMetadata} DetailedAccount
@@ -86,7 +85,7 @@
 
 /**
  * @typedef Amount
- * @property {number} amount
+ * @property {string} amount
  * @property {string} currency
  */
 
@@ -110,7 +109,7 @@
  * @property {string} [creditorId] Identification of Creditors, e.g. a SEPA Creditor ID
  * @property {string} [creditorName] Name of the creditor if a "Debited" transaction
  * @property {Array<any>} [currencyExchange] Array of Report [Exchange] Rate
- * @property {string} [debtorAccount] Account Reference  Conditional
+ * @property {{iban: string}} [debtorAccount] Account Reference  Conditional
  * @property {string} [debtorAgent] BICFI
  * @property {string} [debtorName] Name of the debtor if a "Credited" transaction
  * @property {string} [endToEndId] Unique end to end ID
@@ -151,4 +150,27 @@
  * @property {number} [status_code]
  * @property {string} [detail]
  * @property {Transactions} transactions
+ */
+
+/**
+ * @typedef {Object} CreateRequisitionParams
+ * @property {string} institutionId
+ * @property {number} accessValidForDays
+ * @property {string} host Host of your frontend app - on this host you will be redirected after linking with bank
+ * @example
+ * {institutionId: "d3eccc94-9536-48d3-98be-813f79199ee3", accessValidForDays: 90, host: "http://localhost"}
+ */
+
+/**
+ * @typedef {Object} Balance
+ * @property {Amount} balanceAmount - An object containing the balance amount and currency
+ * @property {string} balanceType - The type of balance (closingBooked, expected, forwardAvailable, interimAvailable, interimBooked, nonInvoiced, or openingBooked)
+ * @property {boolean} [creditLimitIncluded] - A flag indicating if the credit limit of the corresponding account is included in the calculation of the balance (if applicable)
+ * @property {string} [lastChangeDateTime] - The date and time of the last change to the balance
+ * @property {string} [lastCommittedTransaction] - The reference of the last committed transaction to support the TPP in identifying whether all end users transactions are already known
+ * @property {string} [referenceDate] - The date of the balance
+ */
+/**
+ * @typedef {Object} GetBalances
+ * @property {Array<Balance>} balances
  */

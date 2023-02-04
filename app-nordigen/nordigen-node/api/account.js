@@ -1,12 +1,14 @@
-"use strict";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+'use strict';
 
-Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, '__esModule', {
   value: true
 });
 exports.default = void 0;
 
 class AccountApi {
-  #endpoint = "accounts";
+  #endpoint = 'accounts';
   #client = null;
   #accountId;
   /**
@@ -14,12 +16,9 @@ class AccountApi {
    * @param {Object} params
    * @param {NordigenClient} params.client
    * @param {string} params.accountId
-  */
+   */
 
-  constructor({
-    client,
-    accountId
-  }) {
+  constructor({ client, accountId }) {
     this.#client = client;
     this.#accountId = accountId;
   }
@@ -29,7 +28,6 @@ class AccountApi {
    * @param {object} [parameters] parameters
    * @returns Account data object
    */
-
 
   #get(path, parameters = {}) {
     const url = `${this.#endpoint}/${this.#accountId}/${path}`;
@@ -45,7 +43,6 @@ class AccountApi {
    * @returns Account data object
    */
 
-
   #getPremium(path, parameters = {}) {
     const url = `${this.#endpoint}/premium/${this.#accountId}/${path}`;
     return this.#client.request({
@@ -58,7 +55,6 @@ class AccountApi {
    * @returns Account metadata object
    */
 
-
   getMetadata() {
     return this.#client.request({
       endpoint: `${this.#endpoint}/${this.#accountId}`
@@ -69,27 +65,24 @@ class AccountApi {
    * @returns Object with account details
    */
 
-
   getDetails() {
-    return this.#get("details");
+    return this.#get('details');
   }
   /**
    * Access premium account details
    * @returns Object with premium account details
    */
 
-
   getPremiumDetails() {
-    return this.#getPremium("details");
+    return this.#getPremium('details');
   }
   /**
    * Access account balances
    * @returns Object with account balances
    */
 
-
   getBalances() {
-    return this.#get("balances");
+    return this.#get('balances');
   }
   /**
    * @param {Object} [params]
@@ -99,16 +92,12 @@ class AccountApi {
    * @returns Object with account transactions
    */
 
-
-  getTransactions({
-    dateFrom,
-    dateTo
-  } = {}) {
+  getTransactions({ dateFrom, dateTo } = {}) {
     const dateRange = {
-      "date_from": dateFrom,
-      "date_to": dateTo
+      date_from: dateFrom,
+      date_to: dateTo
     };
-    return this.#get("transactions", dateRange);
+    return this.#get('transactions', dateRange);
   }
   /**
    * @param {Object} [params]
@@ -118,18 +107,13 @@ class AccountApi {
    * @returns Object with premium account transactions
    */
 
-
-  getPremiumTransactions({
-    dateFrom,
-    dateTo
-  } = {}) {
+  getPremiumTransactions({ dateFrom, dateTo } = {}) {
     const dateRange = {
-      "date_from": dateFrom,
-      "date_to": dateTo
+      date_from: dateFrom,
+      date_to: dateTo
     };
-    return this.#getPremium("transactions", dateRange);
+    return this.#getPremium('transactions', dateRange);
   }
-
 }
 
 exports.default = AccountApi;

@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, '__esModule', {
   value: true
 });
 exports.default = void 0;
 
 class InstitutionApi {
-  #endpoint = "institutions";
+  #endpoint = 'institutions';
   #client = null;
   /**
    * Agreements api class
@@ -14,9 +14,7 @@ class InstitutionApi {
    * @param {NordigenClient} params.client
    */
 
-  constructor({
-    client
-  }) {
+  constructor({ client }) {
     this.#client = client;
   }
   /**
@@ -26,10 +24,7 @@ class InstitutionApi {
    * @returns institution data array
    */
 
-
-  getInstitutions({
-    country
-  }) {
+  getInstitutions({ country }) {
     return this.#client.request({
       endpoint: `${this.#endpoint}/?country=${country}`
     });
@@ -37,16 +32,14 @@ class InstitutionApi {
   /***
    * Get single institution by id
    * @param {string} id
-   * @returns single institution data 
-  */
-
+   * @returns single institution data
+   */
 
   getInstitutionById(id) {
     return this.#client.request({
       endpoint: `${this.#endpoint}/${id}/`
     });
   }
-
 }
 
 exports.default = InstitutionApi;

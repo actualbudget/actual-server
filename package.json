@@ -10,7 +10,7 @@
     "types": "tsc --noEmit --incremental",
     "test": "jest",
     "verify": "yarn -s lint && yarn types",
-    "test:e2e": "jest --config ./jest-e2e.config.js --verbose"
+    "test:e2e": "jest --config ./jest-e2e.config.js --verbose=false --silent=false"
   },
   "dependencies": {
     "@actual-app/api": "4.1.5",
