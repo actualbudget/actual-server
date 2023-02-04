@@ -3,7 +3,6 @@ const BankFactory = require('../bank-factory');
 const {
   RequisitionNotLinked,
   AccountNotLinedToRequisition,
-  GenericNordigenError,
   InvalidInputDataError,
   InvalidNordigenTokenError,
   AccessDeniedError,
