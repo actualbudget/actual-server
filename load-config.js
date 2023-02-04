@@ -31,6 +31,16 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 // The env variable always takes precedence
+config.port = process.env.ACTUAL_PORT || process.env.PORT || config.port;
+config.hostname = process.env.ACTUAL_HOSTNAME || config.hostname;
+config.serverFiles = process.env.ACTUAL_SERVER_FILES || config.serverFiles;
 config.userFiles = process.env.ACTUAL_USER_FILES || config.userFiles;
+config.webRoot = process.env.ACTUAL_WEB_ROOT || config.webRoot;
+if (process.env.ACTUAL_HTTPS_KEY && process.env.ACTUAL_HTTPS_CERT) {
+  config.https = {
+    key: process.env.ACTUAL_HTTPS_KEY,
+    cert: process.env.ACTUAL_HTTPS_CERT
+  };
+}
 
 module.exports = config;
