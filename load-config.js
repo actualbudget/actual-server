@@ -1,18 +1,31 @@
-let config;
+let config = {};
+let fs = require('fs');
+let { join } = require('path');
+let root = fs.existsSync('/data') ? '/data' : __dirname;
+
 try {
   // @ts-expect-error TS2307: we expect this file may not exist
   config = require('./config');
 } catch (e) {
-  let fs = require('fs');
-  let { join } = require('path');
-  let root = fs.existsSync('/data') ? '/data' : __dirname;
+  // do nothing
+}
 
+if (process.env.NODE_ENV === 'test') {
+  config = {
+    mode: 'test',
+    port: 5006,
+    hostname: '::',
+    serverFiles: join(__dirname, 'test-server-files'),
+    userFiles: join(__dirname, 'test-user-files')
+  };
+} else {
   config = {
     mode: 'development',
     port: 5006,
-    hostname: '0.0.0.0',
+    hostname: '::',
     serverFiles: join(root, 'server-files'),
-    userFiles: join(root, 'user-files')
+    userFiles: join(root, 'user-files'),
+    ...config
   };
 }
 

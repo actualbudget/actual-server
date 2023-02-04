@@ -7,8 +7,23 @@ supervise
 bin/large-sync-data.txt
 user-files
 server-files
+test-user-files
+test-server-files
 fly.toml
 build/
+*.crt
+*.pem
+*.key
+
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 dist
 .idea
 /coverage
