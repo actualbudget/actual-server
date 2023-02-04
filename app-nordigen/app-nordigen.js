@@ -35,7 +35,7 @@ app.post(
 );
 
 app.post(
-  '/get-web-token-contents', // TODO: Change endpoint name
+  '/get-accounts',
   handleError(async (req, res) => {
     const { requisitionId } = req.body;
 

@@ -80,7 +80,7 @@ describe('Nordigen', () => {
   }, 60_000);
 
   it('get accounts details', async () => {
-    const res = await request(server).post('/get-web-token-contents').send({
+    const res = await request(server).post('/get-accounts').send({
       requisitionId
     });
 
