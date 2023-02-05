@@ -1,6 +1,6 @@
 {
   "name": "actual-sync",
-  "version": "23.1.12",
+  "version": "23.2.5",
   "license": "MIT",
   "description": "actual syncing server",
   "main": "index.js",
