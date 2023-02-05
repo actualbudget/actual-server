@@ -51,7 +51,6 @@ async function run() {
   await accountApp.init();
   await syncApp.init();
 
-  console.log('Listening on ' + config.hostname + ':' + config.port + '...');
   if (config.https) {
     const https = require('https');
     const httpsOptions = {
@@ -63,6 +62,7 @@ async function run() {
   } else {
     app.listen(config.port, config.hostname);
   }
+  console.log('Listening on ' + config.hostname + ':' + config.port + '...');
 }
 
 run().catch((err) => {
