@@ -3,11 +3,15 @@ let fs = require('fs');
 let { join } = require('path');
 let root = fs.existsSync('/data') ? '/data' : __dirname;
 
-try {
-  // @ts-expect-error TS2307: we expect this file may not exist
-  userConfig = require('./config');
-} catch (e) {
-  // do nothing
+if (process.env.ACTUAL_CONFIG_PATH) {
+  userConfig = require(process.env.ACTUAL_CONFIG_PATH);
+} else {
+  try {
+    // @ts-expect-error TS2307: we expect this file may not exist
+    userConfig = require('./config');
+  } catch (e) {
+    // do nothing
+  }
 }
 
 /** @type {Omit<import('./config-types').Config, 'mode' | 'serverFiles' | 'userFiles'>} */
