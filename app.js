@@ -55,8 +55,12 @@ async function run() {
     const https = require('https');
     const httpsOptions = {
       ...config.https,
-      key: fs.readFileSync(config.https.key),
-      cert: fs.readFileSync(config.https.cert)
+      key: config.https.key.startsWith('-----BEGIN')
+        ? config.https.key
+        : fs.readFileSync(config.https.key),
+      cert: config.https.cert.startsWith('-----BEGIN')
+        ? config.https.cert
+        : fs.readFileSync(config.https.cert)
     };
     https.createServer(httpsOptions, app).listen(config.port, config.hostname);
   } else {
