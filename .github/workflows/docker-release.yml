@@ -75,7 +75,7 @@ jobs:
         with:
           context: .
           push: true
-          file: docker/standard-ubuntu.Dockerfile
+          file: docker/stable-ubuntu.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
 
@@ -84,6 +84,6 @@ jobs:
         with:
           context: .
           push: true
-          file: docker/standard-alpine.Dockerfile
+          file: docker/stable-alpine.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.alpine-meta.outputs.tags }}

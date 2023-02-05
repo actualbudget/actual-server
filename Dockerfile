@@ -1,1 +1,1 @@
-docker/standard-ubuntu.Dockerfile
+docker/stable-ubuntu.Dockerfile
