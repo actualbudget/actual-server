@@ -35,9 +35,9 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static(config.webRoot, { index: false }));
-app.get('/*', (req, res) => {
-  res.sendFile(config.webRoot + '/index.html');
-});
+
+let indexHTML = fs.readFileSync(config.webRoot + '/index.html');
+app.get('/*', (req, res) => res.send(indexHTML));
 
 async function run() {
   if (!fs.existsSync(config.serverFiles)) {
