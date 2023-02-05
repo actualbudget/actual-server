@@ -36,7 +36,7 @@ if (process.env.NODE_ENV === 'test') {
     ...defaultConfig,
     serverFiles: join(root, 'server-files'),
     userFiles: join(root, 'user-files'),
-    ...userConfig
+    ...(userConfig || {})
   };
 }
 
