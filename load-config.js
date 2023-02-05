@@ -10,12 +10,10 @@ try {
   // do nothing
 }
 
-/** @type {Omit<import('./config-types').Config, 'mode'>} */
+/** @type {Omit<import('./config-types').Config, 'mode' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
   port: 5006,
   hostname: '::',
-  serverFiles: join(root, 'server-files'),
-  userFiles: join(root, 'user-files'),
   webRoot: join(__dirname, 'node_modules', '@actual-app', 'web', 'build')
 };
 
@@ -24,12 +22,16 @@ let config;
 if (process.env.NODE_ENV === 'test') {
   config = {
     mode: 'test',
+    serverFiles: join(__dirname, 'test-server-files'),
+    userFiles: join(__dirname, 'test-user-files'),
     ...defaultConfig
   };
 } else {
   config = {
     mode: 'development',
     ...defaultConfig,
+    serverFiles: join(root, 'server-files'),
+    userFiles: join(root, 'user-files'),
     ...userConfig
   };
 }
