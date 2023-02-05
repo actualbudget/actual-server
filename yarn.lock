@@ -16,7 +16,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actual-app/web@npm:^23.2.5":
+"@actual-app/web@npm:23.2.5":
   version: 23.2.5
   resolution: "@actual-app/web@npm:23.2.5"
   dependencies:
@@ -1516,7 +1516,7 @@ __metadata:
   resolution: "actual-sync@workspace:."
   dependencies:
     "@actual-app/api": 4.1.6
-    "@actual-app/web": ^23.2.5
+    "@actual-app/web": 23.2.5
     "@types/better-sqlite3": ^7.5.0
     "@types/jest": ^29.2.3
     "@types/node": ^17.0.31
