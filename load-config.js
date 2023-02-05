@@ -48,7 +48,7 @@ module.exports = {
       ? {
           key: process.env.ACTUAL_HTTPS_KEY,
           cert: process.env.ACTUAL_HTTPS_CERT,
-          ...config.https
+          ...(config.https || {})
         }
       : config.https
 };
