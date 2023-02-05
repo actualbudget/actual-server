@@ -8,8 +8,8 @@
     "start": "node app",
     "lint": "eslint .",
     "build": "tsc",
-    "test": "jest",
-    "test:e2e": "jest --config ./jest-e2e.config.js --verbose=false --silent=false",
+    "test": "NODE_ENV=test jest",
+    "test:e2e": "test --config ./jest-e2e.config.js",
     "types": "tsc --noEmit --incremental",
     "verify": "yarn -s lint && yarn types"
   },
