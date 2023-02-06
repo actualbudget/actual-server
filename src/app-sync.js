@@ -1,22 +1,23 @@
-let fs = require('fs/promises');
-let { Buffer } = require('buffer');
-let express = require('express');
-let uuid = require('uuid');
-let { validateUser } = require('./util/validate-user');
-let errorMiddleware = require('./util/error-middleware');
-let { getAccountDb } = require('./account-db');
-let { getPathForUserFile, getPathForGroupFile } = require('./util/paths');
+import fs from 'node:fs/promises';
+import { Buffer } from 'node:buffer';
+import express from 'express';
+import uuid from 'uuid';
+import validateUser from './util/validate-user.js';
+import errorMiddleware from './util/error-middleware.js';
+import getAccountDb from './account-db.js';
+import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
-let simpleSync = require('./sync-simple');
+import * as simpleSync from './sync-simple.js';
 
-let actual = require('@actual-app/api');
+import actual from '@actual-app/api';
 let SyncPb = actual.internal.SyncProtoBuf;
 
 const app = express();
 app.use(errorMiddleware);
+export { app as handlers };
 
 // eslint-disable-next-line
-async function init() {}
+export async function init() {}
 
 // This is a version representing the internal format of sync
 // messages. When this changes, all sync files need to be reset. We
@@ -403,6 +404,3 @@ app.post('/delete-user-file', (req, res) => {
   accountDb.mutate('UPDATE files SET deleted = TRUE WHERE id = ?', [fileId]);
   res.send(JSON.stringify({ status: 'ok' }));
 });
-
-module.exports.handlers = app;
-module.exports.init = init;

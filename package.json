@@ -3,12 +3,12 @@
   "version": "23.2.6",
   "license": "MIT",
   "description": "actual syncing server",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node app",
     "lint": "eslint .",
     "build": "tsc",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest",
     "types": "tsc --noEmit --incremental",
     "verify": "yarn -s lint && yarn types"
   },
