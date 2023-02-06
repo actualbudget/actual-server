@@ -45,7 +45,7 @@ function parseHTTPSConfig(value) {
   return fs.readFileSync(value);
 }
 
-async function run() {
+module.exports = async function run() {
   if (!fs.existsSync(config.serverFiles)) {
     fs.mkdirSync(config.serverFiles);
   }
@@ -69,9 +69,4 @@ async function run() {
     app.listen(config.port, config.hostname);
   }
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
-}
-
-run().catch((err) => {
-  console.log('Error starting app:', err);
-  process.exit(1);
-});
+};
