@@ -40,7 +40,7 @@ app.get('/*', (req, res) => res.sendFile(config.webRoot + '/index.html'));
 
 function parseHTTPSConfig(value) {
   if (value.startsWith('-----BEGIN')) {
-    return value.replace(/\\n/g, '\n');
+    return value;
   }
   return fs.readFileSync(value);
 }
