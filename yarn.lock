@@ -1252,12 +1252,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/better-sqlite3@npm:^7.5.0":
-  version: 7.5.0
-  resolution: "@types/better-sqlite3@npm:7.5.0"
+"@types/better-sqlite3@npm:^7.6.3":
+  version: 7.6.3
+  resolution: "@types/better-sqlite3@npm:7.6.3"
   dependencies:
     "@types/node": "*"
-  checksum: 8ff28d9ad2c315544fe16b223d7106c013555ea86ca2a2f2bf9c0931976763b1093db0dc1d7a6e67f0ed45264b15f66157afb45f8dd80896a3bb80efd87e800f
+  checksum: 37ffd2507beb55f284261fc72b2f0b5585aecd65ffaffbc1f48a4d59958c3bcc16e54b83d9fd6af5f6a0edab830e384aef7ed79dbbfc3d443f850cb1eab091f5
   languageName: node
   linkType: hard
 
@@ -1650,7 +1650,7 @@ __metadata:
     "@actual-app/api": 4.1.6
     "@actual-app/web": 23.2.5
     "@types/bcrypt": ^5.0.0
-    "@types/better-sqlite3": ^7.5.0
+    "@types/better-sqlite3": ^7.6.3
     "@types/cors": ^2.8.13
     "@types/express": ^4.17.17
     "@types/express-actuator": ^1.8.0
@@ -1661,7 +1661,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.51.0
     "@typescript-eslint/parser": ^5.51.0
     bcrypt: ^5.1.0
-    better-sqlite3: ^7.5.0
+    better-sqlite3: ^8.0.1
     body-parser: ^1.20.1
     cors: ^2.8.5
     eslint: ^8.33.0
@@ -1980,6 +1980,17 @@ __metadata:
     node-gyp: latest
     prebuild-install: ^7.0.0
   checksum: 049ab5de6b7c13f9957c6a93fe9a044f745b8b47672c8dc0bb8e0d1a9c846d0744be0f5e1f0f80903e010a07ee7a9eb52bf3e12124db214bab5989d0270d4ddc
+  languageName: node
+  linkType: hard
+
+"better-sqlite3@npm:^8.0.1":
+  version: 8.1.0
+  resolution: "better-sqlite3@npm:8.1.0"
+  dependencies:
+    bindings: ^1.5.0
+    node-gyp: latest
+    prebuild-install: ^7.1.0
+  checksum: 7e6b4c33142f4b2ee2e60d3926b4db682feb0d09554efdaf7bea53cd5bef406ca0a5115ab9b411458daa45ba14973252ebd6853a3cdf94e4fd49cc8291730ade
   languageName: node
   linkType: hard
 
@@ -5114,6 +5125,28 @@ __metadata:
   bin:
     prebuild-install: bin.js
   checksum: 117c8966f221242633bbf245755fb469dabc7085909f5e3db83359d6281a88dedbdada7e839315805a192c74b7cce3ed1a86c1382a8d950c1ea60a9d5d8e7bf0
+  languageName: node
+  linkType: hard
+
+"prebuild-install@npm:^7.1.0":
+  version: 7.1.1
+  resolution: "prebuild-install@npm:7.1.1"
+  dependencies:
+    detect-libc: ^2.0.0
+    expand-template: ^2.0.3
+    github-from-package: 0.0.0
+    minimist: ^1.2.3
+    mkdirp-classic: ^0.5.3
+    napi-build-utils: ^1.0.1
+    node-abi: ^3.3.0
+    pump: ^3.0.0
+    rc: ^1.2.7
+    simple-get: ^4.0.0
+    tar-fs: ^2.0.0
+    tunnel-agent: ^0.6.0
+  bin:
+    prebuild-install: bin.js
+  checksum: dbf96d0146b6b5827fc8f67f72074d2e19c69628b9a7a0a17d0fad1bf37e9f06922896972e074197fc00a52eae912993e6ef5a0d471652f561df5cb516f3f467
   languageName: node
   linkType: hard
 
