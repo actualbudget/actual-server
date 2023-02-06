@@ -204,15 +204,22 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   let accountDb = getAccountDb();
+  if (typeof req.headers['x-actual-name'] !== 'string') {
+    res.status(400).send('single x-actual-name is required');
+    return;
+  }
   let name = decodeURIComponent(req.headers['x-actual-name']);
   let fileId = req.headers['x-actual-file-id'];
   let groupId = req.headers['x-actual-group-id'] || null;
   let encryptMeta = req.headers['x-actual-encrypt-meta'] || null;
   let syncFormatVersion = req.headers['x-actual-format'] || null;
 
-  let keyId = encryptMeta ? JSON.parse(encryptMeta).keyId : null;
+  let keyId =
+    encryptMeta && typeof encryptMeta === 'string'
+      ? JSON.parse(encryptMeta).keyId
+      : null;
 
-  if (!fileId) {
+  if (!fileId || typeof fileId !== 'string') {
     throw new Error('fileId is required');
   }
 
@@ -291,6 +298,10 @@ app.get('/download-user-file', async (req, res) => {
   }
   let accountDb = getAccountDb();
   let fileId = req.headers['x-actual-file-id'];
+  if (typeof fileId !== 'string') {
+    res.status(400).send('Single file ID is required');
+    return;
+  }
 
   // Do some authentication
   let rows = accountDb.all(
