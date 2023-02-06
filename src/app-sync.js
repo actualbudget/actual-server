@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { Buffer } from 'node:buffer';
 import express from 'express';
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 import validateUser from './util/validate-user.js';
 import errorMiddleware from './util/error-middleware.js';
 import getAccountDb from './account-db.js';

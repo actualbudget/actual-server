@@ -1,6 +1,6 @@
 import express from 'express';
 import * as bcrypt from 'bcrypt';
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 import errorMiddleware from './util/error-middleware.js';
 import validateUser from './util/validate-user.js';
 import getAccountDb from './account-db.js';
