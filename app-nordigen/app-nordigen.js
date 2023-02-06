@@ -1,12 +1,8 @@
 const express = require('express');
 
-const { handleError } = require('./../util/handle-error');
 const { nordigenService } = require('./services/nordigen-service');
-const {
-  RequisitionNotLinked,
-  AccountNotLinedToRequisition,
-  GenericNordigenError
-} = require('./errors');
+const { RequisitionNotLinked, AccountNotLinedToRequisition, GenericNordigenError } = require('./errors');
+const { handleError } = require('../build/util/handle-error');
 
 const app = express();
 
@@ -40,8 +36,7 @@ app.post(
     const { requisitionId } = req.body;
 
     try {
-      const { requisition, accounts } =
-        await nordigenService.getRequisitionWithAccounts(requisitionId);
+      const { requisition, accounts } = await nordigenService.getRequisitionWithAccounts(requisitionId);
 
       res.send({
         status: 'ok',
@@ -97,12 +92,7 @@ app.post(
         institutionId,
         startingBalance,
         transactions: { booked, pending }
-      } = await nordigenService.getTransactionsWithBalance(
-        requisitionId,
-        accountId,
-        startDate,
-        endDate
-      );
+      } = await nordigenService.getTransactionsWithBalance(requisitionId, accountId, startDate, endDate);
 
       res.send({
         status: 'ok',
@@ -117,8 +107,7 @@ app.post(
         }
       });
     } catch (error) {
-      const sendErrorResponse = (data) =>
-        res.send({ status: 'ok', data: { ...data, details: error.details } });
+      const sendErrorResponse = (data) => res.send({ status: 'ok', data: { ...data, details: error.details } });
 
       switch (true) {
         case error instanceof RequisitionNotLinked:
