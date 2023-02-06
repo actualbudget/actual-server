@@ -1,4 +1,4 @@
-name: Build Released Docker Image
+name: Build Stable Docker Image
 
 # Stable Docker images are built for every new tag
 on:

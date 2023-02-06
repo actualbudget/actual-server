@@ -1,4 +1,4 @@
-name: Build Released Docker Image
+name: Build Edge Docker Image
 
 # Edge Docker images are built for every commit, and daily
 on:
