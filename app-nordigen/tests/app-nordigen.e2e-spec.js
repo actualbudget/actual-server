@@ -11,8 +11,12 @@ const approveBankConnection = async (link) => {
     slowMo: 30
   });
   const page = await browser.newPage();
-  const acceptBeforeUnload = (dialog) =>
-    dialog.type() === 'beforeunload' && dialog.accept();
+  const acceptBeforeUnload = (dialog) => dialog.type() === 'beforeunload' && dialog.accept();
+
+  await page.setExtraHTTPHeaders({
+    'x-actual-token': 'valid-token',
+    'x-actual-file-id': 'file-id'
+  });
 
   page.on('dialog', acceptBeforeUnload);
 
@@ -36,13 +40,8 @@ const approveBankConnection = async (link) => {
   await browser.close();
 };
 
-if (
-  process.env.SECRET_ID === undefined ||
-  process.env.SECRET_KEY === undefined
-) {
-  console.log(
-    'Env variables SECRET_ID and SECRET_KEY are missing which are required to execute e2e Nordigen tests'
-  );
+if (process.env.SECRET_ID === undefined || process.env.SECRET_KEY === undefined) {
+  console.log('Env variables SECRET_ID and SECRET_KEY are missing which are required to execute e2e Nordigen tests');
   process.exit(1);
 }
 
@@ -57,12 +56,9 @@ describe('Nordigen', () => {
 
   it('generate requisition and approve it in bank', async () => {
     const origin = 'http://localhost:3001';
-    const res = await request(server)
-      .post('/create-web-token')
-      .set('Origin', origin)
-      .send({
-        institutionId
-      });
+    const res = await request(server).post('/create-web-token').set('Origin', origin).send({
+      institutionId
+    });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({

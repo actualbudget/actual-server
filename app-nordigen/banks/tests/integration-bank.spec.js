@@ -1,83 +1,62 @@
 const IntegrationBank = require('../integration-bank');
+const { mockExtendAccountsAboutInstitutions, mockInstitution } = require('../../services/tests/fixtures');
 
 describe('IntegrationBank', () => {
-  let integrationBank;
-
   let consoleSpy;
 
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    integrationBank = new IntegrationBank();
+    consoleSpy = jest.spyOn(console, 'log');
   });
 
   describe('normalizeAccount', () => {
-    it('should return a normalized account object', () => {
-      const account = {
-        id: '1234',
-        institution: { name: 'Test Institution' },
-        institution_id: 'test-institution',
-        iban: '1234'
-      };
+    const account = mockExtendAccountsAboutInstitutions[0];
 
-      const normalizedAccount = integrationBank.normalizeAccount(account);
+    it('should return a normalized account object', () => {
+      const normalizedAccount = IntegrationBank.normalizeAccount(account);
       expect(normalizedAccount).toEqual({
-        account_id: '1234',
-        institution: { name: 'Test Institution' },
-        mask: '1234',
-        name: 'integration-test-institution',
-        official_name: 'integration-test-institution',
+        account_id: account.id,
+        institution: mockInstitution,
+        mask: '4321',
+        name: 'integration-SANDBOXFINANCE_SFIN0000',
+        official_name: 'integration-SANDBOXFINANCE_SFIN0000',
         type: 'checking'
       });
     });
 
     it('should return a normalized account object with masked value "0000" when no iban property is provided', () => {
-      const account = {
-        id: '1234',
-        institution: { name: 'Test Institution' },
-        institution_id: 'test-institution'
-      };
-
-      const normalizedAccount = integrationBank.normalizeAccount(account);
+      const normalizedAccount = IntegrationBank.normalizeAccount({ ...account, iban: undefined });
       expect(normalizedAccount).toEqual({
-        account_id: '1234',
-        institution: { name: 'Test Institution' },
+        account_id: account.id,
+        institution: mockInstitution,
         mask: '0000',
-        name: 'integration-test-institution',
-        official_name: 'integration-test-institution',
+        name: 'integration-SANDBOXFINANCE_SFIN0000',
+        official_name: 'integration-SANDBOXFINANCE_SFIN0000',
         type: 'checking'
       });
     });
 
     it('normalizeAccount logs available account properties', () => {
-      const account = {
-        id: '1234',
-        institution: { name: 'Test Institution' },
-        institution_id: 'test-institution',
-        iban: '1234'
-      };
-
-      integrationBank.normalizeAccount(account);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Available account properties for new institution integration',
-        { account: JSON.stringify(account) }
-      );
+      IntegrationBank.normalizeAccount(account);
+      expect(consoleSpy).toHaveBeenCalledWith('Available account properties for new institution integration', {
+        account: JSON.stringify(account)
+      });
     });
   });
 
   describe('sortTransactions', () => {
     const transactions = [
-      { date: '2022-01-01', amount: 100 },
-      { date: '2022-01-02', amount: 200 },
-      { date: '2022-01-03', amount: 300 }
+      { date: '2022-01-01', transactionAmount: { amount: '100', currency: 'EUR' } },
+      { date: '2022-01-02', transactionAmount: { amount: '100', currency: 'EUR' } },
+      { date: '2022-01-03', transactionAmount: { amount: '100', currency: 'EUR' } }
     ];
 
     it('should return the same array of transactions that was passed to it', () => {
-      const sortedTransactions = integrationBank.sortTransactions(transactions);
+      const sortedTransactions = IntegrationBank.sortTransactions(transactions);
       expect(sortedTransactions).toEqual(transactions);
     });
 
     it('sortTransactions logs available transactions properties', () => {
-      integrationBank.sortTransactions(transactions);
+      IntegrationBank.sortTransactions(transactions);
       expect(consoleSpy).toHaveBeenCalledWith(
         'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
         { top10Transactions: JSON.stringify(transactions.slice(0, 10)) }
@@ -86,32 +65,33 @@ describe('IntegrationBank', () => {
   });
 
   describe('calculateStartingBalance', () => {
+    /** @type {import('../../nordigen-node.types').Transaction[]} */
     const transactions = [
-      { date: '2022-01-01', amount: 100 },
-      { date: '2022-02-01', amount: 200 },
-      { date: '2022-03-01', amount: 300 }
+      { bookingDate: '2022-01-01', transactionAmount: { amount: '100', currency: 'EUR' } },
+      { bookingDate: '2022-02-01', transactionAmount: { amount: '100', currency: 'EUR' } },
+      { bookingDate: '2022-03-01', transactionAmount: { amount: '100', currency: 'EUR' } }
     ];
+
+    /** @type {import('../../nordigen-node.types').Balance[]} */
     const balances = [
-      { date: '2022-01-01', amount: 1000 },
-      { date: '2022-02-01', amount: 2000 },
-      { date: '2022-03-01', amount: 3000 }
+      {
+        balanceAmount: { amount: '1000.00', currency: 'EUR' },
+        balanceType: 'interimBooked'
+      }
     ];
 
     it('should return 0 when no transactions or balances are provided', () => {
-      const startingBalance = integrationBank.calculateStartingBalance();
+      const startingBalance = IntegrationBank.calculateStartingBalance([], []);
       expect(startingBalance).toEqual(0);
     });
 
     it('should return 0 when transactions and balances are provided', () => {
-      const startingBalance = integrationBank.calculateStartingBalance(
-        transactions,
-        balances
-      );
+      const startingBalance = IntegrationBank.calculateStartingBalance(transactions, balances);
       expect(startingBalance).toEqual(0);
     });
 
     it('logs available transactions and balances properties', () => {
-      integrationBank.calculateStartingBalance(transactions, balances);
+      IntegrationBank.calculateStartingBalance(transactions, balances);
       expect(consoleSpy).toHaveBeenCalledWith(
         'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
         {

@@ -22,7 +22,11 @@ const {
   mockAccountDetails,
   mockRequisition,
   mockDeleteRequisition,
-  mockCreateRequisition
+  mockCreateRequisition,
+  mockRequisitionWithExampleAccounts,
+  mockDetailedAccountExample1,
+  mockDetailedAccountExample2,
+  mockExtendAccountsAboutInstitutions
 } = require('./fixtures');
 
 const InstitutionApi = require('../../nordigen-node/api/institutions').default;
@@ -73,47 +77,28 @@ describe('nordigenService', () => {
     it('throws RequisitionNotLinked error if requisition status is different than LN', async () => {
       setTokenSpy.mockResolvedValue();
 
-      jest.spyOn(nordigenService, 'getRequisition').mockResolvedValue({ ...mockRequisition, status: 'ANY' });
+      jest.spyOn(nordigenService, 'getRequisition').mockResolvedValue({ ...mockRequisition, status: 'ER' });
 
       await expect(() => nordigenService.getLinkedRequisition(requisitionId)).rejects.toThrow(RequisitionNotLinked);
     });
   });
 
   describe('#getRequisitionWithAccounts', () => {
-    const mockDetailedAccountExample1 = {
-      ...mockDetailedAccount,
-      id: 'account-example-one',
-      institution_id: mockInstitution.id
-    };
-    const mockDetailedAccountExample2 = {
-      ...mockDetailedAccount,
-      id: 'account-example-two',
-      institution_id: mockInstitution.id
-    };
-    const mockExtendAccountsAboutInstitutions = [
-      {
-        ...mockDetailedAccountExample1,
-        institution: mockInstitution
-      },
-      {
-        ...mockDetailedAccountExample2,
-        institution: mockInstitution
-      }
-    ];
-    const mockRequisitionWithExampleAccounts = {
-      ...mockRequisition,
-
-      accounts: [mockDetailedAccountExample1.id, mockDetailedAccountExample2.id]
-    };
-
     it('returns combined data', async () => {
       jest.spyOn(nordigenService, 'getRequisition').mockResolvedValue(mockRequisitionWithExampleAccounts);
       jest.spyOn(nordigenService, 'getDetailedAccount').mockResolvedValueOnce(mockDetailedAccountExample1);
       jest.spyOn(nordigenService, 'getDetailedAccount').mockResolvedValueOnce(mockDetailedAccountExample2);
       jest.spyOn(nordigenService, 'getInstitution').mockResolvedValue(mockInstitution);
-      jest
-        .spyOn(nordigenService, 'extendAccountsAboutInstitutions')
-        .mockResolvedValue(mockExtendAccountsAboutInstitutions);
+      jest.spyOn(nordigenService, 'extendAccountsAboutInstitutions').mockResolvedValue([
+        {
+          ...mockExtendAccountsAboutInstitutions[0],
+          institution_id: 'NEWONE'
+        },
+        {
+          ...mockExtendAccountsAboutInstitutions[1],
+          institution_id: 'NEWONE'
+        }
+      ]);
 
       const response = await nordigenService.getRequisitionWithAccounts(mockRequisitionWithExampleAccounts.id);
 
@@ -152,7 +137,6 @@ describe('nordigenService', () => {
             booked: expect.arrayContaining([
               expect.objectContaining({
                 bookingDate: expect.any(String),
-                remittanceInformationUnstructured: expect.any(String),
                 transactionAmount: {
                   amount: expect.any(String),
                   currency: 'EUR'
@@ -163,7 +147,6 @@ describe('nordigenService', () => {
             ]),
             pending: expect.arrayContaining([
               expect.objectContaining({
-                remittanceInformationUnstructured: expect.any(String),
                 transactionAmount: {
                   amount: expect.any(String),
                   currency: 'EUR'
@@ -412,7 +395,6 @@ describe('nordigenService', () => {
                   "iban": "string",
                 },
                 "debtorName": "string",
-                "remittanceInformationUnstructured": "string",
                 "transactionAmount": {
                   "amount": "328.18",
                   "currency": "EUR",
@@ -423,7 +405,6 @@ describe('nordigenService', () => {
               {
                 "bankTransactionCode": "string",
                 "bookingDate": "date",
-                "remittanceInformationUnstructured": "string",
                 "transactionAmount": {
                   "amount": "947.26",
                   "currency": "EUR",
@@ -434,7 +415,6 @@ describe('nordigenService', () => {
             ],
             "pending": [
               {
-                "remittanceInformationUnstructured": "string",
                 "transactionAmount": {
                   "amount": "947.26",
                   "currency": "EUR",

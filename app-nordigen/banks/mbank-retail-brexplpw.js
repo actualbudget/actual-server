@@ -1,15 +1,10 @@
 const { printIban, amountToInteger } = require('../utils');
-const IntegrationBank = require('./integration-bank');
 
-class MbankRetailBrexplpw extends IntegrationBank {
-  static institutionId = 'MBANK_RETAIL_BREXPLPW';
+/** @type {import('./bank.interface').IBank} */
+module.exports = {
+  institutionId: 'MBANK_RETAIL_BREXPLPW',
 
-  /**
-   * Returns normalized object with required data for the frontend
-   * @param {DetailedAccount&{institution: Institution}} account
-   * @returns {NormalizedAccountDetails}
-   */
-  normalizeAccount = (account) => {
+  normalizeAccount(account) {
     return {
       account_id: account.id,
       institution: account.institution,
@@ -18,18 +13,11 @@ class MbankRetailBrexplpw extends IntegrationBank {
       official_name: account.product,
       type: 'checking'
     };
-  };
+  },
 
-  /**
-   * Function sorts an array of transactions from newest to oldest
-   * @param {Array<Transaction>} transactions
-   * @returns {Array<Transaction>}
-   */
-  sortTransactions = (transactions = []) => {
-    return transactions.sort(
-      (a, b) => Number(b.transactionId) - Number(a.transactionId)
-    );
-  };
+  sortTransactions(transactions = []) {
+    return transactions.sort((a, b) => Number(b.transactionId) - Number(a.transactionId));
+  },
 
   /**
    *  For MBANK_RETAIL_BREXPLPW we don't know what balance was
@@ -39,15 +27,11 @@ class MbankRetailBrexplpw extends IntegrationBank {
    *  As a current balance we use `interimBooked` balance type because
    *  it includes transaction placed during current day
    */
-  calculateStartingBalance = (sortedTransactions = [], balances = []) => {
-    const currentBalance = balances.find(
-      (balance) => 'interimBooked' === balance.balanceType
-    );
+  calculateStartingBalance(sortedTransactions = [], balances = []) {
+    const currentBalance = balances.find((balance) => 'interimBooked' === balance.balanceType);
 
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);
     }, amountToInteger(currentBalance.balanceAmount.amount));
-  };
-}
-
-module.exports = MbankRetailBrexplpw;
+  }
+};

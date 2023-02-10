@@ -67,7 +67,7 @@ const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<Requisition>}
+   * @returns {Promise<import('../nordigen-node.types').Requisition>}
    */
   getLinkedRequisition: async (requisitionId) => {
     const requisition = await nordigenService.getRequisition(requisitionId);
@@ -96,12 +96,10 @@ const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{requisition: Requisition, accounts: Array<NormalizedAccountDetails>}>}
+   * @returns {Promise<{requisition: import('../nordigen-node.types').Requisition, accounts: Array<import('../nordigen.types').NormalizedAccountDetails>}>}
    */
   getRequisitionWithAccounts: async (requisitionId) => {
-    const requisition = await nordigenService.getLinkedRequisition(
-      requisitionId
-    );
+    const requisition = await nordigenService.getLinkedRequisition(requisitionId);
 
     let institutionIdSet = new Set();
     const detailedAccounts = await Promise.all(
@@ -118,11 +116,10 @@ const nordigenService = {
       })
     );
 
-    const extendedAccounts =
-      await nordigenService.extendAccountsAboutInstitutions({
-        accounts: detailedAccounts,
-        institutions
-      });
+    const extendedAccounts = await nordigenService.extendAccountsAboutInstitutions({
+      accounts: detailedAccounts,
+      institutions
+    });
 
     const normalizedAccounts = extendedAccounts.map((account) => {
       const bankAccount = BankFactory(account.institution_id);
@@ -148,16 +145,10 @@ const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{balances: Array<Balance>, institutionId: string, transactions: {booked: *, pending}, startingBalance: (*|number)}>}
+   * @returns {Promise<{balances: Array<import('../nordigen-node.types').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types').Transaction>, pending: Array<import('../nordigen-node.types').Transaction>}, startingBalance: number}>}
    */
-  getTransactionsWithBalance: async (
-    requisitionId,
-    accountId,
-    startDate,
-    endDate
-  ) => {
-    const { institution_id, accounts: accountIds } =
-      await nordigenService.getLinkedRequisition(requisitionId);
+  getTransactionsWithBalance: async (requisitionId, accountId, startDate, endDate) => {
+    const { institution_id, accounts: accountIds } = await nordigenService.getLinkedRequisition(requisitionId);
 
     if (!accountIds.includes(accountId)) {
       throw new AccountNotLinedToRequisition(accountId, requisitionId);
@@ -173,24 +164,17 @@ const nordigenService = {
     ]);
 
     const bank = BankFactory(institution_id);
-    const sortedBookedTransactions = bank.sortTransactions(
-      transactions.transactions?.booked
-    );
-    const sortedPendingTransactions = bank.sortTransactions(
-      transactions.transactions?.pending
-    );
+    const sortedBookedTransactions = bank.sortTransactions(transactions.transactions?.booked);
+    const sortedPendingTransactions = bank.sortTransactions(transactions.transactions?.pending);
 
-    const startingBalance = bank.calculateStartingBalance(
-      sortedBookedTransactions,
-      accountBalance.balances
-    );
+    const startingBalance = bank.calculateStartingBalance(sortedBookedTransactions, accountBalance.balances);
 
     return {
       balances: accountBalance.balances,
       institutionId: institution_id,
       startingBalance,
       transactions: {
-        booked: sortedBookedTransactions.slice(),
+        booked: sortedBookedTransactions,
         pending: sortedPendingTransactions
       }
     };
@@ -198,7 +182,7 @@ const nordigenService = {
 
   /**
    *
-   * @param {CreateRequisitionParams} params
+   * @param {import('../nordigen.types').CreateRequisitionParams} params
    * @throws {InvalidInputDataError}
    * @throws {InvalidNordigenTokenError}
    * @throws {AccessDeniedError}
@@ -244,9 +228,7 @@ const nordigenService = {
    */
   deleteRequisition: async (requisitionId) => {
     await nordigenService.getRequisition(requisitionId);
-    const response = await nordigenClient.requisition.deleteRequisition(
-      requisitionId
-    );
+    const response = await nordigenClient.requisition.deleteRequisition(requisitionId);
 
     handleNordigenError(response);
     return response;
@@ -264,14 +246,12 @@ const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns { Promise<Requisition> }
+   * @returns { Promise<import('../nordigen-node.types').Requisition> }
    */
   getRequisition: async (requisitionId) => {
     await nordigenService.setToken();
 
-    const response = await nordigenClient.requisition.getRequisitionById(
-      requisitionId
-    );
+    const response = await nordigenClient.requisition.getRequisitionById(requisitionId);
 
     handleNordigenError(response);
 
@@ -281,7 +261,7 @@ const nordigenService = {
   /**
    * Retrieve an detailed account by account id
    * @param accountId
-   * @returns {Promise<DetailedAccount>}
+   * @returns {Promise<import('../nordigen.types').DetailedAccount>}
    */
   getDetailedAccount: async (accountId) => {
     const [detailedAccount, metadataAccount] = await Promise.all([
@@ -293,8 +273,8 @@ const nordigenService = {
     handleNordigenError(metadataAccount);
 
     return {
-      ...metadataAccount,
-      ...detailedAccount.account
+      ...detailedAccount.account,
+      ...metadataAccount
     };
   },
 
@@ -309,12 +289,10 @@ const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<Institution>}
+   * @returns {Promise<import('../nordigen-node.types').Institution>}
    */
   getInstitution: async (institutionId) => {
-    const response = await nordigenClient.institution.getInstitutionById(
-      institutionId
-    );
+    const response = await nordigenClient.institution.getInstitutionById(institutionId);
 
     handleNordigenError(response);
 
@@ -323,8 +301,8 @@ const nordigenService = {
 
   /**
    * Extends provided accounts about details of their institution
-   * @param {{accounts: Array<DetailedAccount>, institutions: Array<Institution>}} params
-   * @returns {Promise<Array<DetailedAccount&{institution: Institution}>>}
+   * @param {{accounts: Array<import('../nordigen.types').DetailedAccount>, institutions: Array<import('../nordigen-node.types').Institution>}} params
+   * @returns {Promise<Array<import('../nordigen.types').DetailedAccount&{institution: import('../nordigen-node.types').Institution}>>}
    */
   extendAccountsAboutInstitutions: async ({ accounts, institutions }) => {
     const institutionsById = institutions.reduce((acc, institution) => {
@@ -343,7 +321,7 @@ const nordigenService = {
 
   /**
    * Returns account transaction in provided dates
-   * @param {GetTransactionsParams} params
+   * @param {import('../nordigen.types').GetTransactionsParams} params
    * @throws {InvalidInputDataError}
    * @throws {InvalidNordigenTokenError}
    * @throws {AccessDeniedError}
@@ -352,12 +330,10 @@ const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<GetTransactionsResponse>}
+   * @returns {Promise<import('../nordigen.types').GetTransactionsResponse>}
    */
   getTransactions: async ({ accountId, startDate, endDate }) => {
-    const response = await nordigenClient
-      .account(accountId)
-      .getTransactions({ dateFrom: startDate, dateTo: endDate });
+    const response = await nordigenClient.account(accountId).getTransactions({ dateFrom: startDate, dateTo: endDate });
 
     handleNordigenError(response);
 
@@ -375,7 +351,7 @@ const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<GetBalances>}
+   * @returns {Promise<import('../nordigen.types').GetBalances>}
    */
   getBalances: async (accountId) => {
     const response = await nordigenClient.account(accountId).getBalances();

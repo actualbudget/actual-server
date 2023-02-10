@@ -1,10 +1,8 @@
 const SandboxfinanceSfin0000 = require('../sandboxfinance-sfin0000');
+const { mockTransactionAmount } = require('../../services/tests/fixtures');
 describe('SandboxfinanceSfin0000', () => {
-  let bank;
-
-  beforeEach(() => (bank = new SandboxfinanceSfin0000()));
-
   describe('#normalizeAccount', () => {
+    /** @type {import('../../nordigen.types').DetailedAccountWithInstitution} */
     const accountRaw = {
       resourceId: '01F3NS5ASCNMVCTEJDT0G215YE',
       iban: 'GL0865354374424724',
@@ -32,7 +30,7 @@ describe('SandboxfinanceSfin0000', () => {
     };
 
     it('returns normalized account data returned to Frontend', () => {
-      expect(bank.normalizeAccount(accountRaw)).toMatchInlineSnapshot(`
+      expect(SandboxfinanceSfin0000.normalizeAccount(accountRaw)).toMatchInlineSnapshot(`
           {
             "account_id": "99a0bfe2-0bef-46df-bff2-e9ae0c6c5838",
             "institution": {
@@ -59,35 +57,43 @@ describe('SandboxfinanceSfin0000', () => {
   describe('#sortTransactions', () => {
     it('sorts transactions by time and sequence from newest to oldest', () => {
       const transactions = [
-        { transactionId: '2023012301927902-2' },
-        { transactionId: '2023012301927902-1' },
-        { transactionId: '2023012301927900-2' },
-        { transactionId: '2023012301927900-1' },
-        { transactionId: '2023012301927900-3' }
+        { transactionId: '2023012301927902-2', transactionAmount: mockTransactionAmount },
+        { transactionId: '2023012301927902-1', transactionAmount: mockTransactionAmount },
+        { transactionId: '2023012301927900-2', transactionAmount: mockTransactionAmount },
+        { transactionId: '2023012301927900-1', transactionAmount: mockTransactionAmount },
+        { transactionId: '2023012301927900-3', transactionAmount: mockTransactionAmount }
       ];
-      const sortedTransactions = bank.sortTransactions(transactions);
+      const sortedTransactions = SandboxfinanceSfin0000.sortTransactions(transactions);
       expect(sortedTransactions).toEqual([
-        { transactionId: '2023012301927902-2' },
-        { transactionId: '2023012301927902-1' },
-        { transactionId: '2023012301927900-3' },
-        { transactionId: '2023012301927900-2' },
-        { transactionId: '2023012301927900-1' }
+        { transactionId: '2023012301927902-2', transactionAmount: mockTransactionAmount },
+        { transactionId: '2023012301927902-1', transactionAmount: mockTransactionAmount },
+        { transactionId: '2023012301927900-3', transactionAmount: mockTransactionAmount },
+        { transactionId: '2023012301927900-2', transactionAmount: mockTransactionAmount },
+        { transactionId: '2023012301927900-1', transactionAmount: mockTransactionAmount }
       ]);
     });
 
     it('handles empty arrays', () => {
       const transactions = [];
-      const sortedTransactions = bank.sortTransactions(transactions);
+      const sortedTransactions = SandboxfinanceSfin0000.sortTransactions(transactions);
       expect(sortedTransactions).toEqual([]);
     });
 
     it('returns empty array for undefined input', () => {
-      const sortedTransactions = bank.sortTransactions(undefined);
+      const sortedTransactions = SandboxfinanceSfin0000.sortTransactions(undefined);
       expect(sortedTransactions).toEqual([]);
     });
   });
 
   describe('#countStartingBalance', () => {
+    /** @type {import('../../nordigen-node.types').Balance[]} */
+    const balances = [
+      {
+        balanceAmount: { amount: '1000.00', currency: 'PLN' },
+        balanceType: 'interimAvailable'
+      }
+    ];
+
     it('should calculate the starting balance correctly', () => {
       const sortedTransactions = [
         {
@@ -103,39 +109,29 @@ describe('SandboxfinanceSfin0000', () => {
           transactionAmount: { amount: '-25.00', currency: 'USD' }
         }
       ];
-      const balances = [
+
+      /** @type {import('../../nordigen-node.types').Balance[]} */
+      const mockBalances = [
+        ...balances,
         {
-          balanceType: 'interimAvailable',
-          balanceAmount: { amount: '1000.00', currency: 'USD' }
-        },
-        {
-          balanceType: 'other',
+          balanceType: 'expected',
           balanceAmount: { amount: '500.00', currency: 'USD' }
         }
       ];
 
-      const startingBalance = bank.calculateStartingBalance(
-        sortedTransactions,
-        balances
-      );
+      const startingBalance = SandboxfinanceSfin0000.calculateStartingBalance(sortedTransactions, balances);
 
       expect(startingBalance).toEqual(107500);
     });
 
     it('returns the same balance amount when no transactions', () => {
       const transactions = [];
-      const balances = [
-        {
-          balanceAmount: { amount: '1000.00', currency: 'PLN' },
-          balanceType: 'interimAvailable'
-        }
-      ];
-      expect(bank.calculateStartingBalance(transactions, balances)).toEqual(
-        100000
-      );
+
+      expect(SandboxfinanceSfin0000.calculateStartingBalance(transactions, balances)).toEqual(100000);
     });
 
     it('returns the balance minus the available transactions', () => {
+      /** @type {import('../../nordigen-node.types').Transaction[]} */
       const transactions = [
         {
           transactionAmount: { amount: '200.00', currency: 'PLN' }
@@ -144,15 +140,8 @@ describe('SandboxfinanceSfin0000', () => {
           transactionAmount: { amount: '300.50', currency: 'PLN' }
         }
       ];
-      const balances = [
-        {
-          balanceAmount: { amount: '1000.00', currency: 'PLN' },
-          balanceType: 'interimAvailable'
-        }
-      ];
-      expect(bank.calculateStartingBalance(transactions, balances)).toEqual(
-        49950
-      );
+
+      expect(SandboxfinanceSfin0000.calculateStartingBalance(transactions, balances)).toEqual(49950);
     });
   });
 });

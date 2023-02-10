@@ -1,13 +1,8 @@
-class IntegrationBank {
-  /**
-   * Returns normalized object with required data for the frontend
-   * @param {DetailedAccount&{institution: Institution}} account
-   * @returns {NormalizedAccountDetails}
-   */ normalizeAccount = (account) => {
-    console.log(
-      'Available account properties for new institution integration',
-      { account: JSON.stringify(account) }
-    );
+/** @type {import('./bank.interface').IBank} */
+module.exports = {
+  institutionId: 'IntegrationBank',
+  normalizeAccount(account) {
+    console.log('Available account properties for new institution integration', { account: JSON.stringify(account) });
 
     return {
       account_id: account.id,
@@ -17,29 +12,15 @@ class IntegrationBank {
       official_name: `integration-${account.institution_id}`,
       type: 'checking'
     };
-  };
-
-  /**
-   * Function sorts an array of transactions from newest to oldest
-   * @param {Array<Transaction>} transactions
-   * @returns {Array<Transaction>}
-   */
-  sortTransactions = (transactions = []) => {
+  },
+  sortTransactions(transactions = []) {
     console.log(
       'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
       { top10Transactions: JSON.stringify(transactions.slice(0, 10)) }
     );
     return transactions;
-  };
-
-  /**
-   * Calculates account balance before which was before transactions provided in sortedTransactions param
-   * @param {Array<Transaction>} sortedTransactions array of transactions sorted from the newest to the oldest
-   * @param {Array<Balance>} balances Each bank have could have different balance types available.
-   *   list and description of the possible balances you can find here - https://nordigen.com/en/docs/account-information/output/balance/
-   * @returns {number} starting account balance
-   */
-  calculateStartingBalance = (sortedTransactions = [], balances = []) => {
+  },
+  calculateStartingBalance(sortedTransactions = [], balances = []) {
     console.log(
       'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
       {
@@ -48,6 +29,5 @@ class IntegrationBank {
       }
     );
     return 0;
-  };
-}
-module.exports = IntegrationBank;
+  }
+};

@@ -2,10 +2,10 @@
 
 Find in [doc](https://docs.google.com/spreadsheets/d/1ogpzydzotOltbssrc3IQ8rhBLlIZbQgm5QCiiNJrkyA/edit#gid=489769432) what is id of bank which you want to integrate
 
-Add the `institution_id` and your name to list of possible options in the frontend 
+Add the `institution_id` and your name to list of possible options in the frontend
 project `actual/packages/loot-design/src/components/modals/NordigenExternalMsg.js`
 
-```
+```jsx
 <Strong>Choose your banks:</Strong>
 <CustomSelect
   options={[
@@ -20,13 +20,13 @@ Launch frontend and backend server
 
 Create new linked account selecting the institution which you added recently.
 
-In the server logs you can find all required information to create class for 
-your bank. 
+In the server logs you can find all required information to create class for
+your bank.
 
-Create new a bank class based on `app-nordigen/banks/sandboxfinance-sfin0000.js`. Name of the file and class should be 
-created based on the ID of the integrated institution. 
+Create new a bank class based on `app-nordigen/banks/sandboxfinance-sfin0000.js`. Name of the file and class should be
+created based on the ID of the integrated institution.
 
-Fill the logic of `normalizeAccount`, `sortTransactions`, and `calculateStartingBalance` functions. 
+Fill the logic of `normalizeAccount`, `sortTransactions`, and `calculateStartingBalance` functions.
 You should do it based on the data which you found in the logs.
 
 Example logs which help you to fill:
@@ -58,4 +58,4 @@ Available (first 10) transactions properties for new integration of institution 
 
 Add new bank integration to `BankFactory` class in file `actual-server/app-nordigen/bank-factory.js`
 
-Remember to add tests for new bank integration in 
+Remember to add tests for new bank integration in

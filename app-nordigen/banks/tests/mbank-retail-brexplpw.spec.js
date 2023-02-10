@@ -1,10 +1,8 @@
 const MbankRetailBrexplpw = require('../mbank-retail-brexplpw');
 
 describe('MbankRetailBrexplpw', () => {
-  let bank;
-  beforeEach(() => (bank = new MbankRetailBrexplpw()));
-
   describe('#normalizeAccount', () => {
+    /** @type {import('../../nordigen.types').DetailedAccountWithInstitution} */
     const accountRaw = {
       iban: 'PL00000000000000000987654321',
       currency: 'PLN',
@@ -12,11 +10,7 @@ describe('MbankRetailBrexplpw', () => {
       displayName: 'EKONTO',
       product: 'RACHUNEK BIEŻĄCY',
       usage: 'PRIV',
-      ownerAddressUnstructured: [
-        'POL',
-        'UL. EXAMPLE STREET 10 M.1',
-        '00-000 WARSZAWA'
-      ],
+      ownerAddressUnstructured: ['POL', 'UL. EXAMPLE STREET 10 M.1', '00-000 WARSZAWA'],
       id: 'd3eccc94-9536-48d3-98be-813f79199ee3',
       created: '2023-01-18T13:24:55.879512Z',
       last_accessed: null,
@@ -42,7 +36,7 @@ describe('MbankRetailBrexplpw', () => {
       }
     };
     it('returns normalized account data returned to Frontend', () => {
-      expect(bank.normalizeAccount(accountRaw)).toMatchInlineSnapshot(`
+      expect(MbankRetailBrexplpw.normalizeAccount(accountRaw)).toMatchInlineSnapshot(`
                   {
                     "account_id": "d3eccc94-9536-48d3-98be-813f79199ee3",
                     "institution": {
@@ -75,46 +69,47 @@ describe('MbankRetailBrexplpw', () => {
 
   describe('#sortTransactions', () => {
     it('returns transactions from newest to oldest', () => {
-      const sortedTransactions = bank.sortTransactions([
-        { transactionId: '202212300001' },
-        { transactionId: '202212300003' },
-        { transactionId: '202212300002' },
-        { transactionId: '202212300000' },
-        { transactionId: '202112300001' }
+      const sortedTransactions = MbankRetailBrexplpw.sortTransactions([
+        { transactionId: '202212300001', transactionAmount: { amount: '100', currency: 'EUR' } },
+        { transactionId: '202212300003', transactionAmount: { amount: '100', currency: 'EUR' } },
+        { transactionId: '202212300002', transactionAmount: { amount: '100', currency: 'EUR' } },
+        { transactionId: '202212300000', transactionAmount: { amount: '100', currency: 'EUR' } },
+        { transactionId: '202112300001', transactionAmount: { amount: '100', currency: 'EUR' } }
       ]);
 
       expect(sortedTransactions).toEqual([
-        { transactionId: '202212300003' },
-        { transactionId: '202212300002' },
-        { transactionId: '202212300001' },
-        { transactionId: '202212300000' },
-        { transactionId: '202112300001' }
+        { transactionId: '202212300003', transactionAmount: { amount: '100', currency: 'EUR' } },
+        { transactionId: '202212300002', transactionAmount: { amount: '100', currency: 'EUR' } },
+        { transactionId: '202212300001', transactionAmount: { amount: '100', currency: 'EUR' } },
+        { transactionId: '202212300000', transactionAmount: { amount: '100', currency: 'EUR' } },
+        { transactionId: '202112300001', transactionAmount: { amount: '100', currency: 'EUR' } }
       ]);
     });
 
     it('returns empty array for empty input', () => {
-      const sortedTransactions = bank.sortTransactions([]);
+      const sortedTransactions = MbankRetailBrexplpw.sortTransactions([]);
       expect(sortedTransactions).toEqual([]);
     });
 
     it('returns empty array for undefined input', () => {
-      const sortedTransactions = bank.sortTransactions(undefined);
+      const sortedTransactions = MbankRetailBrexplpw.sortTransactions(undefined);
       expect(sortedTransactions).toEqual([]);
     });
   });
 
   describe('#countStartingBalance', () => {
+    /** @type {import('../../nordigen-node.types').Balance[]} */
+    const balances = [
+      {
+        balanceAmount: { amount: '1000.00', currency: 'PLN' },
+        balanceType: 'interimBooked'
+      }
+    ];
+
     it('returns the same balance amount when no transactions', () => {
       const transactions = [];
-      const balances = [
-        {
-          balanceAmount: { amount: '1000.00', currency: 'PLN' },
-          balanceType: 'interimBooked'
-        }
-      ];
-      expect(bank.calculateStartingBalance(transactions, balances)).toEqual(
-        100000
-      );
+
+      expect(MbankRetailBrexplpw.calculateStartingBalance(transactions, balances)).toEqual(100000);
     });
 
     it('returns the balance minus the available transactions', () => {
@@ -126,15 +121,8 @@ describe('MbankRetailBrexplpw', () => {
           transactionAmount: { amount: '300.50', currency: 'PLN' }
         }
       ];
-      const balances = [
-        {
-          balanceAmount: { amount: '1000.00', currency: 'PLN' },
-          balanceType: 'interimBooked'
-        }
-      ];
-      expect(bank.calculateStartingBalance(transactions, balances)).toEqual(
-        49950
-      );
+
+      expect(MbankRetailBrexplpw.calculateStartingBalance(transactions, balances)).toEqual(49950);
     });
   });
 });

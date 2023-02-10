@@ -5,23 +5,31 @@ const IngPlIngbplpw = require('../banks/ing-pl-ingbplpw');
 const IntegrationBank = require('../banks/integration-bank');
 
 describe('BankFactory', () => {
-  it('should return MbankRetailBrexplpw instance when institutionId is MbankRetailBrexplpw.institutionId', () => {
-    const bank = BankFactory(MbankRetailBrexplpw.institutionId);
-    expect(bank instanceof MbankRetailBrexplpw).toBe(true);
+  it('should return MbankRetailBrexplpw when institutionId is mbank-retail-brexplpw', () => {
+    const institutionId = MbankRetailBrexplpw.institutionId;
+    const result = BankFactory(institutionId);
+
+    expect(result.institutionId).toBe(institutionId);
   });
 
-  it('should return SandboxfinanceSfin0000 instance when institutionId is SandboxfinanceSfin0000.institutionId', () => {
-    const bank = BankFactory(SandboxfinanceSfin0000.institutionId);
-    expect(bank instanceof SandboxfinanceSfin0000).toBe(true);
+  it('should return SandboxfinanceSfin0000 when institutionId is sandboxfinance-sfin0000', () => {
+    const institutionId = SandboxfinanceSfin0000.institutionId;
+    const result = BankFactory(institutionId);
+
+    expect(result.institutionId).toBe(institutionId);
   });
 
-  it('should return IngPlIngbplpw instance when institutionId is IngPlIngbplpw.institutionId', () => {
-    const bank = BankFactory(IngPlIngbplpw.institutionId);
-    expect(bank instanceof IngPlIngbplpw).toBe(true);
+  it('should return IngPlIngbplpw when institutionId is ing-pl-ingbplpw', () => {
+    const institutionId = IngPlIngbplpw.institutionId;
+    const result = BankFactory(institutionId);
+
+    expect(result.institutionId).toBe(institutionId);
   });
 
-  it('should return IntegrationBank instance when institutionId does not match any of the specified ids', () => {
-    const bank = BankFactory('random-institution-id');
-    expect(bank instanceof IntegrationBank).toBe(true);
+  it('should return IntegrationBank when institutionId is not found', () => {
+    const institutionId = IntegrationBank.institutionId;
+    const result = BankFactory(institutionId);
+
+    expect(result.institutionId).toBe(institutionId);
   });
 });

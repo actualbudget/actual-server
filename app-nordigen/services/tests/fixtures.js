@@ -1,3 +1,4 @@
+/** @type {{balances: import('../../nordigen-node.types').Balance[]}} */
 const mockedBalances = {
   balances: [
     {
@@ -5,7 +6,7 @@ const mockedBalances = {
         amount: '657.49',
         currency: 'string'
       },
-      balanceType: 'string',
+      balanceType: 'interimAvailable',
       referenceDate: '2021-11-22'
     },
     {
@@ -13,12 +14,13 @@ const mockedBalances = {
         amount: '185.67',
         currency: 'string'
       },
-      balanceType: 'string',
+      balanceType: 'interimAvailable',
       referenceDate: '2021-11-19'
     }
   ]
 };
 
+/** @type {{transactions: import('../../nordigen-node.types').Transactions}} */
 const mockTransactions = {
   transactions: {
     booked: [
@@ -34,8 +36,7 @@ const mockTransactions = {
         },
         bankTransactionCode: 'string',
         bookingDate: 'date',
-        valueDate: 'date',
-        remittanceInformationUnstructured: 'string'
+        valueDate: 'date'
       },
       {
         transactionId: 'string',
@@ -45,8 +46,7 @@ const mockTransactions = {
         },
         bankTransactionCode: 'string',
         bookingDate: 'date',
-        valueDate: 'date',
-        remittanceInformationUnstructured: 'string'
+        valueDate: 'date'
       }
     ],
     pending: [
@@ -55,8 +55,7 @@ const mockTransactions = {
           currency: 'EUR',
           amount: '947.26'
         },
-        valueDate: 'date',
-        remittanceInformationUnstructured: 'string'
+        valueDate: 'date'
       }
     ]
   }
@@ -69,33 +68,37 @@ const mockUnknownError = {
   status_code: 500
 };
 
+/** @type {{account: import('../../nordigen-node.types').NordigenAccountDetails}} */
 const mockAccountDetails = {
   account: {
-    resourceId: 'PL13105010381000009117649849',
-    iban: 'PL13105010381000009117649849',
+    resourceId: 'PL00000000000000000987654321',
+    iban: 'PL00000000000000000987654321',
     currency: 'PLN',
-    ownerName: 'STYBEL FILIP MICHAŁ',
+    ownerName: 'JOHN EXAMPLE',
     product: 'Savings Account for Individuals (Retail)',
     bic: 'INGBPLPW',
-    ownerAddressUnstructured: ['MALBORSKA 15/57', '03-286 WARSZAWA']
+    ownerAddressUnstructured: ['EXAMPLE STREET 100/001', '00-000 EXAMPLE CITY']
   }
 };
 
+/** @type {import('../../nordigen-node.types').NordigenAccountMetadata} */
 const mockAccountMetaData = {
   id: 'f0e49aa6-f6db-48fc-94ca-4a62372fadf4',
   created: '2022-07-24T20:45:47.847062Z',
   last_accessed: '2023-01-25T22:12:27.814618Z',
-  iban: 'PL13105010381000009117649849',
-  institution_id: 'ING_PL_INGBPLPW',
+  iban: 'PL00000000000000000987654321',
+  institution_id: 'SANDBOXFINANCE_SFIN0000',
   status: 'READY',
-  owner_name: 'STYBEL FILIP MICHAŁ'
+  owner_name: 'JOHN EXAMPLE'
 };
 
+/** @type {import('../../nordigen.types').DetailedAccount} */
 const mockDetailedAccount = {
   ...mockAccountDetails.account,
   ...mockAccountMetaData
 };
 
+/** @type {import('../../nordigen-node.types').Institution} */
 const mockInstitution = {
   id: 'N26_NTSBDEB1',
   name: 'N26 Bank',
@@ -105,6 +108,7 @@ const mockInstitution = {
   logo: 'https://cdn.nordigen.com/ais/N26_SANDBOX_NTSBDEB1.png'
 };
 
+/** @type {import('../../nordigen-node.types').Requisition} */
 const mockRequisition = {
   id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   created: '2023-01-31T18:15:50.172Z',
@@ -123,8 +127,7 @@ const mockRequisition = {
 
 const mockDeleteRequisition = {
   summary: 'Requisition deleted',
-  detail:
-    "Requisition '$REQUISITION_ID' deleted with all its End User Agreements"
+  detail: "Requisition '$REQUISITION_ID' deleted with all its End User Agreements"
 };
 
 const mockCreateRequisition = {
@@ -143,6 +146,38 @@ const mockCreateRequisition = {
   redirect_immediate: false
 };
 
+/** @type {import('../../nordigen.types').DetailedAccount} */
+const mockDetailedAccountExample1 = {
+  ...mockDetailedAccount,
+  name: 'account-example-one'
+};
+
+/** @type {import('../../nordigen.types').DetailedAccount} */
+const mockDetailedAccountExample2 = {
+  ...mockDetailedAccount,
+  name: 'account-example-two'
+};
+
+/** @type {import('../../nordigen.types').DetailedAccountWithInstitution[]} */
+const mockExtendAccountsAboutInstitutions = [
+  {
+    ...mockDetailedAccountExample1,
+    institution: mockInstitution
+  },
+  {
+    ...mockDetailedAccountExample2,
+    institution: mockInstitution
+  }
+];
+
+const mockRequisitionWithExampleAccounts = {
+  ...mockRequisition,
+
+  accounts: [mockDetailedAccountExample1.id, mockDetailedAccountExample2.id]
+};
+
+const mockTransactionAmount = { amount: '100', currency: 'EUR' };
+
 module.exports = {
   mockTransactions,
   mockedBalances,
@@ -153,5 +188,10 @@ module.exports = {
   mockInstitution,
   mockRequisition,
   mockDeleteRequisition,
-  mockCreateRequisition
+  mockCreateRequisition,
+  mockExtendAccountsAboutInstitutions,
+  mockRequisitionWithExampleAccounts,
+  mockDetailedAccountExample1,
+  mockDetailedAccountExample2,
+  mockTransactionAmount
 };

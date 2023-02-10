@@ -2,11 +2,19 @@ const express = require('express');
 
 const { nordigenService } = require('./services/nordigen-service');
 const { RequisitionNotLinked, AccountNotLinedToRequisition, GenericNordigenError } = require('./errors');
-const { handleError } = require('../build/util/handle-error');
+const { handleError } = require('./util/handle-error');
+const { validateUser } = require('../util/validate-user');
 
 const app = express();
 
 app.use(express.json());
+app.use(async (req, res, next) => {
+  let user = await validateUser(req, res);
+  if (!user) {
+    return;
+  }
+  next();
+});
 
 app.post(
   '/create-web-token',
