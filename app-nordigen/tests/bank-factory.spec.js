@@ -1,8 +1,8 @@
-const BankFactory = require('../bank-factory');
-const MbankRetailBrexplpw = require('../banks/mbank-retail-brexplpw');
-const SandboxfinanceSfin0000 = require('../banks/sandboxfinance-sfin0000');
-const IngPlIngbplpw = require('../banks/ing-pl-ingbplpw');
-const IntegrationBank = require('../banks/integration-bank');
+import BankFactory from '../bank-factory';
+import MbankRetailBrexplpw from '../banks/mbank-retail-brexplpw';
+import SandboxfinanceSfin0000 from '../banks/sandboxfinance-sfin0000';
+import IngPlIngbplpw from '../banks/ing-pl-ingbplpw';
+import IntegrationBank from '../banks/integration-bank';
 
 describe('BankFactory', () => {
   it('should return MbankRetailBrexplpw when institutionId is mbank-retail-brexplpw', () => {

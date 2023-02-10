@@ -1,5 +1,5 @@
-const IngPlIngbplpw = require('../ing-pl-ingbplpw');
-const { mockTransactionAmount } = require('../../services/tests/fixtures');
+import IngPlIngbplpw from '../ing-pl-ingbplpw';
+import { mockTransactionAmount } from '../../services/tests/fixtures';
 
 describe('IngPlIngbplpw', () => {
   describe('#normalizeAccount', () => {

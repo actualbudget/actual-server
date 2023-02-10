@@ -1,5 +1,5 @@
-const IntegrationBank = require('../integration-bank');
-const { mockExtendAccountsAboutInstitutions, mockInstitution } = require('../../services/tests/fixtures');
+import IntegrationBank from '../integration-bank';
+import { mockExtendAccountsAboutInstitutions, mockInstitution } from '../../services/tests/fixtures';
 
 describe('IntegrationBank', () => {
   let consoleSpy;

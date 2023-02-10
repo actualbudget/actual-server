@@ -1,7 +1,7 @@
-const { printIban, amountToInteger } = require('../utils');
+import { printIban, amountToInteger } from '../utils';
 
 /** @type {import('./bank.interface').IBank} */
-module.exports = {
+export default {
   institutionId: 'SANDBOXFINANCE_SFIN0000',
 
   normalizeAccount(account) {

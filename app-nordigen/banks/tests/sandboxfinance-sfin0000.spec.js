@@ -1,5 +1,6 @@
-const SandboxfinanceSfin0000 = require('../sandboxfinance-sfin0000');
-const { mockTransactionAmount } = require('../../services/tests/fixtures');
+import SandboxfinanceSfin0000 from '../sandboxfinance-sfin0000';
+import { mockTransactionAmount } from '../../services/tests/fixtures';
+
 describe('SandboxfinanceSfin0000', () => {
   describe('#normalizeAccount', () => {
     /** @type {import('../../nordigen.types').DetailedAccountWithInstitution} */

@@ -1,6 +1,6 @@
-const request = require('supertest');
-const nordigenApp = require('../app-nordigen');
-const puppeteer = require('puppeteer');
+import request from 'supertest';
+import nordigenApp from '../app-nordigen';
+import puppeteer from 'puppeteer';
 
 const institutionId = 'SANDBOXFINANCE_SFIN0000';
 let server, accountId, nordigenLink, requisitionId;

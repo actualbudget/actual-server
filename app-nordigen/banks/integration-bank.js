@@ -1,5 +1,5 @@
 /** @type {import('./bank.interface').IBank} */
-module.exports = {
+export default {
   institutionId: 'IntegrationBank',
   normalizeAccount(account) {
     console.log('Available account properties for new institution integration', { account: JSON.stringify(account) });

@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 
-const { nordigenService } = require('./services/nordigen-service');
-const { RequisitionNotLinked, AccountNotLinedToRequisition, GenericNordigenError } = require('./errors');
-const { handleError } = require('./util/handle-error');
-const { validateUser } = require('../util/validate-user');
+import { nordigenService } from './services/nordigen-service';
+import { RequisitionNotLinked, AccountNotLinedToRequisition, GenericNordigenError } from './errors';
+import { handleError } from './util/handle-error';
+import validateUser from '../src/util/validate-user.js';
 
 const app = express();
 

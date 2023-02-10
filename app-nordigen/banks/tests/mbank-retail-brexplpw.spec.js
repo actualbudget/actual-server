@@ -1,4 +1,4 @@
-const MbankRetailBrexplpw = require('../mbank-retail-brexplpw');
+import MbankRetailBrexplpw from '../mbank-retail-brexplpw';
 
 describe('MbankRetailBrexplpw', () => {
   describe('#normalizeAccount', () => {

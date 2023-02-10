@@ -1,5 +1,5 @@
 /** @type {{balances: import('../../nordigen-node.types').Balance[]}} */
-const mockedBalances = {
+export const mockedBalances = {
   balances: [
     {
       balanceAmount: {
@@ -21,7 +21,7 @@ const mockedBalances = {
 };
 
 /** @type {{transactions: import('../../nordigen-node.types').Transactions}} */
-const mockTransactions = {
+export const mockTransactions = {
   transactions: {
     booked: [
       {
@@ -61,7 +61,7 @@ const mockTransactions = {
   }
 };
 
-const mockUnknownError = {
+export const mockUnknownError = {
   summary: "Couldn't update account balances",
   detail: 'Request to Institution returned an error',
   type: 'UnknownRequestError',
@@ -69,7 +69,7 @@ const mockUnknownError = {
 };
 
 /** @type {{account: import('../../nordigen-node.types').NordigenAccountDetails}} */
-const mockAccountDetails = {
+export const mockAccountDetails = {
   account: {
     resourceId: 'PL00000000000000000987654321',
     iban: 'PL00000000000000000987654321',
@@ -82,7 +82,7 @@ const mockAccountDetails = {
 };
 
 /** @type {import('../../nordigen-node.types').NordigenAccountMetadata} */
-const mockAccountMetaData = {
+export const mockAccountMetaData = {
   id: 'f0e49aa6-f6db-48fc-94ca-4a62372fadf4',
   created: '2022-07-24T20:45:47.847062Z',
   last_accessed: '2023-01-25T22:12:27.814618Z',
@@ -93,13 +93,13 @@ const mockAccountMetaData = {
 };
 
 /** @type {import('../../nordigen.types').DetailedAccount} */
-const mockDetailedAccount = {
+export const mockDetailedAccount = {
   ...mockAccountDetails.account,
   ...mockAccountMetaData
 };
 
 /** @type {import('../../nordigen-node.types').Institution} */
-const mockInstitution = {
+export const mockInstitution = {
   id: 'N26_NTSBDEB1',
   name: 'N26 Bank',
   bic: 'NTSBDEB1',
@@ -109,7 +109,7 @@ const mockInstitution = {
 };
 
 /** @type {import('../../nordigen-node.types').Requisition} */
-const mockRequisition = {
+export const mockRequisition = {
   id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   created: '2023-01-31T18:15:50.172Z',
   redirect: 'string',
@@ -125,12 +125,12 @@ const mockRequisition = {
   redirect_immediate: false
 };
 
-const mockDeleteRequisition = {
+export const mockDeleteRequisition = {
   summary: 'Requisition deleted',
   detail: "Requisition '$REQUISITION_ID' deleted with all its End User Agreements"
 };
 
-const mockCreateRequisition = {
+export const mockCreateRequisition = {
   id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   created: '2023-02-01T15:53:29.481Z',
   redirect: 'string',
@@ -147,19 +147,19 @@ const mockCreateRequisition = {
 };
 
 /** @type {import('../../nordigen.types').DetailedAccount} */
-const mockDetailedAccountExample1 = {
+export const mockDetailedAccountExample1 = {
   ...mockDetailedAccount,
   name: 'account-example-one'
 };
 
 /** @type {import('../../nordigen.types').DetailedAccount} */
-const mockDetailedAccountExample2 = {
+export const mockDetailedAccountExample2 = {
   ...mockDetailedAccount,
   name: 'account-example-two'
 };
 
 /** @type {import('../../nordigen.types').DetailedAccountWithInstitution[]} */
-const mockExtendAccountsAboutInstitutions = [
+export const mockExtendAccountsAboutInstitutions = [
   {
     ...mockDetailedAccountExample1,
     institution: mockInstitution
@@ -170,28 +170,10 @@ const mockExtendAccountsAboutInstitutions = [
   }
 ];
 
-const mockRequisitionWithExampleAccounts = {
+export const mockRequisitionWithExampleAccounts = {
   ...mockRequisition,
 
   accounts: [mockDetailedAccountExample1.id, mockDetailedAccountExample2.id]
 };
 
-const mockTransactionAmount = { amount: '100', currency: 'EUR' };
-
-module.exports = {
-  mockTransactions,
-  mockedBalances,
-  mockUnknownError,
-  mockAccountMetaData,
-  mockAccountDetails,
-  mockDetailedAccount,
-  mockInstitution,
-  mockRequisition,
-  mockDeleteRequisition,
-  mockCreateRequisition,
-  mockExtendAccountsAboutInstitutions,
-  mockRequisitionWithExampleAccounts,
-  mockDetailedAccountExample1,
-  mockDetailedAccountExample2,
-  mockTransactionAmount
-};
+export const mockTransactionAmount = { amount: '100', currency: 'EUR' };
