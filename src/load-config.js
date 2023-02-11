@@ -54,7 +54,10 @@ export default {
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
   serverFiles: process.env.ACTUAL_SERVER_FILES || config.serverFiles,
   userFiles: process.env.ACTUAL_USER_FILES || config.userFiles,
-  webRoot: process.env.ACTUAL_WEB_ROOT || config.webRoot,
+  webRoot: path.resolve(
+    projectRoot,
+    process.env.ACTUAL_WEB_ROOT || config.webRoot
+  ),
   https:
     process.env.ACTUAL_HTTPS_KEY && process.env.ACTUAL_HTTPS_CERT
       ? {
