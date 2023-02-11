@@ -22,6 +22,13 @@ app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
 
+app.get('/client-bootstrap', (req, res) => {
+  // can also return a `serverURL` to override the server URL
+  // (but our server doesn’t need that because it will default
+  // to the client’s domain which is fine in our case)
+  res.json({ isActual: true });
+});
+
 app.get('/mode', (req, res) => {
   res.send(config.mode);
 });
