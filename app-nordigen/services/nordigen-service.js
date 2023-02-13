@@ -1,6 +1,5 @@
-const uuid = require('uuid');
-const BankFactory = require('../bank-factory');
-const {
+import BankFactory from '../bank-factory.js';
+import {
   RequisitionNotLinked,
   AccountNotLinedToRequisition,
   InvalidInputDataError,
@@ -11,15 +10,16 @@ const {
   RateLimitError,
   UnknownError,
   ServiceError
-} = require('../errors');
-const NordigenClient = require('./../nordigen-node/index').default;
-
+} from '../errors.js';
+import * as nordigenNode from 'nordigen-node';
+import uuid from '@actual-app/api/app/bundle.api.js';
+const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
   secretId: process.env.SECRET_ID,
   secretKey: process.env.SECRET_KEY
 });
 
-const handleNordigenError = (response) => {
+export const handleNordigenError = (response) => {
   switch (response.status_code) {
     case 400:
       throw new InvalidInputDataError(response);
@@ -42,7 +42,7 @@ const handleNordigenError = (response) => {
   }
 };
 
-const nordigenService = {
+export const nordigenService = {
   /**
    *
    * @returns {Promise<void>}
@@ -199,7 +199,7 @@ const nordigenService = {
     const response = await nordigenClient.initSession({
       redirectUrl: host + '/nordigen/link',
       institutionId,
-      referenceId: uuid.v4(),
+      referenceId: uuid.v4,
       accessValidForDays
     });
 
@@ -361,5 +361,3 @@ const nordigenService = {
     return response;
   }
 };
-
-module.exports = { nordigenService, handleNordigenError };

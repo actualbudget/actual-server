@@ -1,12 +1,12 @@
 import express from 'express';
 
-import { nordigenService } from './services/nordigen-service';
-import { RequisitionNotLinked, AccountNotLinedToRequisition, GenericNordigenError } from './errors';
-import { handleError } from './util/handle-error';
+import { nordigenService } from './services/nordigen-service.js';
+import { RequisitionNotLinked, AccountNotLinedToRequisition, GenericNordigenError } from './errors.js';
+import { handleError } from './util/handle-error.js';
 import validateUser from '../src/util/validate-user.js';
 
 const app = express();
-
+export { app as handlers };
 app.use(express.json());
 app.use(async (req, res, next) => {
   let user = await validateUser(req, res);
@@ -153,5 +153,3 @@ app.post(
     }
   })
 );
-
-module.exports.handlers = app;
