@@ -30,10 +30,7 @@ app.get('/needs-bootstrap', (req, res) => {
 
   res.send({
     status: 'ok',
-    data: {
-      isActual: true,
-      bootstrapped: rows.length > 0
-    }
+    data: { bootstrapped: rows.length > 0 }
   });
 });
 
