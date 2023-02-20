@@ -13,10 +13,12 @@ import {
 } from '../errors.js';
 import * as nordigenNode from 'nordigen-node';
 import uuid from '@actual-app/api/app/bundle.api.js';
+import config from '../../src/load-config.js';
+
 const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
-  secretId: process.env.SECRET_ID,
-  secretKey: process.env.SECRET_KEY
+  secretId: config.nordigen_secret_id,
+  secretKey: config.nordigen_secret_key
 });
 
 export const handleNordigenError = (response) => {
