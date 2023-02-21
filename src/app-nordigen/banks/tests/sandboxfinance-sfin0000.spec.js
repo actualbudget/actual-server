@@ -1,9 +1,9 @@
-import SandboxfinanceSfin0000 from '../sandboxfinance-sfin0000';
-import { mockTransactionAmount } from '../../services/tests/fixtures';
+import SandboxfinanceSfin0000 from '../sandboxfinance-sfin0000.js';
+import { mockTransactionAmount } from '../../services/tests/fixtures.js';
 
 describe('SandboxfinanceSfin0000', () => {
   describe('#normalizeAccount', () => {
-    /** @type {import('../../nordigen.types').DetailedAccountWithInstitution} */
+    /** @type {import('../../nordigen.types.js').DetailedAccountWithInstitution} */
     const accountRaw = {
       resourceId: '01F3NS5ASCNMVCTEJDT0G215YE',
       iban: 'GL0865354374424724',
@@ -87,7 +87,7 @@ describe('SandboxfinanceSfin0000', () => {
   });
 
   describe('#countStartingBalance', () => {
-    /** @type {import('../../nordigen-node.types').Balance[]} */
+    /** @type {import('../../nordigen-node.types.js').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'PLN' },
@@ -111,7 +111,7 @@ describe('SandboxfinanceSfin0000', () => {
         }
       ];
 
-      /** @type {import('../../nordigen-node.types').Balance[]} */
+      /** @type {import('../../nordigen-node.types.js').Balance[]} */
       const mockBalances = [
         ...balances,
         {
@@ -132,7 +132,7 @@ describe('SandboxfinanceSfin0000', () => {
     });
 
     it('returns the balance minus the available transactions', () => {
-      /** @type {import('../../nordigen-node.types').Transaction[]} */
+      /** @type {import('../../nordigen-node.types.js').Transaction[]} */
       const transactions = [
         {
           transactionAmount: { amount: '200.00', currency: 'PLN' }

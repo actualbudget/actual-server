@@ -1,9 +1,9 @@
-import IngPlIngbplpw from '../ing-pl-ingbplpw';
-import { mockTransactionAmount } from '../../services/tests/fixtures';
+import IngPlIngbplpw from '../ing-pl-ingbplpw.js';
+import { mockTransactionAmount } from '../../services/tests/fixtures.js';
 
 describe('IngPlIngbplpw', () => {
   describe('#normalizeAccount', () => {
-    /** @type {import('../../nordigen.types').DetailedAccountWithInstitution} */
+    /** @type {import('../../nordigen.types.js').DetailedAccountWithInstitution} */
     const accountRaw = {
       resourceId: 'PL00000000000000000987654321',
       iban: 'PL00000000000000000987654321',
@@ -103,7 +103,7 @@ describe('IngPlIngbplpw', () => {
 
   describe('#countStartingBalance', () => {
     it('should calculate the starting balance correctly', () => {
-      /** @type {import('../../nordigen-node.types').Transaction[]} */
+      /** @type {import('../../nordigen-node.types.js').Transaction[]} */
       const sortedTransactions = [
         {
           transactionAmount: { amount: '-100.00', currency: 'USD' },
@@ -128,7 +128,7 @@ describe('IngPlIngbplpw', () => {
         }
       ];
 
-      /** @type {import('../../nordigen-node.types').Balance[]} */
+      /** @type {import('../../nordigen-node.types.js').Balance[]} */
       const balances = [
         {
           balanceType: 'interimBooked',
@@ -148,7 +148,7 @@ describe('IngPlIngbplpw', () => {
     it('returns the same balance amount when no transactions', () => {
       const transactions = [];
 
-      /** @type {import('../../nordigen-node.types').Balance[]} */
+      /** @type {import('../../nordigen-node.types.js').Balance[]} */
       const balances = [
         {
           balanceType: 'interimBooked',

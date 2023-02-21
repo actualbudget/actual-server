@@ -13,7 +13,7 @@ import {
 } from '../errors.js';
 import * as nordigenNode from 'nordigen-node';
 import uuid from '@actual-app/api/app/bundle.api.js';
-import config from '../../src/load-config.js';
+import config from '../../load-config.js';
 
 const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
@@ -69,7 +69,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<import('../nordigen-node.types').Requisition>}
+   * @returns {Promise<import('../nordigen-node.types.js').Requisition>}
    */
   getLinkedRequisition: async (requisitionId) => {
     const requisition = await nordigenService.getRequisition(requisitionId);
@@ -98,7 +98,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{requisition: import('../nordigen-node.types').Requisition, accounts: Array<import('../nordigen.types').NormalizedAccountDetails>}>}
+   * @returns {Promise<{requisition: import('../nordigen-node.types.js').Requisition, accounts: Array<import('../nordigen.types.js').NormalizedAccountDetails>}>}
    */
   getRequisitionWithAccounts: async (requisitionId) => {
     const requisition = await nordigenService.getLinkedRequisition(requisitionId);
@@ -147,7 +147,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{balances: Array<import('../nordigen-node.types').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types').Transaction>, pending: Array<import('../nordigen-node.types').Transaction>}, startingBalance: number}>}
+   * @returns {Promise<{balances: Array<import('../nordigen-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types.js').Transaction>, pending: Array<import('../nordigen-node.types').Transaction>}, startingBalance: number}>}
    */
   getTransactionsWithBalance: async (requisitionId, accountId, startDate, endDate) => {
     const { institution_id, accounts: accountIds } = await nordigenService.getLinkedRequisition(requisitionId);
@@ -184,7 +184,7 @@ export const nordigenService = {
 
   /**
    *
-   * @param {import('../nordigen.types').CreateRequisitionParams} params
+   * @param {import('../nordigen.types.js').CreateRequisitionParams} params
    * @throws {InvalidInputDataError}
    * @throws {InvalidNordigenTokenError}
    * @throws {AccessDeniedError}
@@ -248,7 +248,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns { Promise<import('../nordigen-node.types').Requisition> }
+   * @returns { Promise<import('../nordigen-node.types.js').Requisition> }
    */
   getRequisition: async (requisitionId) => {
     await nordigenService.setToken();
@@ -263,7 +263,7 @@ export const nordigenService = {
   /**
    * Retrieve an detailed account by account id
    * @param accountId
-   * @returns {Promise<import('../nordigen.types').DetailedAccount>}
+   * @returns {Promise<import('../nordigen.types.js').DetailedAccount>}
    */
   getDetailedAccount: async (accountId) => {
     const [detailedAccount, metadataAccount] = await Promise.all([
@@ -291,7 +291,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<import('../nordigen-node.types').Institution>}
+   * @returns {Promise<import('../nordigen-node.types.js').Institution>}
    */
   getInstitution: async (institutionId) => {
     const response = await nordigenClient.institution.getInstitutionById(institutionId);
@@ -303,8 +303,8 @@ export const nordigenService = {
 
   /**
    * Extends provided accounts about details of their institution
-   * @param {{accounts: Array<import('../nordigen.types').DetailedAccount>, institutions: Array<import('../nordigen-node.types').Institution>}} params
-   * @returns {Promise<Array<import('../nordigen.types').DetailedAccount&{institution: import('../nordigen-node.types').Institution}>>}
+   * @param {{accounts: Array<import('../nordigen.types.js').DetailedAccount>, institutions: Array<import('../nordigen-node.types.js').Institution>}} params
+   * @returns {Promise<Array<import('../nordigen.types.js').DetailedAccount&{institution: import('../nordigen-node.types').Institution}>>}
    */
   extendAccountsAboutInstitutions: async ({ accounts, institutions }) => {
     const institutionsById = institutions.reduce((acc, institution) => {
@@ -323,7 +323,7 @@ export const nordigenService = {
 
   /**
    * Returns account transaction in provided dates
-   * @param {import('../nordigen.types').GetTransactionsParams} params
+   * @param {import('../nordigen.types.js').GetTransactionsParams} params
    * @throws {InvalidInputDataError}
    * @throws {InvalidNordigenTokenError}
    * @throws {AccessDeniedError}
@@ -332,7 +332,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<import('../nordigen.types').GetTransactionsResponse>}
+   * @returns {Promise<import('../nordigen.types.js').GetTransactionsResponse>}
    */
   getTransactions: async ({ accountId, startDate, endDate }) => {
     const response = await nordigenClient.account(accountId).getTransactions({ dateFrom: startDate, dateTo: endDate });
@@ -353,7 +353,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<import('../nordigen.types').GetBalances>}
+   * @returns {Promise<import('../nordigen.types.js').GetBalances>}
    */
   getBalances: async (accountId) => {
     const response = await nordigenClient.account(accountId).getBalances();

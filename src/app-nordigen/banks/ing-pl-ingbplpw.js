@@ -1,6 +1,6 @@
 import { printIban, amountToInteger } from '../utils.js';
 
-/** @type {import('./bank.interface').IBank} */
+/** @type {import('./bank.interface.js').IBank} */
 export default {
   institutionId: 'ING_PL_INGBPLPW',
 

@@ -1,5 +1,5 @@
-import IntegrationBank from '../integration-bank';
-import { mockExtendAccountsAboutInstitutions, mockInstitution } from '../../services/tests/fixtures';
+import IntegrationBank from '../integration-bank.js';
+import { mockExtendAccountsAboutInstitutions, mockInstitution } from '../../services/tests/fixtures.js';
 
 describe('IntegrationBank', () => {
   let consoleSpy;
@@ -65,14 +65,14 @@ describe('IntegrationBank', () => {
   });
 
   describe('calculateStartingBalance', () => {
-    /** @type {import('../../nordigen-node.types').Transaction[]} */
+    /** @type {import('../../nordigen-node.types.js').Transaction[]} */
     const transactions = [
       { bookingDate: '2022-01-01', transactionAmount: { amount: '100', currency: 'EUR' } },
       { bookingDate: '2022-02-01', transactionAmount: { amount: '100', currency: 'EUR' } },
       { bookingDate: '2022-03-01', transactionAmount: { amount: '100', currency: 'EUR' } }
     ];
 
-    /** @type {import('../../nordigen-node.types').Balance[]} */
+    /** @type {import('../../nordigen-node.types.js').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'EUR' },

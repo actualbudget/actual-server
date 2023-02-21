@@ -7,7 +7,7 @@ import config from './load-config.js';
 
 import * as accountApp from './app-account.js';
 import * as syncApp from './app-sync.js';
-import * as nordigenApp from './../app-nordigen/app-nordigen.js';
+import * as nordigenApp from './app-nordigen/app-nordigen.js';
 
 const app = express();
 

@@ -1,5 +1,5 @@
-import { DetailedAccountWithInstitution, NormalizedAccountDetails } from '../nordigen.types';
-import { Transaction, Balance } from '../nordigen-node.types';
+import { DetailedAccountWithInstitution, NormalizedAccountDetails } from '../nordigen.types.js';
+import { Transaction, Balance } from '../nordigen-node.types.js';
 
 export interface IBank {
   institutionId: string;

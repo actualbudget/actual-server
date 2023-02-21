@@ -1,4 +1,4 @@
-/** @type {import('./bank.interface').IBank} */
+/** @type {import('./bank.interface.js').IBank} */
 export default {
   institutionId: 'IntegrationBank',
   normalizeAccount(account) {

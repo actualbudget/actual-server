@@ -1,8 +1,8 @@
-import BankFactory from '../bank-factory';
-import MbankRetailBrexplpw from '../banks/mbank-retail-brexplpw';
-import SandboxfinanceSfin0000 from '../banks/sandboxfinance-sfin0000';
-import IngPlIngbplpw from '../banks/ing-pl-ingbplpw';
-import IntegrationBank from '../banks/integration-bank';
+import BankFactory from '../bank-factory.js';
+import MbankRetailBrexplpw from '../banks/mbank-retail-brexplpw.js';
+import SandboxfinanceSfin0000 from '../banks/sandboxfinance-sfin0000.js';
+import IngPlIngbplpw from '../banks/ing-pl-ingbplpw.js';
+import IntegrationBank from '../banks/integration-bank.js';
 
 describe('BankFactory', () => {
   it('should return MbankRetailBrexplpw when institutionId is mbank-retail-brexplpw', () => {

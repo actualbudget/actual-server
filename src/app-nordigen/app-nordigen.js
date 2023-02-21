@@ -3,7 +3,7 @@ import express from 'express';
 import { nordigenService } from './services/nordigen-service.js';
 import { RequisitionNotLinked, AccountNotLinedToRequisition, GenericNordigenError } from './errors.js';
 import { handleError } from './util/handle-error.js';
-import validateUser from '../src/util/validate-user.js';
+import validateUser from '../util/validate-user.js';
 
 const app = express();
 export { app as handlers };

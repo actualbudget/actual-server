@@ -1,4 +1,4 @@
-const { nordigenService, handleNordigenError } = require('../nordigen-service');
+const { nordigenService, handleNordigenError } = require('../nordigen-service.js');
 
 const {
   InvalidInputDataError,
@@ -11,7 +11,7 @@ const {
   ServiceError,
   RequisitionNotLinked,
   AccountNotLinedToRequisition
-} = require('../../errors');
+} = require('../../errors.js');
 const {
   mockedBalances,
   mockUnknownError,
@@ -27,7 +27,7 @@ const {
   mockDetailedAccountExample1,
   mockDetailedAccountExample2,
   mockExtendAccountsAboutInstitutions
-} = require('./fixtures');
+} = require('./fixtures.js');
 
 const InstitutionApi = require('../../nordigen-node/api/institutions').default;
 const RequisitionsApi = require('../../nordigen-node/api/requisition').default;
