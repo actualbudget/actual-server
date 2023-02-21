@@ -30,14 +30,8 @@ const {
 } = require('./fixtures.js');
 
 const NordigenClient = require('nordigen-node').default;
-const {
-  RequisitionsApi,
-  InstitutionApi
-} = require('nordigen-node/types/api/index.js');
-const {
-  nordigenService,
-  handleNordigenError
-} = require('../nordigen-service.js');
+const { RequisitionsApi, InstitutionApi } = require('nordigen-node/types/api/index.js');
+const { nordigenService, handleNordigenError } = require('../nordigen-service.js');
 
 describe('nordigenService', () => {
   const accountId = mockAccountMetaData.id;
@@ -54,18 +48,11 @@ describe('nordigenService', () => {
   let setTokenSpy;
 
   beforeEach(() => {
-    jest
-      .spyOn(InstitutionApi.prototype, 'getInstitutionById')
-      .mockImplementation(getInstitutionSpy);
-    jest
-      .spyOn(RequisitionsApi.prototype, 'getRequisitionById')
-      .mockImplementation(getRequisitionsSpy);
-    jest
-      .spyOn(RequisitionsApi.prototype, 'deleteRequisition')
-      .mockImplementation(deleteRequisitionsSpy);
-    jest
-      .spyOn(NordigenClient.prototype, 'initSession')
-      .mockImplementation(createRequisitionSpy);
+    jest.spyOn(InstitutionApi.prototype, 'getInstitutionById').mockImplementation(getInstitutionSpy);
+    jest.spyOn(RequisitionsApi.prototype, 'getRequisitionById').mockImplementation(getRequisitionsSpy);
+    jest.spyOn(RequisitionsApi.prototype, 'deleteRequisition').mockImplementation(deleteRequisitionsSpy);
+    jest.spyOn(NordigenClient.prototype, 'initSession').mockImplementation(createRequisitionSpy);
+    // @ts-ignore
     jest.spyOn(NordigenClient.prototype, 'account').mockReturnValue({
       getBalances: getBalancesSpy,
       getTransactions: getTransactionsSpy,
@@ -83,58 +70,38 @@ describe('nordigenService', () => {
     it('returns requisition', async () => {
       setTokenSpy.mockResolvedValue();
 
-      jest
-        .spyOn(nordigenService, 'getRequisition')
-        .mockResolvedValue(mockRequisition);
+      jest.spyOn(nordigenService, 'getRequisition').mockResolvedValue(mockRequisition);
 
-      expect(await nordigenService.getLinkedRequisition(requisitionId)).toEqual(
-        mockRequisition
-      );
+      expect(await nordigenService.getLinkedRequisition(requisitionId)).toEqual(mockRequisition);
     });
 
     it('throws RequisitionNotLinked error if requisition status is different than LN', async () => {
       setTokenSpy.mockResolvedValue();
 
-      jest
-        .spyOn(nordigenService, 'getRequisition')
-        .mockResolvedValue({ ...mockRequisition, status: 'ER' });
+      jest.spyOn(nordigenService, 'getRequisition').mockResolvedValue({ ...mockRequisition, status: 'ER' });
 
-      await expect(() =>
-        nordigenService.getLinkedRequisition(requisitionId)
-      ).rejects.toThrow(RequisitionNotLinked);
+      await expect(() => nordigenService.getLinkedRequisition(requisitionId)).rejects.toThrow(RequisitionNotLinked);
     });
   });
 
   describe('#getRequisitionWithAccounts', () => {
     it('returns combined data', async () => {
-      jest
-        .spyOn(nordigenService, 'getRequisition')
-        .mockResolvedValue(mockRequisitionWithExampleAccounts);
-      jest
-        .spyOn(nordigenService, 'getDetailedAccount')
-        .mockResolvedValueOnce(mockDetailedAccountExample1);
-      jest
-        .spyOn(nordigenService, 'getDetailedAccount')
-        .mockResolvedValueOnce(mockDetailedAccountExample2);
-      jest
-        .spyOn(nordigenService, 'getInstitution')
-        .mockResolvedValue(mockInstitution);
-      jest
-        .spyOn(nordigenService, 'extendAccountsAboutInstitutions')
-        .mockResolvedValue([
-          {
-            ...mockExtendAccountsAboutInstitutions[0],
-            institution_id: 'NEWONE'
-          },
-          {
-            ...mockExtendAccountsAboutInstitutions[1],
-            institution_id: 'NEWONE'
-          }
-        ]);
+      jest.spyOn(nordigenService, 'getRequisition').mockResolvedValue(mockRequisitionWithExampleAccounts);
+      jest.spyOn(nordigenService, 'getDetailedAccount').mockResolvedValueOnce(mockDetailedAccountExample1);
+      jest.spyOn(nordigenService, 'getDetailedAccount').mockResolvedValueOnce(mockDetailedAccountExample2);
+      jest.spyOn(nordigenService, 'getInstitution').mockResolvedValue(mockInstitution);
+      jest.spyOn(nordigenService, 'extendAccountsAboutInstitutions').mockResolvedValue([
+        {
+          ...mockExtendAccountsAboutInstitutions[0],
+          institution_id: 'NEWONE'
+        },
+        {
+          ...mockExtendAccountsAboutInstitutions[1],
+          institution_id: 'NEWONE'
+        }
+      ]);
 
-      const response = await nordigenService.getRequisitionWithAccounts(
-        mockRequisitionWithExampleAccounts.id
-      );
+      const response = await nordigenService.getRequisitionWithAccounts(mockRequisitionWithExampleAccounts.id);
 
       expect(response.accounts.length).toEqual(2);
       expect(response.accounts).toMatchObject(
@@ -158,24 +125,11 @@ describe('nordigenService', () => {
   describe('#getTransactionsWithBalance', () => {
     const requisitionId = mockRequisition.id;
     it('returns transaction with starting balance', async () => {
-      jest
-        .spyOn(nordigenService, 'getLinkedRequisition')
-        .mockResolvedValue(mockRequisition);
-      jest
-        .spyOn(nordigenService, 'getTransactions')
-        .mockResolvedValue(mockTransactions);
-      jest
-        .spyOn(nordigenService, 'getBalances')
-        .mockResolvedValue(mockedBalances);
+      jest.spyOn(nordigenService, 'getLinkedRequisition').mockResolvedValue(mockRequisition);
+      jest.spyOn(nordigenService, 'getTransactions').mockResolvedValue(mockTransactions);
+      jest.spyOn(nordigenService, 'getBalances').mockResolvedValue(mockedBalances);
 
-      expect(
-        await nordigenService.getTransactionsWithBalance(
-          requisitionId,
-          accountId,
-          undefined,
-          undefined
-        )
-      ).toEqual(
+      expect(await nordigenService.getTransactionsWithBalance(requisitionId, accountId, undefined, undefined)).toEqual(
         expect.objectContaining({
           balances: mockedBalances.balances,
           institutionId: mockRequisition.institution_id,
@@ -207,9 +161,7 @@ describe('nordigenService', () => {
     });
 
     it('throws AccountNotLinedToRequisition error if requisition accounts not includes requested account', async () => {
-      jest
-        .spyOn(nordigenService, 'getLinkedRequisition')
-        .mockResolvedValue(mockRequisition);
+      jest.spyOn(nordigenService, 'getLinkedRequisition').mockResolvedValue(mockRequisition);
 
       await expect(() =>
         nordigenService.getTransactionsWithBalance({
@@ -248,9 +200,7 @@ describe('nordigenService', () => {
 
       createRequisitionSpy.mockResolvedValue(mockUnknownError);
 
-      await expect(() =>
-        nordigenService.createRequisition(params)
-      ).rejects.toThrow(UnknownError);
+      await expect(() => nordigenService.createRequisition(params)).rejects.toThrow(UnknownError);
     });
   });
 
@@ -263,9 +213,7 @@ describe('nordigenService', () => {
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
       deleteRequisitionsSpy.mockResolvedValue(mockDeleteRequisition);
 
-      expect(await nordigenService.deleteRequisition(requisitionId)).toEqual(
-        mockDeleteRequisition
-      );
+      expect(await nordigenService.deleteRequisition(requisitionId)).toEqual(mockDeleteRequisition);
 
       expect(getRequisitionsSpy).toBeCalledTimes(1);
       expect(deleteRequisitionsSpy).toBeCalledTimes(1);
@@ -277,9 +225,7 @@ describe('nordigenService', () => {
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
       deleteRequisitionsSpy.mockResolvedValue(mockUnknownError);
 
-      await expect(() =>
-        nordigenService.deleteRequisition(requisitionId)
-      ).rejects.toThrow(UnknownError);
+      await expect(() => nordigenService.deleteRequisition(requisitionId)).rejects.toThrow(UnknownError);
     });
   });
 
@@ -290,9 +236,7 @@ describe('nordigenService', () => {
       setTokenSpy.mockResolvedValue();
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
 
-      expect(await nordigenService.getRequisition(requisitionId)).toEqual(
-        mockRequisition
-      );
+      expect(await nordigenService.getRequisition(requisitionId)).toEqual(mockRequisition);
 
       expect(setTokenSpy).toBeCalledTimes(1);
       expect(getRequisitionsSpy).toBeCalledTimes(1);
@@ -303,9 +247,7 @@ describe('nordigenService', () => {
 
       getRequisitionsSpy.mockResolvedValue(mockUnknownError);
 
-      await expect(() =>
-        nordigenService.getRequisition(requisitionId)
-      ).rejects.toThrow(UnknownError);
+      await expect(() => nordigenService.getRequisition(requisitionId)).rejects.toThrow(UnknownError);
     });
   });
 
@@ -326,9 +268,7 @@ describe('nordigenService', () => {
       getDetailsSpy.mockResolvedValue(mockUnknownError);
       getMetadataSpy.mockResolvedValue(mockAccountMetaData);
 
-      await expect(() =>
-        nordigenService.getDetailedAccount(accountId)
-      ).rejects.toThrow(UnknownError);
+      await expect(() => nordigenService.getDetailedAccount(accountId)).rejects.toThrow(UnknownError);
 
       expect(getDetailsSpy).toBeCalledTimes(1);
       expect(getMetadataSpy).toBeCalledTimes(1);
@@ -338,9 +278,7 @@ describe('nordigenService', () => {
       getDetailsSpy.mockResolvedValue(mockAccountDetails);
       getMetadataSpy.mockResolvedValue(mockUnknownError);
 
-      await expect(() =>
-        nordigenService.getDetailedAccount(accountId)
-      ).rejects.toThrow(UnknownError);
+      await expect(() => nordigenService.getDetailedAccount(accountId)).rejects.toThrow(UnknownError);
 
       expect(getDetailsSpy).toBeCalledTimes(1);
       expect(getMetadataSpy).toBeCalledTimes(1);
@@ -352,18 +290,14 @@ describe('nordigenService', () => {
     it('calls nordigenClient and fetch institution details', async () => {
       getInstitutionSpy.mockResolvedValue(mockInstitution);
 
-      expect(await nordigenService.getInstitution(institutionId)).toEqual(
-        mockInstitution
-      );
+      expect(await nordigenService.getInstitution(institutionId)).toEqual(mockInstitution);
       expect(getInstitutionSpy).toBeCalledTimes(1);
     });
 
     it('handle error if status_code present in the response', async () => {
       getInstitutionSpy.mockResolvedValue(mockUnknownError);
 
-      await expect(() =>
-        nordigenService.getInstitution(institutionId)
-      ).rejects.toThrow(UnknownError);
+      await expect(() => nordigenService.getInstitution(institutionId)).rejects.toThrow(UnknownError);
     });
   });
 
@@ -512,18 +446,14 @@ describe('nordigenService', () => {
     it('calls nordigenClient and fetch balances for provided accountId', async () => {
       getBalancesSpy.mockResolvedValue(mockedBalances);
 
-      expect(await nordigenService.getBalances(accountId)).toEqual(
-        mockedBalances
-      );
+      expect(await nordigenService.getBalances(accountId)).toEqual(mockedBalances);
       expect(getBalancesSpy).toBeCalledTimes(1);
     });
 
     it('handle error if status_code present in the response', async () => {
       getBalancesSpy.mockResolvedValue(mockUnknownError);
 
-      await expect(() =>
-        nordigenService.getBalances(accountId)
-      ).rejects.toThrow(UnknownError);
+      await expect(() => nordigenService.getBalances(accountId)).rejects.toThrow(UnknownError);
     });
   });
 });
@@ -536,9 +466,7 @@ describe('#handleNordigenError', () => {
 
   it('throws InvalidNordigenTokenError for status code 401', () => {
     const response = { status_code: 401 };
-    expect(() => handleNordigenError(response)).toThrow(
-      InvalidNordigenTokenError
-    );
+    expect(() => handleNordigenError(response)).toThrow(InvalidNordigenTokenError);
   });
 
   it('throws AccessDeniedError for status code 403', () => {
