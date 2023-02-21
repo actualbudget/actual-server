@@ -1,4 +1,4 @@
-const { nordigenService, handleNordigenError } = require('../nordigen-service.js');
+// import { nordigenService, handleNordigenError } from '../nordigen-service.js';
 
 const {
   InvalidInputDataError,
@@ -29,9 +29,9 @@ const {
   mockExtendAccountsAboutInstitutions
 } = require('./fixtures.js');
 
-const InstitutionApi = require('../../nordigen-node/api/institutions').default;
-const RequisitionsApi = require('../../nordigen-node/api/requisition').default;
-const NordigenClient = require('../../nordigen-node/index').default;
+const NordigenClient = require('nordigen-node').default;
+const { RequisitionsApi, InstitutionApi } = require('nordigen-node/types/api/index.js');
+const { nordigenService, handleNordigenError } = require('../nordigen-service.js');
 
 describe('nordigenService', () => {
   const accountId = mockAccountMetaData.id;

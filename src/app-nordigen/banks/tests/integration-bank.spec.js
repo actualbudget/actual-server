@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import IntegrationBank from '../integration-bank.js';
 import { mockExtendAccountsAboutInstitutions, mockInstitution } from '../../services/tests/fixtures.js';
 
