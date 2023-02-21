@@ -1,4 +1,15 @@
-type RequisitionStatus = 'CR' | 'ID' | 'LN' | 'RJ' | 'ER' | 'SU' | 'EX' | 'GC' | 'UA' | 'GA' | 'SA';
+type RequisitionStatus =
+  | 'CR'
+  | 'ID'
+  | 'LN'
+  | 'RJ'
+  | 'ER'
+  | 'SU'
+  | 'EX'
+  | 'GC'
+  | 'UA'
+  | 'GA'
+  | 'SA';
 
 export type Requisition = {
   /**
@@ -195,7 +206,13 @@ export type NordigenAccountMetadata = {
    * READY: Account has been successfully processed
    * SUSPENDED: Account has been suspended (more than 10 consecutive failed attempts to access the account)
    */
-  status: 'DISCOVERED' | 'PROCESSING' | 'ERROR' | 'EXPIRED' | 'READY' | 'SUSPENDED';
+  status:
+    | 'DISCOVERED'
+    | 'PROCESSING'
+    | 'ERROR'
+    | 'EXPIRED'
+    | 'READY'
+    | 'SUSPENDED';
   /**
    * Name of the owner of the Nordigen account metadata
    */

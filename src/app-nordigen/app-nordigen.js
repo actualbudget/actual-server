@@ -1,7 +1,11 @@
 import express from 'express';
 
 import { nordigenService } from './services/nordigen-service.js';
-import { RequisitionNotLinked, AccountNotLinedToRequisition, GenericNordigenError } from './errors.js';
+import {
+  RequisitionNotLinked,
+  AccountNotLinedToRequisition,
+  GenericNordigenError
+} from './errors.js';
 import { handleError } from './util/handle-error.js';
 import validateUser from '../util/validate-user.js';
 
@@ -44,7 +48,8 @@ app.post(
     const { requisitionId } = req.body;
 
     try {
-      const { requisition, accounts } = await nordigenService.getRequisitionWithAccounts(requisitionId);
+      const { requisition, accounts } =
+        await nordigenService.getRequisitionWithAccounts(requisitionId);
 
       res.send({
         status: 'ok',
@@ -100,7 +105,12 @@ app.post(
         institutionId,
         startingBalance,
         transactions: { booked, pending }
-      } = await nordigenService.getTransactionsWithBalance(requisitionId, accountId, startDate, endDate);
+      } = await nordigenService.getTransactionsWithBalance(
+        requisitionId,
+        accountId,
+        startDate,
+        endDate
+      );
 
       res.send({
         status: 'ok',
@@ -115,7 +125,8 @@ app.post(
         }
       });
     } catch (error) {
-      const sendErrorResponse = (data) => res.send({ status: 'ok', data: { ...data, details: error.details } });
+      const sendErrorResponse = (data) =>
+        res.send({ status: 'ok', data: { ...data, details: error.details } });
 
       switch (true) {
         case error instanceof RequisitionNotLinked:

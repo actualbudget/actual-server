@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
 import IntegrationBank from '../integration-bank.js';
-import { mockExtendAccountsAboutInstitutions, mockInstitution } from '../../services/tests/fixtures.js';
+import {
+  mockExtendAccountsAboutInstitutions,
+  mockInstitution
+} from '../../services/tests/fixtures.js';
 
 describe('IntegrationBank', () => {
   let consoleSpy;
@@ -25,7 +28,10 @@ describe('IntegrationBank', () => {
     });
 
     it('should return a normalized account object with masked value "0000" when no iban property is provided', () => {
-      const normalizedAccount = IntegrationBank.normalizeAccount({ ...account, iban: undefined });
+      const normalizedAccount = IntegrationBank.normalizeAccount({
+        ...account,
+        iban: undefined
+      });
       expect(normalizedAccount).toEqual({
         account_id: account.id,
         institution: mockInstitution,
@@ -38,17 +44,29 @@ describe('IntegrationBank', () => {
 
     it('normalizeAccount logs available account properties', () => {
       IntegrationBank.normalizeAccount(account);
-      expect(consoleSpy).toHaveBeenCalledWith('Available account properties for new institution integration', {
-        account: JSON.stringify(account)
-      });
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Available account properties for new institution integration',
+        {
+          account: JSON.stringify(account)
+        }
+      );
     });
   });
 
   describe('sortTransactions', () => {
     const transactions = [
-      { date: '2022-01-01', transactionAmount: { amount: '100', currency: 'EUR' } },
-      { date: '2022-01-02', transactionAmount: { amount: '100', currency: 'EUR' } },
-      { date: '2022-01-03', transactionAmount: { amount: '100', currency: 'EUR' } }
+      {
+        date: '2022-01-01',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      },
+      {
+        date: '2022-01-02',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      },
+      {
+        date: '2022-01-03',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      }
     ];
 
     it('should return the same array of transactions that was passed to it', () => {
@@ -68,9 +86,18 @@ describe('IntegrationBank', () => {
   describe('calculateStartingBalance', () => {
     /** @type {import('../../nordigen-node.types.js').Transaction[]} */
     const transactions = [
-      { bookingDate: '2022-01-01', transactionAmount: { amount: '100', currency: 'EUR' } },
-      { bookingDate: '2022-02-01', transactionAmount: { amount: '100', currency: 'EUR' } },
-      { bookingDate: '2022-03-01', transactionAmount: { amount: '100', currency: 'EUR' } }
+      {
+        bookingDate: '2022-01-01',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      },
+      {
+        bookingDate: '2022-02-01',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      },
+      {
+        bookingDate: '2022-03-01',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      }
     ];
 
     /** @type {import('../../nordigen-node.types.js').Balance[]} */
@@ -87,7 +114,10 @@ describe('IntegrationBank', () => {
     });
 
     it('should return 0 when transactions and balances are provided', () => {
-      const startingBalance = IntegrationBank.calculateStartingBalance(transactions, balances);
+      const startingBalance = IntegrationBank.calculateStartingBalance(
+        transactions,
+        balances
+      );
       expect(startingBalance).toEqual(0);
     });
 

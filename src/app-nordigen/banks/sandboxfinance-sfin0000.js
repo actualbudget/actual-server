@@ -33,7 +33,9 @@ export default {
    *  it includes transaction placed during current day
    */
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    const currentBalance = balances.find((balance) => 'interimAvailable' === balance.balanceType);
+    const currentBalance = balances.find(
+      (balance) => 'interimAvailable' === balance.balanceType
+    );
 
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);

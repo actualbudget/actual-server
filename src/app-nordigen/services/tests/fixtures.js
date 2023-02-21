@@ -127,7 +127,8 @@ export const mockRequisition = {
 
 export const mockDeleteRequisition = {
   summary: 'Requisition deleted',
-  detail: "Requisition '$REQUISITION_ID' deleted with all its End User Agreements"
+  detail:
+    "Requisition '$REQUISITION_ID' deleted with all its End User Agreements"
 };
 
 export const mockCreateRequisition = {

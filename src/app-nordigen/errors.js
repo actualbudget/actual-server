@@ -55,13 +55,19 @@ export class NotFoundError extends NordigenClientError {
 
 export class ResourceSuspended extends NordigenClientError {
   constructor(response) {
-    super('Resource was suspended due to numerous errors that occurred while accessing it', response);
+    super(
+      'Resource was suspended due to numerous errors that occurred while accessing it',
+      response
+    );
   }
 }
 
 export class RateLimitError extends NordigenClientError {
   constructor(response) {
-    super('Daily request limit set by the Institution has been exceeded', response);
+    super(
+      'Daily request limit set by the Institution has been exceeded',
+      response
+    );
   }
 }
 

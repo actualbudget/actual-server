@@ -31,7 +31,8 @@ describe('SandboxfinanceSfin0000', () => {
     };
 
     it('returns normalized account data returned to Frontend', () => {
-      expect(SandboxfinanceSfin0000.normalizeAccount(accountRaw)).toMatchInlineSnapshot(`
+      expect(SandboxfinanceSfin0000.normalizeAccount(accountRaw))
+        .toMatchInlineSnapshot(`
           {
             "account_id": "99a0bfe2-0bef-46df-bff2-e9ae0c6c5838",
             "institution": {
@@ -58,30 +59,63 @@ describe('SandboxfinanceSfin0000', () => {
   describe('#sortTransactions', () => {
     it('sorts transactions by time and sequence from newest to oldest', () => {
       const transactions = [
-        { transactionId: '2023012301927902-2', transactionAmount: mockTransactionAmount },
-        { transactionId: '2023012301927902-1', transactionAmount: mockTransactionAmount },
-        { transactionId: '2023012301927900-2', transactionAmount: mockTransactionAmount },
-        { transactionId: '2023012301927900-1', transactionAmount: mockTransactionAmount },
-        { transactionId: '2023012301927900-3', transactionAmount: mockTransactionAmount }
+        {
+          transactionId: '2023012301927902-2',
+          transactionAmount: mockTransactionAmount
+        },
+        {
+          transactionId: '2023012301927902-1',
+          transactionAmount: mockTransactionAmount
+        },
+        {
+          transactionId: '2023012301927900-2',
+          transactionAmount: mockTransactionAmount
+        },
+        {
+          transactionId: '2023012301927900-1',
+          transactionAmount: mockTransactionAmount
+        },
+        {
+          transactionId: '2023012301927900-3',
+          transactionAmount: mockTransactionAmount
+        }
       ];
-      const sortedTransactions = SandboxfinanceSfin0000.sortTransactions(transactions);
+      const sortedTransactions =
+        SandboxfinanceSfin0000.sortTransactions(transactions);
       expect(sortedTransactions).toEqual([
-        { transactionId: '2023012301927902-2', transactionAmount: mockTransactionAmount },
-        { transactionId: '2023012301927902-1', transactionAmount: mockTransactionAmount },
-        { transactionId: '2023012301927900-3', transactionAmount: mockTransactionAmount },
-        { transactionId: '2023012301927900-2', transactionAmount: mockTransactionAmount },
-        { transactionId: '2023012301927900-1', transactionAmount: mockTransactionAmount }
+        {
+          transactionId: '2023012301927902-2',
+          transactionAmount: mockTransactionAmount
+        },
+        {
+          transactionId: '2023012301927902-1',
+          transactionAmount: mockTransactionAmount
+        },
+        {
+          transactionId: '2023012301927900-3',
+          transactionAmount: mockTransactionAmount
+        },
+        {
+          transactionId: '2023012301927900-2',
+          transactionAmount: mockTransactionAmount
+        },
+        {
+          transactionId: '2023012301927900-1',
+          transactionAmount: mockTransactionAmount
+        }
       ]);
     });
 
     it('handles empty arrays', () => {
       const transactions = [];
-      const sortedTransactions = SandboxfinanceSfin0000.sortTransactions(transactions);
+      const sortedTransactions =
+        SandboxfinanceSfin0000.sortTransactions(transactions);
       expect(sortedTransactions).toEqual([]);
     });
 
     it('returns empty array for undefined input', () => {
-      const sortedTransactions = SandboxfinanceSfin0000.sortTransactions(undefined);
+      const sortedTransactions =
+        SandboxfinanceSfin0000.sortTransactions(undefined);
       expect(sortedTransactions).toEqual([]);
     });
   });
@@ -111,16 +145,10 @@ describe('SandboxfinanceSfin0000', () => {
         }
       ];
 
-      /** @type {import('../../nordigen-node.types.js').Balance[]} */
-      const mockBalances = [
-        ...balances,
-        {
-          balanceType: 'expected',
-          balanceAmount: { amount: '500.00', currency: 'USD' }
-        }
-      ];
-
-      const startingBalance = SandboxfinanceSfin0000.calculateStartingBalance(sortedTransactions, balances);
+      const startingBalance = SandboxfinanceSfin0000.calculateStartingBalance(
+        sortedTransactions,
+        balances
+      );
 
       expect(startingBalance).toEqual(107500);
     });
@@ -128,7 +156,9 @@ describe('SandboxfinanceSfin0000', () => {
     it('returns the same balance amount when no transactions', () => {
       const transactions = [];
 
-      expect(SandboxfinanceSfin0000.calculateStartingBalance(transactions, balances)).toEqual(100000);
+      expect(
+        SandboxfinanceSfin0000.calculateStartingBalance(transactions, balances)
+      ).toEqual(100000);
     });
 
     it('returns the balance minus the available transactions', () => {
@@ -142,7 +172,9 @@ describe('SandboxfinanceSfin0000', () => {
         }
       ];
 
-      expect(SandboxfinanceSfin0000.calculateStartingBalance(transactions, balances)).toEqual(49950);
+      expect(
+        SandboxfinanceSfin0000.calculateStartingBalance(transactions, balances)
+      ).toEqual(49950);
     });
   });
 });

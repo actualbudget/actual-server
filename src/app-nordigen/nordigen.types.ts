@@ -6,8 +6,11 @@ import {
   Balance
 } from './nordigen-node.types.js';
 
-export type DetailedAccount = Omit<NordigenAccountDetails, 'status'> & NordigenAccountMetadata;
-export type DetailedAccountWithInstitution = DetailedAccount & { institution: Institution };
+export type DetailedAccount = Omit<NordigenAccountDetails, 'status'> &
+  NordigenAccountMetadata;
+export type DetailedAccountWithInstitution = DetailedAccount & {
+  institution: Institution;
+};
 
 export type NormalizedAccountDetails = {
   /**

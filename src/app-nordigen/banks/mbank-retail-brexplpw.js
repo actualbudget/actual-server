@@ -16,7 +16,9 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    return transactions.sort((a, b) => Number(b.transactionId) - Number(a.transactionId));
+    return transactions.sort(
+      (a, b) => Number(b.transactionId) - Number(a.transactionId)
+    );
   },
 
   /**
@@ -28,7 +30,9 @@ export default {
    *  it includes transaction placed during current day
    */
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    const currentBalance = balances.find((balance) => 'interimBooked' === balance.balanceType);
+    const currentBalance = balances.find(
+      (balance) => 'interimBooked' === balance.balanceType
+    );
 
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);
