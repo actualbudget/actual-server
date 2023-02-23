@@ -253,7 +253,7 @@ export type Institution = {
    */
   logo: string;
 
-  supported_payments?: any;
+  supported_payments?: object;
   supported_features?: string[];
 };
 
@@ -376,7 +376,7 @@ export type Transaction = {
   /**
    * Array of report exchange rates
    */
-  currencyExchange?: any[];
+  currencyExchange?: string[];
 
   /**
    * Account reference, conditional
@@ -428,12 +428,12 @@ export type Transaction = {
   /**
    * Conditional
    */
-  purposeCode?: any;
+  purposeCode?: string;
 
   /**
    * Reference as contained in the structured remittance reference structure
    */
-  remittanceInformation?: any;
+  remittanceInformation?: string;
 
   /**
    * The amount of the transaction as billed to the account
