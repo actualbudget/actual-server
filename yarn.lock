@@ -2322,7 +2322,7 @@ __metadata:
     express-actuator: 1.8.4
     express-response-size: ^0.0.3
     jest: ^29.3.1
-    nordigen-node: ^1.2.1
+    nordigen-node: ^1.2.3
     prettier: ^2.8.3
     typescript: ^4.9.5
     uuid: ^9.0.0
@@ -5555,13 +5555,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nordigen-node@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "nordigen-node@npm:1.2.1"
+"nordigen-node@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "nordigen-node@npm:1.2.3"
   dependencies:
     axios: ^1.2.1
     dotenv: ^10.0.0
-  checksum: 4f6d14dd67057baef94d8f170af4d1a79f26e7ab1dfab7f54f1d8306b1ed5d8b1b1236a8f683f0b3d072517d0ad6fe399a9d75169154ef5cc3ca4f92a5ea9001
+  checksum: 721b1b87e750ddde72e97de6b77791da71b0f7206397b485ceb8c271121d26d0e76613b95896b762f9b88eb32fd9cf83202c638a3aeade956910c6971639146b
   languageName: node
   linkType: hard
 
