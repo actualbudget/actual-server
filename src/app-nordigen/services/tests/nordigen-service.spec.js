@@ -1,6 +1,5 @@
-// import { nordigenService, handleNordigenError } from '../nordigen-service.js';
-
-const {
+import { jest } from '@jest/globals';
+import {
   InvalidInputDataError,
   InvalidNordigenTokenError,
   AccessDeniedError,
@@ -11,8 +10,9 @@ const {
   ServiceError,
   RequisitionNotLinked,
   AccountNotLinedToRequisition
-} = require('../../errors.js');
-const {
+} from '../../errors.js';
+
+import {
   mockedBalances,
   mockUnknownError,
   mockTransactions,
@@ -27,56 +27,37 @@ const {
   mockDetailedAccountExample1,
   mockDetailedAccountExample2,
   mockExtendAccountsAboutInstitutions
-} = require('./fixtures.js');
+} from './fixtures.js';
 
-const NordigenClient = require('nordigen-node').default;
-const {
-  RequisitionsApi,
-  InstitutionApi
-} = require('nordigen-node/types/api/index.js');
-const {
+import {
   nordigenService,
-  handleNordigenError
-} = require('../nordigen-service.js');
+  handleNordigenError,
+  client
+} from '../nordigen-service.js';
 
 describe('nordigenService', () => {
   const accountId = mockAccountMetaData.id;
   const requisitionId = mockRequisition.id;
 
-  const getBalancesSpy = jest.fn();
-  const getTransactionsSpy = jest.fn();
-  const getDetailsSpy = jest.fn();
-  const getMetadataSpy = jest.fn();
-  const getInstitutionSpy = jest.fn();
-  const getRequisitionsSpy = jest.fn();
-  const deleteRequisitionsSpy = jest.fn();
-  const createRequisitionSpy = jest.fn();
+  let getBalancesSpy;
+  let getTransactionsSpy;
+  let getDetailsSpy;
+  let getMetadataSpy;
+  let getInstitutionSpy;
+  let getRequisitionsSpy;
+  let deleteRequisitionsSpy;
+  let createRequisitionSpy;
   let setTokenSpy;
 
   beforeEach(() => {
-    jest
-      .spyOn(InstitutionApi.prototype, 'getInstitutionById')
-      .mockImplementation(getInstitutionSpy);
-    jest
-      .spyOn(RequisitionsApi.prototype, 'getRequisitionById')
-      .mockImplementation(getRequisitionsSpy);
-    jest
-      .spyOn(RequisitionsApi.prototype, 'deleteRequisition')
-      .mockImplementation(deleteRequisitionsSpy);
-    jest
-      .spyOn(NordigenClient.prototype, 'initSession')
-      .mockImplementation(createRequisitionSpy);
-    jest.spyOn(NordigenClient.prototype, 'account').mockReturnValue({
-      getBalances: getBalancesSpy,
-      getTransactions: getTransactionsSpy,
-      getDetails: getDetailsSpy,
-      getMetadata: getMetadataSpy,
-      getPremiumDetails: jest.fn(),
-      getPremiumTransactions: jest.fn(),
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      '#private': undefined
-    });
+    getInstitutionSpy = jest.spyOn(client, 'getInstitutionById');
+    getRequisitionsSpy = jest.spyOn(client, 'getRequisitionById');
+    deleteRequisitionsSpy = jest.spyOn(client, 'deleteRequisition');
+    createRequisitionSpy = jest.spyOn(client, 'initSession');
+    getBalancesSpy = jest.spyOn(client, 'getBalances');
+    getTransactionsSpy = jest.spyOn(client, 'getTransactions');
+    getDetailsSpy = jest.spyOn(client, 'getDetails');
+    getMetadataSpy = jest.spyOn(client, 'getMetadata');
     setTokenSpy = jest.spyOn(nordigenService, 'setToken');
   });
 
@@ -280,7 +261,7 @@ describe('nordigenService', () => {
       setTokenSpy.mockResolvedValue();
 
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
-      deleteRequisitionsSpy.mockResolvedValue(mockUnknownError);
+      deleteRequisitionsSpy.mockReturnValue(mockUnknownError);
 
       await expect(() =>
         nordigenService.deleteRequisition(requisitionId)
@@ -306,7 +287,7 @@ describe('nordigenService', () => {
     it('handle error if status_code present in the response', async () => {
       setTokenSpy.mockResolvedValue();
 
-      getRequisitionsSpy.mockResolvedValue(mockUnknownError);
+      getRequisitionsSpy.mockReturnValue(mockUnknownError);
 
       await expect(() =>
         nordigenService.getRequisition(requisitionId)
