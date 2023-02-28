@@ -1,3 +1,5 @@
+import { sortByBookingDate } from '../utils.js';
+
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   institutionId: 'IntegrationBank',
@@ -21,7 +23,7 @@ export default {
       'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
       { top10Transactions: JSON.stringify(transactions.slice(0, 10)) }
     );
-    return transactions;
+    return sortByBookingDate(transactions);
   },
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     console.log(

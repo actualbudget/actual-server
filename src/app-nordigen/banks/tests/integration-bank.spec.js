@@ -57,28 +57,48 @@ describe('IntegrationBank', () => {
     const transactions = [
       {
         date: '2022-01-01',
-        transactionAmount: { amount: '100', currency: 'EUR' }
-      },
-      {
-        date: '2022-01-02',
+        bookingDate: '2022-01-01',
         transactionAmount: { amount: '100', currency: 'EUR' }
       },
       {
         date: '2022-01-03',
+        bookingDate: '2022-01-03',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      },
+      {
+        date: '2022-01-02',
+        bookingDate: '2022-01-02',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      }
+    ];
+    const sortedTransactions = [
+      {
+        date: '2022-01-03',
+        bookingDate: '2022-01-03',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      },
+      {
+        date: '2022-01-02',
+        bookingDate: '2022-01-02',
+        transactionAmount: { amount: '100', currency: 'EUR' }
+      },
+      {
+        date: '2022-01-01',
+        bookingDate: '2022-01-01',
         transactionAmount: { amount: '100', currency: 'EUR' }
       }
     ];
 
-    it('should return the same array of transactions that was passed to it', () => {
+    it('should return transactions sorted by bookingDate', () => {
       const sortedTransactions = IntegrationBank.sortTransactions(transactions);
-      expect(sortedTransactions).toEqual(transactions);
+      expect(sortedTransactions).toEqual(sortedTransactions);
     });
 
     it('sortTransactions logs available transactions properties', () => {
       IntegrationBank.sortTransactions(transactions);
       expect(consoleSpy).toHaveBeenCalledWith(
         'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-        { top10Transactions: JSON.stringify(transactions.slice(0, 10)) }
+        { top10Transactions: JSON.stringify(sortedTransactions.slice(0, 10)) }
       );
     });
   });

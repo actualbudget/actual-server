@@ -14,6 +14,7 @@ import {
 import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
 import config from '../../load-config.js';
+import { sortByBookingDate } from '../utils.js';
 
 const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
