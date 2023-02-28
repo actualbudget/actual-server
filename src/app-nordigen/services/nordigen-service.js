@@ -390,6 +390,11 @@ export const nordigenService = {
   }
 };
 
+/**
+ * All executions of nordigenClient should be here for testing purposes,
+ * as the nordigen-node library is not written in a way that is conducive to testing.
+ * In that way we can mock the `client` const instead of nordigen library
+ */
 export const client = {
   getBalances: async (accountId) =>
     await nordigenClient.account(accountId).getBalances(),
