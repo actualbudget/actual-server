@@ -23,4 +23,5 @@ ADD package.json app.js ./
 ADD src ./src
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 ENV ACTUAL_WEB_ROOT=/public
+EXPOSE 5006
 CMD ["node", "app.js"]
