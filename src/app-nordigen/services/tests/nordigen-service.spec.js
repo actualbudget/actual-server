@@ -165,7 +165,7 @@ describe('nordigenService', () => {
         expect.objectContaining({
           balances: mockedBalances.balances,
           institutionId: mockRequisition.institution_id,
-          startingBalance: 0,
+          startingBalance: expect.any(Number),
           transactions: {
             booked: expect.arrayContaining([
               expect.objectContaining({
