@@ -1,10 +1,9 @@
 FROM alpine as base
 RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
 WORKDIR /app
-ENV NODE_ENV=production
-ADD yarn.lock package.json ./
-RUN npm rebuild bcrypt --build-from-source
-RUN yarn install --production
+ADD .yarn ./.yarn
+ADD yarn.lock package.json .yarnrc.yml ./
+RUN yarn workspaces focus --all --production
 
 # Since we’re just using static files, use the Ubuntu image to build the frontend
 # (otherwise electron fails to build)
