@@ -7,7 +7,6 @@ RUN npm rebuild bcrypt --build-from-source
 RUN yarn install --production
 
 FROM node:16-bullseye as frontend
-RUN apt-get update && apt-get install -y openssl
 WORKDIR /frontend
 # Rebuild whenever there are new commits to the frontend
 ADD "https://api.github.com/repos/actualbudget/actual/commits" /tmp/actual-commit.json

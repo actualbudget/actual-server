@@ -6,8 +6,9 @@ ADD yarn.lock package.json ./
 RUN npm rebuild bcrypt --build-from-source
 RUN yarn install --production
 
-FROM alpine as frontend
-RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
+# Since we’re just using static files, use the Ubuntu image to build the frontend
+# (otherwise electron fails to build)
+FROM node:16-bullseye as frontend
 WORKDIR /frontend
 # Rebuild whenever there are new commits to the frontend
 ADD "https://api.github.com/repos/actualbudget/actual/commits" /tmp/actual-commit.json
