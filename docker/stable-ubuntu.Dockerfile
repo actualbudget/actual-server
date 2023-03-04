@@ -1,7 +1,6 @@
 FROM node:16-bullseye as base
 RUN apt-get update && apt-get install -y openssl
 WORKDIR /app
-ENV NODE_ENV=production
 ADD .yarn ./.yarn
 ADD yarn.lock package.json .yarnrc.yml ./
 RUN yarn workspaces focus --all --production
