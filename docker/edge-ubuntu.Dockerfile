@@ -15,7 +15,7 @@ RUN yarn install
 RUN ./bin/package-browser
 
 FROM node:16-bullseye-slim as prod
-RUN apt-get update && apt-get install openssl tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=base /app/node_modules /app/node_modules
 COPY --from=frontend /frontend/packages/desktop-client/build /public

@@ -6,7 +6,7 @@ ADD yarn.lock package.json .yarnrc.yml ./
 RUN yarn workspaces focus --all --production
 
 FROM alpine as prod
-RUN apk add --no-cache nodejs yarn openssl tini
+RUN apk add --no-cache nodejs tini
 WORKDIR /app
 COPY --from=base /app/node_modules /app/node_modules
 ADD package.json app.js ./

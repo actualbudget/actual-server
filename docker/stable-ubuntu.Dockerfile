@@ -7,7 +7,7 @@ ADD yarn.lock package.json .yarnrc.yml ./
 RUN yarn workspaces focus --all --production
 
 FROM node:16-bullseye-slim as prod
-RUN apt-get update && apt-get install openssl tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=base /app/node_modules /app/node_modules
 ADD package.json app.js ./

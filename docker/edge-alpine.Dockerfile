@@ -16,7 +16,7 @@ RUN yarn install
 RUN ./bin/package-browser
 
 FROM alpine as prod
-RUN apk add --no-cache nodejs yarn openssl tini
+RUN apk add --no-cache nodejs tini
 WORKDIR /app
 COPY --from=base /app/node_modules /app/node_modules
 COPY --from=frontend /frontend/packages/desktop-client/build /public
