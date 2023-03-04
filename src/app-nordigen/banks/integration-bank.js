@@ -1,4 +1,4 @@
-import { sortByBookingDate } from '../utils.js';
+import { sortByBookingDate, amountToInteger, printIban } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -13,7 +13,7 @@ export default {
       account_id: account.id,
       institution: account.institution,
       mask: (account?.iban || '0000').slice(-4),
-      name: `integration-${account.institution_id}`,
+      name: [account.name, printIban(account)].join(' '),
       official_name: `integration-${account.institution_id}`,
       type: 'checking'
     };
@@ -33,6 +33,12 @@ export default {
         top10SortedTransactions: JSON.stringify(sortedTransactions.slice(0, 10))
       }
     );
-    return 0;
+    const currentBalance = balances.find(
+      (balance) => 'expected' === balance.balanceType
+    );
+
+    return sortedTransactions.reduce((total, trans) => {
+      return total - amountToInteger(trans.transactionAmount.amount);
+    }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
   }
 };
