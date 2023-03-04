@@ -9,6 +9,8 @@ RUN yarn install --production
 FROM node:16-bullseye as frontend
 RUN apt-get update && apt-get install -y openssl
 WORKDIR /frontend
+# Rebuild whenever there are new commits to the frontend
+ADD "https://api.github.com/repos/actualbudget/actual/commits" /tmp/actual-commit.json
 RUN git clone --depth=1 https://github.com/actualbudget/actual /frontend
 RUN yarn install
 RUN ./bin/package-browser

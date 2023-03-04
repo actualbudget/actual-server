@@ -9,6 +9,8 @@ RUN yarn install --production
 FROM alpine as frontend
 RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
 WORKDIR /frontend
+# Rebuild whenever there are new commits to the frontend
+ADD "https://api.github.com/repos/actualbudget/actual/commits" /tmp/actual-commit.json
 RUN git clone --depth=1 https://github.com/actualbudget/actual /frontend
 RUN yarn install
 RUN ./bin/package-browser
