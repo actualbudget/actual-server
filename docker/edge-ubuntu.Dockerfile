@@ -17,9 +17,10 @@ RUN ./bin/package-browser
 FROM node:16-bullseye-slim as prod
 RUN apt-get update && apt-get install openssl tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY --from=base /app /app
+COPY --from=base /app/node_modules /app/node_modules
 COPY --from=frontend /frontend/packages/desktop-client/build /public
-ADD . .
+ADD package.json app.js ./
+ADD src ./src
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 ENV ACTUAL_WEB_ROOT=/public
 CMD ["node", "app.js"]
