@@ -33,10 +33,8 @@ export default {
         top10SortedTransactions: JSON.stringify(sortedTransactions.slice(0, 10))
       }
     );
-    const currentBalance = balances.find(
-      (balance) => 'expected' === balance.balanceType
-    );
 
+    const currentBalance = balances[0];
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);
     }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
