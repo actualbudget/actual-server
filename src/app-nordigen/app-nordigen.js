@@ -8,6 +8,7 @@ import {
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import validateUser from '../util/validate-user.js';
+import banks from './banks.js';
 
 const app = express();
 export { app as handlers };
@@ -68,6 +69,34 @@ app.post(
         throw error;
       }
     }
+  })
+);
+
+app.post(
+  '/get-banks',
+  handleError(async (req, res) => {
+    res.send({
+      status: 'ok',
+      // TODO: enable all banks
+      // data: banks
+      data: [
+        {
+          id: 'ING_PL_INGBPLPW',
+          name: 'ING PL',
+          country: ''
+        },
+        {
+          id: 'MBANK_RETAIL_BREXPLPW',
+          name: 'MBANK',
+          country: ''
+        },
+        {
+          id: 'SANDBOXFINANCE_SFIN0000',
+          name: 'DEMO - TEST',
+          country: ''
+        }
+      ]
+    });
   })
 );
 
