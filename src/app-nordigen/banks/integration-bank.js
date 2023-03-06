@@ -2,6 +2,7 @@ import { sortByBookingDate, amountToInteger, printIban } from '../utils.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
+  'expected',
   'forwardAvailable',
   'interimAvailable',
   'interimBooked',
