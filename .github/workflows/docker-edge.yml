@@ -8,6 +8,9 @@ on:
     paths-ignore:
       - README.md
       - LICENSE.txt
+  pull_request:
+    branches:
+      - master
   schedule:
     - cron: '0 0 * * *'
 
@@ -71,7 +74,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           file: docker/edge-ubuntu.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
@@ -82,7 +85,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           file: docker/edge-alpine.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.alpine-meta.outputs.tags }}
