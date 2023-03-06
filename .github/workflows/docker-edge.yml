@@ -11,6 +11,10 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   IMAGES: |
     jlongster/actual-server
@@ -71,6 +75,8 @@ jobs:
           file: docker/edge-ubuntu.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Alpine image
         uses: docker/build-push-action@v4
