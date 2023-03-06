@@ -1,5 +1,5 @@
 FROM alpine:3.17 as base
-RUN apk add --no-cache nodejs yarn npm python3 openssl build-base jq
+RUN apk add --no-cache nodejs yarn npm python3 openssl build-base jq curl
 WORKDIR /app
 ADD .yarn ./.yarn
 ADD yarn.lock package.json .yarnrc.yml ./
