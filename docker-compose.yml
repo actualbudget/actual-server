@@ -1,13 +1,13 @@
-version: "3"
+version: '3'
 services:
   actual_server:
-    container_name: actual_server
-    build:
-      context: ./
-      dockerfile: Dockerfile
+    image: jlongster/actual-server:latest
     ports:
-      - "5006:5006"
+      - 5006:5006
+    environment:
+      # Add or change configuration options here.
+      - ACTUAL_SERVER_FILES=/data/server-files
+      - ACTUAL_USER_FILES=/data/user-files
     volumes:
-      - ./server-files:/app/server-files
-      - ./user-files:/app/user-files
+      - ./server-data:/data
     restart: unless-stopped
