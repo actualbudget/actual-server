@@ -27,6 +27,7 @@ env:
   # - actual-server:edge
   TAGS: |
     type=edge,value=edge
+    type=sha
 
 jobs:
   build:
