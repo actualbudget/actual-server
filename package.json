@@ -1,5 +1,8 @@
 {
   "name": "actual-sync",
+  "engines": {
+    "node": ">=14 <19"
+  },
   "version": "23.2.9",
   "license": "MIT",
   "description": "actual syncing server",
