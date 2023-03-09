@@ -68,10 +68,13 @@ export default {
           ...(config.https || {}),
         }
       : config.https,
-  nordigen: {
-    secretId:
-      process.env.ACTUAL_NORDIGEN_SECRET_ID || config.nordigen?.secretId,
-    secretKey:
-      process.env.ACTUAL_NORDIGEN_SECRET_KEY || config.nordigen?.secretKey,
-  },
+  nordigen:
+    process.env.ACTUAL_NORDIGEN_SECRET_ID &&
+    process.env.ACTUAL_NORDIGEN_SECRET_KEY
+      ? {
+          secretId: process.env.ACTUAL_NORDIGEN_SECRET_ID,
+          secretKey: process.env.ACTUAL_NORDIGEN_SECRET_KEY,
+          ...(config.nordigen || {}),
+        }
+      : config.nordigen,
 };
