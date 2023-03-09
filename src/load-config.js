@@ -2,9 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const projectRoot = path.dirname(
-  path.dirname(fileURLToPath(import.meta.url))
-);
+const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+export const sqlDir = path.join(projectRoot, 'src', 'sql');
 let defaultDataDir = fs.existsSync('/data') ? '/data' : projectRoot;
 
 function parseJSON(path) {
@@ -26,7 +25,13 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 let defaultConfig = {
   port: 5006,
   hostname: '::',
-  webRoot: path.join(projectRoot, 'node_modules', '@actual-app', 'web', 'build')
+  webRoot: path.join(
+    projectRoot,
+    'node_modules',
+    '@actual-app',
+    'web',
+    'build',
+  ),
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -36,7 +41,7 @@ if (process.env.NODE_ENV === 'test') {
     mode: 'test',
     serverFiles: path.join(projectRoot, 'test-server-files'),
     userFiles: path.join(projectRoot, 'test-user-files'),
-    ...defaultConfig
+    ...defaultConfig,
   };
 } else {
   config = {
@@ -44,7 +49,7 @@ if (process.env.NODE_ENV === 'test') {
     ...defaultConfig,
     serverFiles: path.join(defaultDataDir, 'server-files'),
     userFiles: path.join(defaultDataDir, 'user-files'),
-    ...(userConfig || {})
+    ...(userConfig || {}),
   };
 }
 
@@ -60,7 +65,7 @@ export default {
       ? {
           key: process.env.ACTUAL_HTTPS_KEY.replace(/\\n/g, '\n'),
           cert: process.env.ACTUAL_HTTPS_CERT.replace(/\\n/g, '\n'),
-          ...(config.https || {})
+          ...(config.https || {}),
         }
-      : config.https
+      : config.https,
 };

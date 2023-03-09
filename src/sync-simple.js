@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import openDatabase from './db.js';
 import { getPathForGroupFile } from './util/paths.js';
 
-import { projectRoot } from './load-config.js';
+import { sqlDir } from './load-config.js';
 
 import actual from '@actual-app/api';
 let merkle = actual.internal.merkle;
@@ -17,7 +17,7 @@ function getGroupDb(groupId) {
   let db = openDatabase(path);
 
   if (needsInit) {
-    let sql = readFileSync(join(projectRoot, 'sql/messages.sql'), 'utf8');
+    let sql = readFileSync(join(sqlDir, 'messages.sql'), 'utf8');
     db.exec(sql);
   }
 
@@ -37,8 +37,8 @@ function addMessages(db, messages) {
           [
             msg.getTimestamp(),
             msg.getIsencrypted() ? 1 : 0,
-            Buffer.from(msg.getContent())
-          ]
+            Buffer.from(msg.getContent()),
+          ],
         );
 
         if (info.changes > 0) {
@@ -51,7 +51,7 @@ function addMessages(db, messages) {
 
     db.mutate(
       'INSERT INTO messages_merkles (id, merkle) VALUES (1, ?) ON CONFLICT (id) DO UPDATE SET merkle = ?',
-      [JSON.stringify(trie), JSON.stringify(trie)]
+      [JSON.stringify(trie), JSON.stringify(trie)],
     );
 
     returnValue = trie;
@@ -78,7 +78,7 @@ export function sync(messages, since, groupId) {
     `SELECT * FROM messages_binary
          WHERE timestamp > ?
          ORDER BY timestamp`,
-    [since]
+    [since],
   );
 
   let trie = addMessages(db, messages);
@@ -93,6 +93,6 @@ export function sync(messages, since, groupId) {
       envelopePb.setIsencrypted(msg.is_encrypted);
       envelopePb.setContent(msg.content);
       return envelopePb;
-    })
+    }),
   };
 }

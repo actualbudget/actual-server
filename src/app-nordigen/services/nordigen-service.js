@@ -9,17 +9,16 @@ import {
   ResourceSuspended,
   RateLimitError,
   UnknownError,
-  ServiceError
+  ServiceError,
 } from '../errors.js';
 import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
 import config from '../../load-config.js';
-import { sortByBookingDate } from '../utils.js';
 
 const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
   secretId: config.nordigen_secret_id,
-  secretKey: config.nordigen_secret_key
+  secretKey: config.nordigen_secret_key,
 });
 
 export const handleNordigenError = (response) => {
@@ -103,7 +102,7 @@ export const nordigenService = {
    */
   getRequisitionWithAccounts: async (requisitionId) => {
     const requisition = await nordigenService.getLinkedRequisition(
-      requisitionId
+      requisitionId,
     );
 
     let institutionIdSet = new Set();
@@ -112,19 +111,19 @@ export const nordigenService = {
         const account = await nordigenService.getDetailedAccount(accountId);
         institutionIdSet.add(account.institution_id);
         return account;
-      })
+      }),
     );
 
     const institutions = await Promise.all(
       Array.from(institutionIdSet).map(async (institutionId) => {
         return await nordigenService.getInstitution(institutionId);
-      })
+      }),
     );
 
     const extendedAccounts =
       await nordigenService.extendAccountsAboutInstitutions({
         accounts: detailedAccounts,
-        institutions
+        institutions,
       });
 
     const normalizedAccounts = extendedAccounts.map((account) => {
@@ -157,7 +156,7 @@ export const nordigenService = {
     requisitionId,
     accountId,
     startDate,
-    endDate
+    endDate,
   ) => {
     const { institution_id, accounts: accountIds } =
       await nordigenService.getLinkedRequisition(requisitionId);
@@ -170,22 +169,22 @@ export const nordigenService = {
       nordigenService.getTransactions({
         accountId,
         startDate,
-        endDate
+        endDate,
       }),
-      nordigenService.getBalances(accountId)
+      nordigenService.getBalances(accountId),
     ]);
 
     const bank = BankFactory(institution_id);
     const sortedBookedTransactions = bank.sortTransactions(
-      transactions.transactions?.booked
+      transactions.transactions?.booked,
     );
     const sortedPendingTransactions = bank.sortTransactions(
-      transactions.transactions?.pending
+      transactions.transactions?.pending,
     );
 
     const startingBalance = bank.calculateStartingBalance(
       sortedBookedTransactions,
-      accountBalance.balances
+      accountBalance.balances,
     );
 
     return {
@@ -194,8 +193,8 @@ export const nordigenService = {
       startingBalance,
       transactions: {
         booked: sortedBookedTransactions,
-        pending: sortedPendingTransactions
-      }
+        pending: sortedPendingTransactions,
+      },
     };
   },
 
@@ -224,7 +223,7 @@ export const nordigenService = {
       userLanguage: 'en',
       ssn: null,
       redirectImmediate: false,
-      accountSelection: false
+      accountSelection: false,
     });
 
     handleNordigenError(response);
@@ -233,7 +232,7 @@ export const nordigenService = {
 
     return {
       link,
-      requisitionId
+      requisitionId,
     };
   },
 
@@ -290,7 +289,7 @@ export const nordigenService = {
   getDetailedAccount: async (accountId) => {
     const [detailedAccount, metadataAccount] = await Promise.all([
       client.getDetails(accountId),
-      client.getMetadata(accountId)
+      client.getMetadata(accountId),
     ]);
 
     handleNordigenError(detailedAccount);
@@ -298,8 +297,29 @@ export const nordigenService = {
 
     return {
       ...detailedAccount.account,
-      ...metadataAccount
+      ...metadataAccount,
     };
+  },
+
+  /**
+   * Retrieve details about all Institutions in a specific country
+   * @param country
+   * @throws {InvalidInputDataError}
+   * @throws {InvalidNordigenTokenError}
+   * @throws {AccessDeniedError}
+   * @throws {NotFoundError}
+   * @throws {ResourceSuspended}
+   * @throws {RateLimitError}
+   * @throws {UnknownError}
+   * @throws {ServiceError}
+   * @returns {Promise<Array<import('../nordigen-node.types.js').Institution>>}
+   */
+  getInstitutions: async (country) => {
+    const response = await client.getInstitutions(country);
+
+    handleNordigenError(response);
+
+    return response;
   },
 
   /**
@@ -338,7 +358,7 @@ export const nordigenService = {
       const institution = institutionsById[account.institution_id] || null;
       return {
         ...account,
-        institution
+        institution,
       };
     });
   },
@@ -360,7 +380,7 @@ export const nordigenService = {
     const response = await client.getTransactions({
       accountId,
       dateFrom: startDate,
-      dateTo: endDate
+      dateTo: endDate,
     });
 
     handleNordigenError(response);
@@ -387,7 +407,7 @@ export const nordigenService = {
     handleNordigenError(response);
 
     return response;
-  }
+  },
 };
 
 /**
@@ -402,8 +422,10 @@ export const client = {
     await nordigenClient.account(accountId).getTransactions({
       dateFrom,
       dateTo,
-      country: undefined
+      country: undefined,
     }),
+  getInstitutions: async (country) =>
+    await nordigenClient.institution.getInstitutions({ country }),
   getInstitutionById: async (institutionId) =>
     await nordigenClient.institution.getInstitutionById(institutionId),
   getDetails: async (accountId) =>
@@ -423,7 +445,7 @@ export const client = {
     userLanguage,
     ssn,
     redirectImmediate,
-    accountSelection
+    accountSelection,
   }) =>
     await nordigenClient.initSession({
       redirectUrl,
@@ -434,7 +456,7 @@ export const client = {
       userLanguage,
       ssn,
       redirectImmediate,
-      accountSelection
+      accountSelection,
     }),
-  generateToken: async () => await nordigenClient.generateToken()
+  generateToken: async () => await nordigenClient.generateToken(),
 };
