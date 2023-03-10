@@ -61,34 +61,11 @@ export const nordigenService = {
       return clockTimestamp >= payload.exp;
     };
 
-    const accessToken = nordigenClient.token;
-    const refreshToken = process.env.NORDIGEN_REFRESH_TOKEN;
-    const accessTokenExpired = isExpiredJwtToken(accessToken);
-    const refreshTokenExpired = isExpiredJwtToken(refreshToken);
-
-    if (!accessTokenExpired) {
-      return;
-    }
-
-    if (!refreshTokenExpired) {
-      const newToken = await client.exchangeToken({
-        refreshToken: refreshToken,
-      });
-
-      nordigenClient.token = newToken.access;
-      process.env.NORDIGEN_REFRESH_TOKEN = undefined;
-    } else {
+    if (isExpiredJwtToken(nordigenClient.token)) {
       // Generate new access token. Token is valid for 24 hours
-      const tokenData = await client.generateToken();
-
-      console.log({ msg: 'Generated new token', tokenData });
-      // Get access and refresh token
       // Note: access_token is automatically injected to other requests after you successfully obtain it
-      const token = tokenData.access;
-      process.env.NORDIGEN_REFRESH_TOKEN = tokenData.refresh;
-
+      const tokenData = await client.generateToken();
       handleNordigenError(tokenData);
-      nordigenClient.token = token;
     }
   },
 
