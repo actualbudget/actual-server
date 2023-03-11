@@ -8,7 +8,6 @@ import {
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import validateUser from '../util/validate-user.js';
-import config from '../load-config.js';
 
 const app = express();
 app.get('/link', function (req, res) {
