@@ -8,8 +8,21 @@ import {
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import validateUser from '../util/validate-user.js';
+import config from '../load-config.js';
 
 const app = express();
+app.get('/link', function (req, res) {
+  res.send(`
+<script>window.close();</script>
+
+<p>Please wait...</p>
+<p>
+  The window should close automatically. If nothing happened you can
+  close this window or tab.
+</p>
+`);
+});
+
 export { app as handlers };
 app.use(express.json());
 app.use(async (req, res, next) => {
