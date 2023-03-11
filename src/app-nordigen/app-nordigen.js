@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 
 import { nordigenService } from './services/nordigen-service.js';
 import {
@@ -11,15 +12,7 @@ import validateUser from '../util/validate-user.js';
 
 const app = express();
 app.get('/link', function (req, res) {
-  res.send(`
-<script>window.close();</script>
-
-<p>Please wait...</p>
-<p>
-  The window should close automatically. If nothing happened you can
-  close this window or tab.
-</p>
-`);
+  res.sendFile('link.html', { root: path.resolve('./src/app-nordigen') });
 });
 
 export { app as handlers };
