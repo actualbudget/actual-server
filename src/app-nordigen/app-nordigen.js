@@ -138,6 +138,7 @@ app.post(
 
     try {
       const {
+        iban,
         balances,
         institutionId,
         startingBalance,
@@ -152,6 +153,7 @@ app.post(
       res.send({
         status: 'ok',
         data: {
+          iban,
           balances,
           institutionId,
           startingBalance,
