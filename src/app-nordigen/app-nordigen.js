@@ -8,6 +8,7 @@ import {
   GenericNordigenError,
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
+import { sha256String } from '../util/hash.js';
 import validateUser from '../util/validate-user.js';
 
 const app = express();
@@ -153,7 +154,7 @@ app.post(
       res.send({
         status: 'ok',
         data: {
-          iban,
+          iban: await sha256String(iban),
           balances,
           institutionId,
           startingBalance,
