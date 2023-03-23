@@ -70,7 +70,13 @@ app.post(
         status: 'ok',
         data: {
           ...requisition,
-          accounts,
+          accounts: await Promise.all(
+            accounts.map(async (account) =>
+              account?.iban
+                ? { ...account, iban: await sha256String(account.iban) }
+                : account,
+            ),
+          ),
         },
       });
     } catch (error) {
