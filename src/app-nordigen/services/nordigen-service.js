@@ -14,6 +14,7 @@ import {
 import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
 import config from '../../load-config.js';
+import { sha256String } from '../../util/hash.js';
 import jwt from 'jws';
 
 const NordigenClient = nordigenNode.default;
@@ -146,10 +147,18 @@ export const nordigenService = {
         institutions,
       });
 
-    const normalizedAccounts = extendedAccounts.map((account) => {
-      const bankAccount = BankFactory(account.institution_id);
-      return bankAccount.normalizeAccount(account);
-    });
+    const normalizedAccounts = await Promise.all(
+      extendedAccounts.map(async (account) => {
+        const bankAccount = BankFactory(
+          account.institution_id,
+        ).normalizeAccount(account);
+        return {
+          ...bankAccount,
+          iban: bankAccount.iban && (await sha256String(bankAccount.iban)),
+          mask: (bankAccount.iban || '0000').slice(-4),
+        };
+      }),
+    );
 
     return { requisition, accounts: normalizedAccounts };
   },
@@ -209,7 +218,7 @@ export const nordigenService = {
     );
 
     return {
-      iban: accountMetadata.iban,
+      iban: accountMetadata.iban && (await sha256String(accountMetadata.iban)),
       balances: accountBalance.balances,
       institutionId: institution_id,
       startingBalance,

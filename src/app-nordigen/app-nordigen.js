@@ -8,7 +8,6 @@ import {
   GenericNordigenError,
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
-import { sha256String } from '../util/hash.js';
 import validateUser from '../util/validate-user.js';
 
 const app = express();
@@ -70,13 +69,7 @@ app.post(
         status: 'ok',
         data: {
           ...requisition,
-          accounts: await Promise.all(
-            accounts.map(async (account) =>
-              account?.iban
-                ? { ...account, iban: await sha256String(account.iban) }
-                : account,
-            ),
-          ),
+          accounts,
         },
       });
     } catch (error) {
@@ -160,7 +153,7 @@ app.post(
       res.send({
         status: 'ok',
         data: {
-          iban: iban ? await sha256String(iban) : null,
+          iban: iban,
           balances,
           institutionId,
           startingBalance,

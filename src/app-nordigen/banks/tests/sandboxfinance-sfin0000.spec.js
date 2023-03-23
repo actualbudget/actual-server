@@ -48,7 +48,6 @@ describe('SandboxfinanceSfin0000', () => {
               "supported_payments": {},
               "transaction_total_days": "90",
             },
-            "mask": "4724",
             "name": "Main Account (XXX 4724)",
             "official_name": "Checkings",
             "type": "checking",

@@ -8,7 +8,6 @@ export default {
     return {
       account_id: account.id,
       institution: account.institution,
-      mask: account.iban.slice(-4),
       iban: account.iban,
       name: [account.product, printIban(account)].join(' ').trim(),
       official_name: account.product,

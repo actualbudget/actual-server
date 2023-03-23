@@ -20,7 +20,6 @@ describe('IntegrationBank', () => {
       expect(normalizedAccount).toEqual({
         account_id: account.id,
         institution: mockInstitution,
-        mask: '4321',
         iban: account.iban,
         name: 'account-example-one (XXX 4321) PLN',
         official_name: 'integration-SANDBOXFINANCE_SFIN0000',
@@ -36,7 +35,6 @@ describe('IntegrationBank', () => {
       expect(normalizedAccount).toEqual({
         account_id: account.id,
         institution: mockInstitution,
-        mask: '0000',
         iban: null,
         name: 'account-example-one PLN',
         official_name: 'integration-SANDBOXFINANCE_SFIN0000',

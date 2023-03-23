@@ -1,6 +1,6 @@
 import {
   DetailedAccountWithInstitution,
-  NormalizedAccountDetails,
+  NormalizedBankAccount,
 } from '../nordigen.types.js';
 import { Transaction, Balance } from '../nordigen-node.types.js';
 
@@ -11,7 +11,7 @@ export interface IBank {
    */
   normalizeAccount: (
     account: DetailedAccountWithInstitution,
-  ) => NormalizedAccountDetails;
+  ) => NormalizedBankAccount;
 
   /**
    * Function sorts an array of transactions from newest to oldest

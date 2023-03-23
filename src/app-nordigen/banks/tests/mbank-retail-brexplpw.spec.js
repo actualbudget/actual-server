@@ -64,7 +64,6 @@ describe('MbankRetailBrexplpw', () => {
                       "supported_payments": {},
                       "transaction_total_days": "90",
                     },
-                    "mask": "4321",
                     "name": "EKONTO (XXX 4321)",
                     "official_name": "RACHUNEK BIEŻĄCY",
                     "type": "checking",
