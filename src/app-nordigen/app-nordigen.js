@@ -160,7 +160,7 @@ app.post(
       res.send({
         status: 'ok',
         data: {
-          iban: await sha256String(iban),
+          iban: iban ? await sha256String(iban) : null,
           balances,
           institutionId,
           startingBalance,
