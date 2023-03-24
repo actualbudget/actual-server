@@ -29,7 +29,6 @@ import {
   mockExtendAccountsAboutInstitutions,
 } from './fixtures.js';
 
-import { sha256String } from '../../../util/hash.js';
 import {
   nordigenService,
   handleNordigenError,
@@ -132,15 +131,11 @@ describe('nordigenService', () => {
             account_id: mockDetailedAccountExample1.id,
             institution: mockInstitution,
             official_name: expect.stringContaining('integration-'), // It comes from IntegrationBank
-            mask: mockDetailedAccountExample1.iban.slice(-4),
-            iban: await sha256String(mockDetailedAccountExample1.iban),
           }),
           expect.objectContaining({
             account_id: mockDetailedAccountExample2.id,
             institution: mockInstitution,
             official_name: expect.stringContaining('integration-'), // It comes from IntegrationBank
-            mask: mockDetailedAccountExample2.iban.slice(-4),
-            iban: await sha256String(mockDetailedAccountExample2.iban),
           }),
         ]),
       );
@@ -173,7 +168,7 @@ describe('nordigenService', () => {
         ),
       ).toEqual(
         expect.objectContaining({
-          iban: await sha256String(mockAccountMetaData.iban),
+          iban: mockAccountMetaData.iban,
           balances: mockedBalances.balances,
           institutionId: mockRequisition.institution_id,
           startingBalance: expect.any(Number),

@@ -12,7 +12,7 @@ export type DetailedAccountWithInstitution = DetailedAccount & {
   institution: Institution;
 };
 
-export type NormalizedBankAccount = {
+export type NormalizedAccountDetails = {
   /**
    * Id of the account
    */
@@ -22,6 +22,11 @@ export type NormalizedBankAccount = {
    * Institution of account
    */
   institution: Institution;
+
+  /**
+   * last 4 digits from the account iban
+   */
+  mask: string;
 
   /**
    * the account iban
@@ -42,13 +47,6 @@ export type NormalizedBankAccount = {
    * type of account
    */
   type: string;
-};
-
-export type NormalizedAccountDetails = NormalizedBankAccount & {
-  /**
-   * last 4 digits from the account iban
-   */
-  mask: string;
 };
 
 export type GetTransactionsParams = {
