@@ -291,7 +291,7 @@ app.post('/upload-user-file', async (req, res) => {
   }
 });
 
-app.get('/download-user-file', async (req, res) => {
+app.get('/download-user-file', async (req, res, next) => {
   let user = validateUser(req, res);
   if (!user) {
     return;
@@ -313,17 +313,17 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
-  let buffer;
-  try {
-    buffer = await fs.readFile(getPathForUserFile(fileId));
-  } catch (e) {
-    console.log(`Error: file does not exist: ${getPathForUserFile(fileId)}`);
-    res.status(500).send('File does not exist on server');
-    return;
-  }
-
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
-  res.send(buffer);
+  res.sendFile(getPathForUserFile(fileId), function (err) {
+    if (err) {
+      if (err.status == 404) {
+        console.log('File does not exist on server.');
+        res.status(500).send('File does not exist on server.');
+      } else {
+        next(err);
+      }
+    }
+  });
 });
 
 app.post('/update-user-filename', (req, res) => {
