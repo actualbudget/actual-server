@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { Buffer } from 'node:buffer';
 import express from 'express';
-import { HttpError } from 'http-errors';
 import * as uuid from 'uuid';
 import validateUser from './util/validate-user.js';
 import errorMiddleware from './util/error-middleware.js';
@@ -292,7 +291,7 @@ app.post('/upload-user-file', async (req, res) => {
   }
 });
 
-app.get('/download-user-file', async (req, res, next) => {
+app.get('/download-user-file', async (req, res) => {
   let user = validateUser(req, res);
   if (!user) {
     return;
@@ -315,16 +314,7 @@ app.get('/download-user-file', async (req, res, next) => {
   }
 
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
-  res.sendFile(getPathForUserFile(fileId), function (err) {
-    if (err) {
-      if (err instanceof HttpError && err.status == 404) {
-        console.log('File does not exist on server.');
-        res.status(500).send('File does not exist on server.');
-      } else {
-        next(err);
-      }
-    }
-  });
+  res.sendFile(getPathForUserFile(fileId));
 });
 
 app.post('/update-user-filename', (req, res) => {
