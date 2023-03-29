@@ -14,11 +14,12 @@ import {
 import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
 import config from '../../load-config.js';
+import jwt from 'jws';
 
 const NordigenClient = nordigenNode.default;
 const nordigenClient = new NordigenClient({
-  secretId: config.nordigen_secret_id,
-  secretKey: config.nordigen_secret_key,
+  secretId: config.nordigen?.secretId,
+  secretKey: config.nordigen?.secretKey,
 });
 
 export const handleNordigenError = (response) => {
@@ -46,14 +47,33 @@ export const handleNordigenError = (response) => {
 
 export const nordigenService = {
   /**
+   * Check if the Nordigen service is configured to be used.
+   * @returns {boolean}
+   */
+  isConfigured: () => {
+    return !!(nordigenClient.secretId && nordigenClient.secretKey);
+  },
+
+  /**
    *
    * @returns {Promise<void>}
    */
   setToken: async () => {
-    if (!nordigenClient.token) {
+    const isExpiredJwtToken = (token) => {
+      const decodedToken = jwt.decode(token);
+      if (!decodedToken) {
+        return true;
+      }
+      const payload = decodedToken.payload;
+      const clockTimestamp = Math.floor(Date.now() / 1000);
+      return clockTimestamp >= payload.exp;
+    };
+
+    if (isExpiredJwtToken(nordigenClient.token)) {
+      // Generate new access token. Token is valid for 24 hours
+      // Note: access_token is automatically injected to other requests after you successfully obtain it
       const tokenData = await client.generateToken();
       handleNordigenError(tokenData);
-      nordigenClient.token = tokenData.access;
     }
   },
 
@@ -150,7 +170,7 @@ export const nordigenService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{balances: Array<import('../nordigen-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types.js').Transaction>, pending: Array<import('../nordigen-node.types.js').Transaction>}, startingBalance: number}>}
+   * @returns {Promise<{iban: string, balances: Array<import('../nordigen-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types.js').Transaction>, pending: Array<import('../nordigen-node.types.js').Transaction>}, startingBalance: number}>}
    */
   getTransactionsWithBalance: async (
     requisitionId,
@@ -165,7 +185,8 @@ export const nordigenService = {
       throw new AccountNotLinedToRequisition(accountId, requisitionId);
     }
 
-    const [transactions, accountBalance] = await Promise.all([
+    const [accountMetadata, transactions, accountBalance] = await Promise.all([
+      nordigenService.getAccountMetadata(accountId),
       nordigenService.getTransactions({
         accountId,
         startDate,
@@ -188,6 +209,7 @@ export const nordigenService = {
     );
 
     return {
+      iban: accountMetadata.iban,
       balances: accountBalance.balances,
       institutionId: institution_id,
       startingBalance,
@@ -299,6 +321,22 @@ export const nordigenService = {
       ...detailedAccount.account,
       ...metadataAccount,
     };
+  },
+
+  /**
+   * Retrieve account metadata by account id
+   *
+   * Unlike getDetailedAccount, this method is not affected by institution rate-limits.
+   *
+   * @param accountId
+   * @returns {Promise<import('../nordigen-node.types.js').NordigenAccountMetadata>}
+   */
+  getAccountMetadata: async (accountId) => {
+    const response = await client.getMetadata(accountId);
+
+    handleNordigenError(response);
+
+    return response;
   },
 
   /**
@@ -459,4 +497,6 @@ export const client = {
       accountSelection,
     }),
   generateToken: async () => await nordigenClient.generateToken(),
+  exchangeToken: async ({ refreshToken }) =>
+    await nordigenClient.exchangeToken({ refreshToken }),
 };

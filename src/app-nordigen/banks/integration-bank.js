@@ -23,7 +23,10 @@ export default {
       account_id: account.id,
       institution: account.institution,
       mask: (account?.iban || '0000').slice(-4),
-      name: [account.name, printIban(account)].filter(Boolean).join(' '),
+      iban: account?.iban || null,
+      name: [account.name, printIban(account), account.currency]
+        .filter(Boolean)
+        .join(' '),
       official_name: `integration-${account.institution_id}`,
       type: 'checking',
     };

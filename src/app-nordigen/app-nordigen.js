@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 
 import { nordigenService } from './services/nordigen-service.js';
 import {
@@ -7,9 +8,14 @@ import {
   GenericNordigenError,
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
+import { sha256String } from '../util/hash.js';
 import validateUser from '../util/validate-user.js';
 
 const app = express();
+app.get('/link', function (req, res) {
+  res.sendFile('link.html', { root: path.resolve('./src/app-nordigen') });
+});
+
 export { app as handlers };
 app.use(express.json());
 app.use(async (req, res, next) => {
@@ -18,6 +24,15 @@ app.use(async (req, res, next) => {
     return;
   }
   next();
+});
+
+app.post('/status', async (req, res) => {
+  res.send({
+    status: 'ok',
+    data: {
+      configured: nordigenService.isConfigured(),
+    },
+  });
 });
 
 app.post(
@@ -55,7 +70,13 @@ app.post(
         status: 'ok',
         data: {
           ...requisition,
-          accounts,
+          accounts: await Promise.all(
+            accounts.map(async (account) =>
+              account?.iban
+                ? { ...account, iban: await sha256String(account.iban) }
+                : account,
+            ),
+          ),
         },
       });
     } catch (error) {
@@ -74,14 +95,22 @@ app.post(
 app.post(
   '/get-banks',
   handleError(async (req, res) => {
-    let { country } = req.body;
+    let { country, showDemo = false } = req.body;
 
     await nordigenService.setToken();
     const data = await nordigenService.getInstitutions(country);
 
     res.send({
       status: 'ok',
-      data,
+      data: showDemo
+        ? [
+            {
+              id: 'SANDBOXFINANCE_SFIN0000',
+              name: 'DEMO bank (used for testing bank-sync)',
+            },
+            ...data,
+          ]
+        : data,
     });
   }),
 );
@@ -116,6 +145,7 @@ app.post(
 
     try {
       const {
+        iban,
         balances,
         institutionId,
         startingBalance,
@@ -130,6 +160,7 @@ app.post(
       res.send({
         status: 'ok',
         data: {
+          iban: iban ? await sha256String(iban) : null,
           balances,
           institutionId,
           startingBalance,
