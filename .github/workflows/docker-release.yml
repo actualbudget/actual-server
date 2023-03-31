@@ -11,7 +11,7 @@ on:
 
 env:
   IMAGES: |
-    jlongster/actual-server
+    actualbudget/actual-server
     ghcr.io/actualbudget/actual-server
 
   # Creates the following tags:
