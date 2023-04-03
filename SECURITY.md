@@ -8,4 +8,4 @@ We welcome reports of vulnerabilities in unreleased builds, since we’d obvious
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities in Actual’s server to https://github.com/actualbudget/actual-server/security/advisories/new, and any vulnerabilities in the client-side web app to https://github.com/actualbudget/actual/security/advisories/new.
+Please report security vulnerabilities in Actual’s server to https://github.com/actualbudget/actual-server/security/advisories/new, and any vulnerabilities in the client-side web app to https://github.com/actualbudget/actual/security/advisories/new. But don’t worry too much about whether you’re filing a vulnerability in the right repo of the two, the same people maintain both and will be able to see and fix the issue.
