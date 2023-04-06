@@ -70,7 +70,7 @@ if (process.env.NODE_ENV === 'test') {
   };
 }
 
-const config = {
+const finalConfig = {
   ...config,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
@@ -96,30 +96,32 @@ const config = {
       : config.nordigen,
 };
 
-debug(`using port ${config.port}`);
-debug(`using hostname ${config.hostname}`);
-debug(`using server files directory ${config.serverFiles}`);
-debug(`using user files directory ${config.userFiles}`);
-debug(`using web root directory ${config.webRoot}`);
+debug(`using port ${finalConfig.port}`);
+debug(`using hostname ${finalConfig.hostname}`);
+debug(`using server files directory ${finalConfig.serverFiles}`);
+debug(`using user files directory ${finalConfig.userFiles}`);
+debug(`using web root directory ${finalConfig.webRoot}`);
 
-if (config.https) {
-  debug(`using https key: ${'*'.repeat(config.https.key.length)}`);
-  debugSensitive(`using https key ${config.https.key}`);
-  debug(`using https cert: ${'*'.repeat(config.https.cert.length)}`);
-  debugSensitive(`using https cert ${config.https.cert}`);
+if (finalConfig.https) {
+  debug(`using https key: ${'*'.repeat(finalConfig.https.key.length)}`);
+  debugSensitive(`using https key ${finalConfig.https.key}`);
+  debug(`using https cert: ${'*'.repeat(finalConfig.https.cert.length)}`);
+  debugSensitive(`using https cert ${finalConfig.https.cert}`);
 }
 
-if (config.nordigen) {
+if (finalConfig.nordigen) {
   debug(
-    `using nordigen secret id: ${'*'.repeat(config.nordigen.secretId.length)}`,
-  );
-  debugSensitive(`using nordigen secret id ${config.nordigen.secretId}`);
-  debug(
-    `using nordigen secret key: ${'*'.repeat(
-      config.nordigen.secretKey.length,
+    `using nordigen secret id: ${'*'.repeat(
+      finalConfig.nordigen.secretId.length,
     )}`,
   );
-  debugSensitive(`using nordigen secret key ${config.nordigen.secretKey}`);
+  debugSensitive(`using nordigen secret id ${finalConfig.nordigen.secretId}`);
+  debug(
+    `using nordigen secret key: ${'*'.repeat(
+      finalConfig.nordigen.secretKey.length,
+    )}`,
+  );
+  debugSensitive(`using nordigen secret key ${finalConfig.nordigen.secretKey}`);
 }
 
-export default config;
+export default finalConfig;
