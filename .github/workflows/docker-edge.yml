@@ -37,10 +37,10 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu, alpine]
-        platform: [linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6]
+        arch: [amd64, arm64, arm/v7, arm/v6]
         exclude:
           - os: ubuntu
-            platform: linux/arm/v6
+            arch: arm/v6
     steps:
       - uses: actions/checkout@v3
 
@@ -80,7 +80,7 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           file: docker/edge-${{ matrix.os }}.Dockerfile
-          platforms: ${{ matrix.platform }}
+          platforms: linux/${{ matrix.arch }}
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
