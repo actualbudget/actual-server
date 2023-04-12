@@ -102,8 +102,5 @@ export function changePassword(newPassword) {
 
 export function getSession(token) {
   let accountDb = getAccountDb();
-  let rows = accountDb.first('SELECT * FROM sessions WHERE token = ?', [token]);
-
-  if (rows.length === 0) return null;
-  return rows[0];
+  return accountDb.first('SELECT * FROM sessions WHERE token = ?', [token]);
 }
