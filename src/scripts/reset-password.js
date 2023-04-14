@@ -1,23 +1,5 @@
 import { needsBootstrap, bootstrap, changePassword } from '../account-db.js';
-import prompt from '../util/prompt.js';
-
-async function promptPassword() {
-  let password = await prompt('Enter a password, then press enter: ');
-
-  if (password === '') {
-    console.log('Password cannot be empty.');
-    return promptPassword();
-  }
-
-  let password2 = await prompt('Enter the password again, then press enter: ');
-
-  if (password !== password2) {
-    console.log('Passwords do not match.');
-    return promptPassword();
-  }
-
-  return password;
-}
+import { promptPassword } from '../util/prompt.js';
 
 if (needsBootstrap()) {
   console.log(
