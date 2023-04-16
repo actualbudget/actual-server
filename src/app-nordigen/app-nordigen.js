@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios';
 import express from 'express';
 import path from 'path';
 
@@ -194,6 +195,16 @@ app.post(
           break;
         case error instanceof GenericNordigenError:
           console.log({ message: 'Something went wrong', error });
+          sendErrorResponse({
+            error_type: 'SYNC_ERROR',
+            error_code: 'NORDIGEN_ERROR',
+          });
+          break;
+        case isAxiosError(error):
+          console.log({
+            message: 'Something went wrong',
+            error: error.response.data,
+          });
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',
