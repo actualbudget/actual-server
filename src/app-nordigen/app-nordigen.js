@@ -7,7 +7,7 @@ import {
   AccountNotLinedToRequisition,
   GenericNordigenError,
 } from './errors.js';
-import { handleError } from './util/handle-error.js';
+import { handleError } from '../util/handle-error.js';
 import { sha256String } from '../util/hash.js';
 import validateUser from '../util/validate-user.js';
 

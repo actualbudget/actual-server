@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import * as accountApp from './app-account.js';
 import * as syncApp from './app-sync.js';
 import * as nordigenApp from './app-nordigen/app-nordigen.js';
+import * as plaidApp from './app-plaid/app.plaid.js';
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
 app.use('/nordigen', nordigenApp.handlers);
+app.use('/plaid', plaidApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.mode);

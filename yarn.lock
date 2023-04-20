@@ -1583,6 +1583,7 @@ __metadata:
     jest: ^29.3.1
     jws: ^4.0.0
     nordigen-node: ^1.2.3
+    plaid: ^13.0.0
     prettier: ^2.8.3
     supertest: ^6.3.1
     typescript: ^4.9.5
@@ -1751,6 +1752,15 @@ __metadata:
   version: 0.4.0
   resolution: "asynckit@npm:0.4.0"
   checksum: 7b78c451df768adba04e2d02e63e2d0bf3b07adcd6e42b4cf665cb7ce899bedd344c69a1dcbce355b5f972d597b25aaa1c1742b52cffd9caccb22f348114f6be
+  languageName: node
+  linkType: hard
+
+"axios@npm:0.21.4":
+  version: 0.21.4
+  resolution: "axios@npm:0.21.4"
+  dependencies:
+    follow-redirects: ^1.14.0
+  checksum: 44245f24ac971e7458f3120c92f9d66d1fc695e8b97019139de5b0cc65d9b8104647db01e5f46917728edfc0cfd88eb30fc4c55e6053eef4ace76768ce95ff3c
   languageName: node
   linkType: hard
 
@@ -3018,7 +3028,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.0":
+"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.15.0":
   version: 1.15.2
   resolution: "follow-redirects@npm:1.15.2"
   peerDependenciesMeta:
@@ -4950,6 +4960,15 @@ __metadata:
   dependencies:
     find-up: ^4.0.0
   checksum: 9863e3f35132bf99ae1636d31ff1e1e3501251d480336edb1c211133c8d58906bed80f154a1d723652df1fda91e01c7442c2eeaf9dc83157c7ae89087e43c8d6
+  languageName: node
+  linkType: hard
+
+"plaid@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "plaid@npm:13.0.0"
+  dependencies:
+    axios: 0.21.4
+  checksum: f34159a78246348609bc81920eda57f96309fa717a57fba110f538bb1632ee2fa70e3f47228517a211224cc9c7806e759aa311d33529f9f05e257b65c7c29ad6
   languageName: node
   linkType: hard
 

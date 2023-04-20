@@ -26,6 +26,7 @@
     "express-response-size": "^0.0.3",
     "jws": "^4.0.0",
     "nordigen-node": "^1.2.3",
+    "plaid": "^13.0.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
