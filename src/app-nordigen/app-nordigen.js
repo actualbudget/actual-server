@@ -149,7 +149,7 @@ app.post(
         balances,
         institutionId,
         startingBalance,
-        transactions: { booked, pending },
+        transactions: { booked, pending, all },
       } = await nordigenService.getTransactionsWithBalance(
         requisitionId,
         accountId,
@@ -167,6 +167,7 @@ app.post(
           transactions: {
             booked,
             pending,
+            all,
           },
         },
       });
