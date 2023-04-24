@@ -91,7 +91,10 @@ class SecretsDb {
 const secretsDb = new SecretsDb();
 export const secretsService = {
   get: (name) => {
-    return secretsDb.get(name);
+    const secret = secretsDb.get(name)?.value;
+    if (!secret) return null;
+
+    return secretsDb.get(name)?.value;
   },
   set: (name, value) => {
     return secretsDb.set(name, value);
