@@ -28,7 +28,7 @@ class SecretsDb {
       if (hasNordigenEnvs) {
         this.set('nordigen_secretId', process.env?.ACTUAL_NORDIGEN_SECRET_ID);
         this.set('nordigen_secretKey', process.env?.ACTUAL_NORDIGEN_SECRET_KEY);
-        this.debug('Migrated Nordigen keys from config.json to app secrets');
+        this.debug('Migrated Nordigen keys from process.env to app secrets');
       }
     }
   }
