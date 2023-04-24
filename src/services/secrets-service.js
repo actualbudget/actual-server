@@ -19,16 +19,16 @@ class SecretsDb {
       process.env?.ACTUAL_NORDIGEN_SECRET_KEY;
 
     if (!this.get('nordigen_secretId') && !this.get('nordigen_secretKey')) {
-      if (hasNordigenConfigs) {
-        this.set('nordigen_secretId', config.nordigen?.secretId);
-        this.set('nordigen_secretKey', config.nordigen?.secretKey);
-        this.debug('Migrated Nordigen keys from config.json to app secrets');
-      }
-
       if (hasNordigenEnvs) {
         this.set('nordigen_secretId', process.env?.ACTUAL_NORDIGEN_SECRET_ID);
         this.set('nordigen_secretKey', process.env?.ACTUAL_NORDIGEN_SECRET_KEY);
         this.debug('Migrated Nordigen keys from process.env to app secrets');
+      }
+
+      if (hasNordigenConfigs) {
+        this.set('nordigen_secretId', config.nordigen?.secretId);
+        this.set('nordigen_secretKey', config.nordigen?.secretKey);
+        this.debug('Migrated Nordigen keys from config.json to app secrets');
       }
     }
   }
