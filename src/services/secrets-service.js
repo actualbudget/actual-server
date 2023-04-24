@@ -3,6 +3,17 @@ import fs from 'node:fs';
 import config, { sqlDir } from '../load-config.js';
 import { join } from 'node:path';
 import openDatabase from '../db.js';
+
+/**
+ * An enum of valid secret names.
+ * @readonly
+ * @enum {string}
+ */
+export const SecretName = {
+  nordigen_secretId: 'nordigen_secretId',
+  nordigen_secretKey: 'nordigen_secretKey',
+};
+
 class SecretsDb {
   constructor() {
     this.debug = createDebug('actual:secrets-db');
@@ -11,25 +22,18 @@ class SecretsDb {
   }
 
   /// Migrates nordigen from config.json or process.env to app secret
+  //TODO: Create a migration script for this instead
   migrateNordigen() {
-    const hasNordigenConfigs =
-      config.nordigen?.secretId && config.nordigen?.secretKey;
-    const hasNordigenEnvs =
-      process.env?.ACTUAL_NORDIGEN_SECRET_ID &&
-      process.env?.ACTUAL_NORDIGEN_SECRET_KEY;
-
-    if (!this.get('nordigen_secretId') && !this.get('nordigen_secretKey')) {
-      if (hasNordigenEnvs) {
-        this.set('nordigen_secretId', process.env?.ACTUAL_NORDIGEN_SECRET_ID);
-        this.set('nordigen_secretKey', process.env?.ACTUAL_NORDIGEN_SECRET_KEY);
-        this.debug('Migrated Nordigen keys from process.env to app secrets');
-      }
-
-      if (hasNordigenConfigs) {
-        this.set('nordigen_secretId', config.nordigen?.secretId);
-        this.set('nordigen_secretKey', config.nordigen?.secretKey);
-        this.debug('Migrated Nordigen keys from config.json to app secrets');
-      }
+    if (
+      config.nordigen &&
+      (!this.get(SecretName.nordigen_secretId) ||
+        !this.get(SecretName.nordigen_secretKey))
+    ) {
+      this.set(SecretName.nordigen_secretId, config.nordigen.secretId);
+      this.set(SecretName.nordigen_secretKey, config.nordigen.secretKey);
+      this.debug(
+        'Migrated Nordigen keys from config.json/environment to app secrets',
+      );
     }
   }
 
@@ -65,7 +69,6 @@ class SecretsDb {
       `INSERT OR REPLACE INTO secrets (name, value) VALUES (?,?)`,
       [name, value],
     );
-    this.close();
     return result;
   }
 
@@ -78,28 +81,46 @@ class SecretsDb {
     const result = this.db.first(`SELECT value FROM secrets WHERE name =?`, [
       name,
     ]);
-    this.close();
     return result;
-  }
-
-  close() {
-    this.db.close();
-    this.db = null;
   }
 }
 
 const secretsDb = new SecretsDb();
+const _cachedSecrets = new Map();
+/**
+ * A service for managing secrets stored in `secretsDb`.
+ */
 export const secretsService = {
+  /**
+   * Retrieves the value of a secret by name.
+   * @param {SecretName} name - The name of the secret to retrieve.
+   * @returns {string|null} The value of the secret, or null if the secret does not exist.
+   */
   get: (name) => {
-    const secret = secretsDb.get(name)?.value;
-    if (!secret) return null;
+    return _cachedSecrets.get(name) ?? secretsDb.get(name)?.value ?? null;
+  },
 
-    return secretsDb.get(name)?.value;
-  },
+  /**
+   * Sets the value of a secret by name.
+   * @param {SecretName} name - The name of the secret to set.
+   * @param {string} value - The value to set for the secret.
+   * @returns {Object}
+   */
   set: (name, value) => {
-    return secretsDb.set(name, value);
+    const result = secretsDb.set(name, value);
+
+    if (result.changes === 1) {
+      _cachedSecrets.set(name, value);
+    }
+    return result;
   },
+
+  /**
+   * Determines whether a secret with the given name exists.
+   * @param {SecretName} name - The name of the secret to check for existence.
+   * @returns {boolean} True if a secret with the given name exists, false otherwise.
+   */
   exists: (name) => {
-    return Boolean(secretsDb.get(name));
+    return Boolean(secretsService.get(name));
   },
 };
