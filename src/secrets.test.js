@@ -14,7 +14,7 @@ describe('secretsService', () => {
   it('should get a secret', () => {
     const result = secretsService.get(testSecretName);
     expect(result).toBeDefined();
-    expect(result.value).toBe(testSecretValue);
+    expect(result).toBe(testSecretValue);
   });
 
   it('should check if a secret exists', () => {
@@ -33,7 +33,7 @@ describe('secretsService', () => {
 
     const getResult = secretsService.get(testSecretName);
     expect(getResult).toBeDefined();
-    expect(getResult.value).toBe(newValue);
+    expect(getResult).toBe(newValue);
   });
 
   describe('secrets api', () => {
