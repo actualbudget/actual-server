@@ -7,6 +7,26 @@ class SecretsDb {
   constructor() {
     this.debug = createDebug('actual:secrets-db');
     this.db = null;
+    this.migrateNordigen();
+  }
+
+  /// Migrates nordigen from config.json or process.env to app secret
+  migrateNordigen() {
+    const hasNordigenConfigs =
+      config?.nordigen?.secretId && config?.nordigen?.secretKey;
+    const hasNordigenEnvs =
+      process.env?.ACTUAL_NORDIGEN_SECRET_ID &&
+      process.env?.ACTUAL_NORDIGEN_SECRET_KEY;
+
+    if (hasNordigenConfigs || hasNordigenEnvs) {
+      if (!this.get('nordigen_secretId') && !this.get('nordigen_secretKey')) {
+        this.set('nordigen_secretId', config.nordigen.secretId);
+        this.set('nordigen_secretKey', config.nordigen.secretKey);
+        this.debug(
+          'Migrated Nordigen keys from config/process.env to app secrets',
+        );
+      }
+    }
   }
 
   open() {
