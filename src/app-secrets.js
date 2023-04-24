@@ -20,15 +20,15 @@ app.post('/', async (req, res) => {
 
   secretsService.set(name, value);
 
-  res.sendStatus(204);
+  res.status(200).send('secret set');
 });
 
 app.get('/:name', async (req, res) => {
   const name = req.params.name;
   const keyExists = secretsService.exists(name);
   if (keyExists) {
-    res.status(200).send('Key exists');
+    res.sendStatus(204);
   } else {
-    res.status(404).send('Key not found');
+    res.status(404).send('key not found');
   }
 });

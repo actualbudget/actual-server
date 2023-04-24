@@ -57,23 +57,23 @@ describe('secretsService', () => {
       expect(res.statusCode).toEqual(404);
     });
 
-    it('returns 200 if secret exists', async () => {
+    it('returns 204 if secret exists', async () => {
       secretsService.set(testSecretName, testSecretValue);
       const res = await request(app)
         .get(`/${testSecretName}`)
         .set('x-actual-token', 'valid-token');
 
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(204);
     });
 
-    it('returns 204 if secret was set', async () => {
+    it('returns 200 if secret was set', async () => {
       secretsService.set(testSecretName, testSecretValue);
       const res = await request(app)
         .post(`/`)
         .set('x-actual-token', 'valid-token')
         .send({ name: testSecretName, value: testSecretValue });
 
-      expect(res.statusCode).toEqual(204);
+      expect(res.statusCode).toEqual(200);
     });
   });
 });
