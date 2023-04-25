@@ -22,6 +22,13 @@ const nordigenClient = new NordigenClient({
   secretKey: secretsService.get(SecretName.nordigen_secretKey),
 });
 
+secretsService.onUpdate(SecretName.nordigen_secretId, (newSecret) => {
+  nordigenClient.secretId = newSecret;
+});
+secretsService.onUpdate(SecretName.nordigen_secretKey, (newSecret) => {
+  nordigenClient.secretKey = newSecret;
+});
+
 export const handleNordigenError = (response) => {
   switch (response.status_code) {
     case 400:
