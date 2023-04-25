@@ -2,7 +2,7 @@ import createDebug from 'debug';
 import fs from 'node:fs';
 import config, { sqlDir } from '../load-config.js';
 import { join } from 'node:path';
-import openDatabase from '../db.js';
+import getAccountDb from '../account-db.js';
 
 /**
  * An enum of valid secret names.
@@ -18,6 +18,7 @@ class SecretsDb {
   constructor() {
     this.debug = createDebug('actual:secrets-db');
     this.db = null;
+    this.initialize();
     this.migrateNordigen();
   }
 
@@ -36,26 +37,19 @@ class SecretsDb {
     }
   }
 
+  initialize() {
+    if (!this.db) {
+      this.db = this.open();
+    }
+
+    this.debug(`initializing secrets table'`);
+    //Create secret table if it doesn't exist
+    const initSql = fs.readFileSync(join(sqlDir, 'secrets.sql'), 'utf8');
+    this.db.exec(initSql);
+  }
+
   open() {
-    if (!fs.existsSync(config.serverFiles)) {
-      this.debug(`creating server files directory: '${config.serverFiles}'`);
-      fs.mkdirSync(config.serverFiles);
-    }
-
-    const dbPath = join(config.serverFiles, 'secrets.sqlite');
-    const needsInit = !fs.existsSync(dbPath);
-
-    let db = openDatabase(dbPath);
-
-    if (needsInit) {
-      this.debug(`initializing secrets database: '${dbPath}'`);
-      let initSql = fs.readFileSync(join(sqlDir, 'secrets.sql'), 'utf8');
-      db.exec(initSql);
-    } else {
-      this.debug(`opening secrets database: '${dbPath}'`);
-    }
-
-    return db;
+    return getAccountDb();
   }
 
   set(name, value) {
