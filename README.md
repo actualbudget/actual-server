@@ -34,7 +34,7 @@ docker run -p 5006:5006 actual-server
 
 The multi-arch Docker container image runs on amd64, arm64, and armv7 platforms. Please be warned that Actual may be sluggish on armv7, but users report that it does work.
 
-Note: if you would like to build the edge image variant locally, make sure you run `./docker/download-artifacts.sh` first.
+Note: if you would like to build the edge image variant locally, make sure you run `./docker/download-artifacts.sh` first. Then run `docker build . -f docker/edge-ubuntu.Dockerfile --build-arg GITHUB_TOKEN="ghp_your-personal-access-token"`.
 
 ## Deploying
 
