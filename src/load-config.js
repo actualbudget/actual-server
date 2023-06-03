@@ -38,7 +38,7 @@ if (process.env.ACTUAL_CONFIG_PATH) {
   userConfig = parseJSON(path.join(defaultDataDir, 'config.json'), true);
 }
 
-/** @type {Omit<import('./config-types.js').Config, 'mode' | 'serverFiles' | 'userFiles'>} */
+/** @type {Omit<import('./config-types.js').Config, 'mode' | 'serverFiles' | 'apiFiles' | 'userFiles'>} */
 let defaultConfig = {
   port: 5006,
   hostname: '::',
@@ -57,6 +57,7 @@ if (process.env.NODE_ENV === 'test') {
   config = {
     mode: 'test',
     serverFiles: path.join(projectRoot, 'test-server-files'),
+    apiFiles: path.join(projectRoot, 'test-api-files'),
     userFiles: path.join(projectRoot, 'test-user-files'),
     ...defaultConfig,
   };
@@ -65,6 +66,7 @@ if (process.env.NODE_ENV === 'test') {
     mode: 'development',
     ...defaultConfig,
     serverFiles: path.join(defaultDataDir, 'server-files'),
+    apiFiles: path.join(defaultDataDir, 'api-files'),
     userFiles: path.join(defaultDataDir, 'user-files'),
     ...(userConfig || {}),
   };
@@ -74,6 +76,7 @@ const finalConfig = {
   ...config,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
+  apiFiles: process.env.ACTUAL_API_FILES || config.apiFiles,
   serverFiles: process.env.ACTUAL_SERVER_FILES || config.serverFiles,
   userFiles: process.env.ACTUAL_USER_FILES || config.userFiles,
   webRoot: process.env.ACTUAL_WEB_ROOT || config.webRoot,

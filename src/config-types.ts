@@ -5,6 +5,7 @@ export interface Config {
   port: number;
   hostname: string;
   serverFiles: string;
+  apiFiles: string;
   userFiles: string;
   webRoot: string;
   https?: {

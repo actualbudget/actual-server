@@ -7,8 +7,10 @@ supervise
 bin/large-sync-data.txt
 user-files
 server-files
+api-files
 test-user-files
 test-server-files
+test-api-files
 fly.toml
 build/
 *.crt

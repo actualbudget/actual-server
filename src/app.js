@@ -10,6 +10,7 @@ import * as accountApp from './app-account.js';
 import * as syncApp from './app-sync.js';
 import * as nordigenApp from './app-nordigen/app-nordigen.js';
 import * as secretApp from './app-secrets.js';
+import * as apiApp from './app-api.js';
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
 app.use('/nordigen', nordigenApp.handlers);
 app.use('/secret', secretApp.handlers);
+app.use('/api', apiApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.mode);
@@ -61,6 +63,10 @@ function parseHTTPSConfig(value) {
 export default async function run() {
   if (!fs.existsSync(config.serverFiles)) {
     fs.mkdirSync(config.serverFiles);
+  }
+
+  if (!fs.existsSync(config.apiFiles)) {
+    fs.mkdirSync(config.apiFiles);
   }
 
   if (!fs.existsSync(config.userFiles)) {
