@@ -61,7 +61,7 @@ app.post('/init', async (req, res) => {
       );
       // Store the token in the session
       req.session.token = token;
-      res.end('OK');
+      res.status(200).send({ token });
     } else {
       res.status(401).send('BAD');
     }
