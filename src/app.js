@@ -11,21 +11,28 @@ import * as syncApp from './app-sync.js';
 import * as nordigenApp from './app-nordigen/app-nordigen.js';
 import * as secretApp from './app-secrets.js';
 
-const app = express();
+// Create a function that returns an express app with cors and rateLimit middleware
+function createApp() {
+  const app = express();
+  app.use(cors());
+  app.use(
+    rateLimit({
+      windowMs: 60 * 1000,
+      max: 500,
+      legacyHeaders: false,
+      standardHeaders: true,
+    }),
+  );
+  return app;
+}
+
+// Use the createApp function to create the main express app
+const app = createApp();
 
 process.on('unhandledRejection', (reason) => {
   console.log('Rejection:', reason);
 });
 
-app.use(cors());
-app.use(
-  rateLimit({
-    windowMs: 60 * 1000,
-    max: 500,
-    legacyHeaders: false,
-    standardHeaders: true,
-  }),
-);
 app.use(bodyParser.json({ limit: '20mb' }));
 app.use(bodyParser.raw({ type: 'application/actual-sync', limit: '20mb' }));
 app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
@@ -41,11 +48,34 @@ app.get('/mode', (req, res) => {
 
 app.use(actuator()); // Provides /health, /metrics, /info
 
+// If HTTPS is configured, listen and redirect on port 80
+if (config.https) {
+  // Use the createApp function to create another express app for port 80
+  const redirectApp = createApp();
+
+  // Redirect all requests to port 443
+  redirectApp.get('*', (req, res) => {
+    res.redirect(`https://${req.headers.host}${req.url}`);
+  });
+
+  // Listen on port 80
+  redirectApp.listen(80, config.hostname);
+}
+
+
 // The web frontend
 app.use((req, res, next) => {
   res.set('Cross-Origin-Opener-Policy', 'same-origin');
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
-  next();
+  if (config.https) {
+    if (req.secure) {
+      next();
+    } else {
+      res.redirect(`https://${req.headers.host}${req.url}`);
+    }
+  } else {
+    next();
+  }
 });
 app.use(express.static(config.webRoot, { index: false }));
 
