@@ -1,6 +1,7 @@
 import express from 'express';
 import errorMiddleware from './util/error-middleware.js';
 import api from '@actual-app/api';
+import audit from 'express-requests-logger';
 
 import {
   generateToken,
@@ -18,6 +19,7 @@ import {
 
 const app = express();
 app.use(errorMiddleware);
+if (process.env.NODE_ENV === 'development') app.use(audit());
 
 export { app as handlers };
 
