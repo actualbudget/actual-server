@@ -1,1 +1,6 @@
-See the [Writing Good Release Notes](https://github.com/actualbudget/docs#writing-good-release-notes) section of the README for the documentation repo for more information on how to create a release notes file here.
+---
+category: Maintenance
+authors: [enxyz]
+---
+
+Add missing step to deploy to README
