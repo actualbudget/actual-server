@@ -48,7 +48,7 @@ Next, [install the `flyctl`](https://fly.io/docs/flyctl/installing/) utility. Ru
 
 Copy `fly.template.toml` to `fly.toml`. Open `fly.toml` and customize the app name on the first line of the file.
 
-Now, run `flyctl launch` from `actual-server`. You should have a running app now! To get to the Actual UI, simply run `flyctl open`
+Now, run `flyctl launch` from `actual-server` to confirm configuration. Then, run `flyctl deploy` to deploy your app. You should have a running app now! To get to the Actual UI, simply run `flyctl open`
 
 Whenever you want to update Actual, update the versions of `@actual-app/api` and `@actual-app/web` in `package.json` and run `flyctl deploy`.
 
