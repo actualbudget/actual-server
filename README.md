@@ -1,9 +1,17 @@
 This is the main project to run [Actual](https://github.com/actualbudget/actual), a local-first personal finance tool. It comes with the latest version of Actual, and a server to persist changes and make data available across all devices.
 
-### Getting Started 
+### Getting Started
+Actual is a local-first personal finance tool. It is 100% free and open-source, written in NodeJS, it has a synchronization element so that all your changes can move between devices without any heavy lifting.
 
-To get started with Actual, visit our [](https://actualbudget.org/docs/install/) page, here you will find our recommended and support options for deploying Actual both locally and in the cloud. 
+If you are interested in contributing, or want to know how development works, see [CONTRIBUTING.md](https://github.com/actualbudget/actual/blob/master/CONTRIBUTING.md) we would love to have you.
 
-### Getting Support
+Want to say thanks? Click the ⭐ at the top of the page.
 
-If you are looking for help, you can [contact us](https://actualbudget.org/contact) but please bare in mind Actual is an open source app, which means that nobody is being paid to work on it, and everything is happening in our free time. Please keep that in mind when asking us for help.
+### Documentation 
+
+We have a wide range of documentation on how to use Actual, this is all available in our [Community Documentation](https://actualbudget.org/docs/), this includes topics on Budgeting, Account Management, Tips & Tricks and some documentation for developers.
+
+### Feature Requests
+Current feature requests can be seen [here](https://github.com/actualbudget/actual/issues?q=is%3Aissue+label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc). Vote for your favorite requests by reacting 👍 to the top comment of the request.
+
+To add new feature requests, open a new Issue of the "Feature Request" type.
