@@ -114,6 +114,9 @@ export function bootstrap(loginSettings) {
     );
   }
 
+  const token = uuid.v4();
+  accountDb.mutate('INSERT INTO sessions (token) VALUES (?)', [token]);
+
   return {};
 }
 
@@ -122,14 +125,14 @@ export function loginWithPassword(password) {
   let row = accountDb.first(
     "SELECT extra_data FROM auth WHERE method = 'password'",
   );
-  let confirmed = row && bcrypt.compareSync(password, row.password);
+  let confirmed = row && bcrypt.compareSync(password, row.extra_data);
 
   if (confirmed) {
     // Right now, tokens are permanent and there's just one in the
     // system. In the future this should probably evolve to be a
     // "session" that times out after a long time or something, and
     // maybe each device has a different token
-    let row = accountDb.first('SELECT * FROM sessions');
+    let row = accountDb.first('SELECT token FROM sessions');
     return row.token;
   } else {
     return null;
