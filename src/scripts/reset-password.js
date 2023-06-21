@@ -7,7 +7,7 @@ if (needsBootstrap()) {
   );
 
   promptPassword().then((password) => {
-    let { error } = bootstrap(password);
+    let { error } = bootstrap({ password });
     if (error) {
       console.log('Error setting password:', error);
       console.log(

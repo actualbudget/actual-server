@@ -1,9 +1,15 @@
-
 CREATE TABLE auth
-  (password TEXT PRIMARY KEY);
+  (method TEXT PRIMARY KEY,
+   extra_data TEXT);
 
 CREATE TABLE sessions
   (token TEXT PRIMARY KEY);
+
+CREATE TABLE pending_openid_requests
+  (state TEXT PRIMARY KEY,
+   code_verifier TEXT,
+   return_url TEXT,
+   expiry_time INTEGER);
 
 CREATE TABLE files
   (id TEXT PRIMARY KEY,

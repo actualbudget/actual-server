@@ -28,6 +28,7 @@
     "express-response-size": "^0.0.3",
     "jws": "^4.0.0",
     "nordigen-node": "^1.2.3",
+    "openid-client": "^5.4.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

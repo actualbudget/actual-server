@@ -3,7 +3,10 @@ import errorMiddleware from './util/error-middleware.js';
 import validateUser from './util/validate-user.js';
 import {
   bootstrap,
-  login,
+  listLoginMethods,
+  loginWithPassword,
+  loginWithOpenIdSetup,
+  loginWithOpenIdFinalize,
   changePassword,
   needsBootstrap,
 } from './account-db.js';
@@ -31,19 +34,45 @@ app.get('/needs-bootstrap', (req, res) => {
 });
 
 app.post('/bootstrap', (req, res) => {
-  let { error, token } = bootstrap(req.body.password);
+  let { error } = bootstrap(req.body);
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
     return;
   } else {
-    res.send({ status: 'ok', data: { token } });
+    res.send({ status: 'ok' });
   }
 });
 
+app.get('/login-methods', (req, res) => {
+  let methods = listLoginMethods();
+  res.send({ status: 'ok', methods });
+});
+
 app.post('/login', (req, res) => {
-  let token = login(req.body.password);
+  let token = loginWithPassword(req.body.password);
   res.send({ status: 'ok', data: { token } });
+});
+
+app.post('/login-openid', async (req, res) => {
+  // req.body needs to contain
+  // - return_url: address of the actual frontend which we should return to after the openid flow
+  let { error, url } = await loginWithOpenIdSetup(req.body);
+  if (error) {
+    res.send({ status: 'error', reason: error });
+    return;
+  }
+  res.send({ status: 'ok', data: { redirect_url: url } });
+});
+
+app.get('/login-openid/cb', async (req, res) => {
+  let { error, url } = await loginWithOpenIdFinalize(req.query);
+  if (error) {
+    res.send({ error });
+    return;
+  }
+
+  res.redirect(url);
 });
 
 app.post('/change-password', (req, res) => {
