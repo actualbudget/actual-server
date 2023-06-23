@@ -4,12 +4,13 @@ import validateUser from './util/validate-user.js';
 import {
   bootstrap,
   listLoginMethods,
-  loginWithPassword,
+  needsBootstrap,
+} from './accounts/index.js';
+import { loginWithPassword, changePassword } from './accounts/password.js';
+import {
   loginWithOpenIdSetup,
   loginWithOpenIdFinalize,
-  changePassword,
-  needsBootstrap,
-} from './account-db.js';
+} from './accounts/openid.js';
 
 let app = express();
 app.use(errorMiddleware);

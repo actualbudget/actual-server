@@ -4,7 +4,7 @@ import express from 'express';
 import * as uuid from 'uuid';
 import validateUser from './util/validate-user.js';
 import errorMiddleware from './util/error-middleware.js';
-import getAccountDb from './account-db.js';
+import getAccountDb from './accounts/index.js';
 import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
 import * as simpleSync from './sync-simple.js';

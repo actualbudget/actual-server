@@ -1,4 +1,4 @@
-import { getSession } from '../account-db.js';
+import { getSession } from '../accounts/index.js';
 
 /**
  * @param {import('express').Request} req
