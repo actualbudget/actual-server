@@ -60,21 +60,34 @@ export function bootstrap(loginSettings) {
     return { error: 'already-bootstrapped' };
   }
 
-  if (
-    !loginSettings.hasOwnProperty('password') &&
-    !loginSettings.hasOwnProperty('openid')
-  ) {
+  const passEnabled = loginSettings.hasOwnProperty('password');
+  const openIdEnabled = loginSettings.hasOwnProperty('openid');
+
+  if (!passEnabled && !openIdEnabled) {
     return { error: 'no-auth-method-selected' };
   }
 
-  if (loginSettings.hasOwnProperty('password')) {
+  if (passEnabled && openIdEnabled) {
+    return { error: 'max-one-method-allowed' };
+  }
+
+  if (passEnabled) {
     const password = loginSettings.password;
     if (password === null || password === '') {
       return { error: 'invalid-password' };
     }
+
+    // Hash the password. There's really not a strong need for this
+    // since this is a self-hosted instance owned by the user.
+    // However, just in case we do it.
+    let hashed = hashPassword(loginSettings.password);
+    accountDb.mutate(
+      "INSERT INTO auth (method, extra_data) VALUES ('password', ?)",
+      [hashed],
+    );
   }
 
-  if (loginSettings.hasOwnProperty('openid')) {
+  if (openIdEnabled) {
     const config = loginSettings.openid;
     if (!config.hasOwnProperty('issuer')) {
       return { error: 'missing-issuer' };
@@ -88,26 +101,13 @@ export function bootstrap(loginSettings) {
     if (!config.hasOwnProperty('server_hostname')) {
       return { error: 'missing-server-hostname' };
     }
+
     // Beyond verifying that the configuration exists, we do not attempt
     // to check if the configuration is actually correct.
     // If the user improperly configures this during bootstrap, there is
     // no way to recover without manually editing the database. However,
     // this might not be a real issue since an analogous situation happens
     // if they forget their password.
-  }
-
-  if (loginSettings.hasOwnProperty('password')) {
-    // Hash the password. There's really not a strong need for this
-    // since this is a self-hosted instance owned by the user.
-    // However, just in case we do it.
-    let hashed = hashPassword(loginSettings.password);
-    accountDb.mutate(
-      "INSERT INTO auth (method, extra_data) VALUES ('password', ?)",
-      [hashed],
-    );
-  }
-
-  if (loginSettings.hasOwnProperty('openid')) {
     accountDb.mutate(
       "INSERT INTO auth (method, extra_data) VALUES ('openid', ?)",
       [JSON.stringify(loginSettings.openid)],
