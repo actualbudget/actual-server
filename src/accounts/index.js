@@ -19,20 +19,64 @@ export default function getAccountDb() {
     }
 
     let dbPath = join(config.serverFiles, 'account.sqlite');
-    let needsInit = !fs.existsSync(dbPath);
 
     _accountDb = openDatabase(dbPath);
-
-    if (needsInit) {
-      debug(`initializing account database: '${dbPath}'`);
-      let initSql = fs.readFileSync(join(sqlDir, 'account.sql'), 'utf8');
-      _accountDb.exec(initSql);
-    } else {
-      debug(`opening account database: '${dbPath}'`);
-    }
+    _accountDb.transaction(() => runMigrations(_accountDb));
   }
 
   return _accountDb;
+}
+
+function runMigrations(db) {
+  const migrationsDir = join(sqlDir, 'migrations');
+  let migrations = fs.readdirSync(migrationsDir);
+  migrations.sort();
+
+  // Detection due to https://stackoverflow.com/a/1604121
+  const tableExistsMigrations = !!db.first(
+    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='migrations'",
+  );
+  const tableExistsAuth = !!db.first(
+    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='auth'",
+  );
+
+  if (!tableExistsMigrations) {
+    // If the definition of the migrations table ever changes we might have
+    // difficulty properly applying this change, but this is unlikely.
+    db.mutate('CREATE TABLE migrations (id TEXT PRIMARY KEY)');
+    if (tableExistsAuth) {
+      // Original version of the database before migrations were introduced,
+      // register the fact that the old schema already exists.
+      db.mutate("INSERT INTO migrations VALUES ('20000000_old_schema.sql')");
+    }
+  }
+
+  let firstUnapplied = null;
+  for (var i = 0; i < migrations.length; i++) {
+    const applied = !db.first('SELECT 1 FROM migrations WHERE id = ?', [
+      migrations[i],
+    ]);
+
+    if (applied) {
+      if (firstUnapplied === null) {
+        firstUnapplied = i;
+      }
+    } else {
+      if (firstUnapplied !== null) {
+        throw new Error('out-of-sync migrations');
+      }
+    }
+  }
+
+  if (firstUnapplied !== null) {
+    for (var i = firstUnapplied; i < migrations.length; i++) {
+      const migrationSql = fs.readFileSync(join(migrationsDir, migrations[i]), {
+        encoding: 'utf8',
+      });
+      db.exec(migrationSql);
+      db.mutate('INSERT INTO migrations (id) VALUES (?)', [migrations[i]]);
+    }
+  }
 }
 
 export function needsBootstrap() {
