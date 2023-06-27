@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import request from 'supertest';
 import { handlers as app } from './app-sync.js';
-import getAccountDb from '../accounts/index.js';
+import getAccountDb from './accounts/index.js';
 import { getPathForUserFile } from './util/paths.js';
 
 describe('/download-user-file', () => {

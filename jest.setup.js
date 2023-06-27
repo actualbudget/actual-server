@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import getAccountDb from './src/account-db.js';
+import getAccountDb from './src/accounts/index.js';
 import config from './src/load-config.js';
 
 // Delete previous test database (force creation of a new one)

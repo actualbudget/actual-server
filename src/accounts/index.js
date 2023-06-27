@@ -52,7 +52,7 @@ function runMigrations(db) {
   }
 
   let firstUnapplied = null;
-  for (var i = 0; i < migrations.length; i++) {
+  for (let i = 0; i < migrations.length; i++) {
     const applied = !db.first('SELECT 1 FROM migrations WHERE id = ?', [
       migrations[i],
     ]);
@@ -69,7 +69,7 @@ function runMigrations(db) {
   }
 
   if (firstUnapplied !== null) {
-    for (var i = firstUnapplied; i < migrations.length; i++) {
+    for (let i = firstUnapplied; i < migrations.length; i++) {
       const migrationSql = fs.readFileSync(join(migrationsDir, migrations[i]), {
         encoding: 'utf8',
       });
@@ -101,8 +101,14 @@ export function bootstrap(loginSettings) {
     return { error: 'already-bootstrapped' };
   }
 
-  const passEnabled = loginSettings.hasOwnProperty('password');
-  const openIdEnabled = loginSettings.hasOwnProperty('openid');
+  const passEnabled = Object.prototype.hasOwnProperty.call(
+    loginSettings,
+    'password',
+  );
+  const openIdEnabled = Object.prototype.hasOwnProperty.call(
+    loginSettings,
+    'openid',
+  );
 
   if (!passEnabled && !openIdEnabled) {
     return { error: 'no-auth-method-selected' };

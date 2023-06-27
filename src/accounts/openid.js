@@ -1,33 +1,33 @@
-import getAccountDb from "./index.js";
+import getAccountDb from './index.js';
 import { generators, Issuer } from 'openid-client';
 
 export function bootstrapOpenId(config) {
-    if (!config.hasOwnProperty('issuer')) {
-      return { error: 'missing-issuer' };
-    }
-    if (!config.hasOwnProperty('client_id')) {
-      return { error: 'missing-client-id' };
-    }
-    if (!config.hasOwnProperty('client_secret')) {
-      return { error: 'missing-client-secret' };
-    }
-    if (!config.hasOwnProperty('server_hostname')) {
-      return { error: 'missing-server-hostname' };
-    }
+  if (!Object.prototype.hasOwnProperty.call(config, 'issuer')) {
+    return { error: 'missing-issuer' };
+  }
+  if (!Object.prototype.hasOwnProperty.call(config, 'client_id')) {
+    return { error: 'missing-client-id' };
+  }
+  if (!Object.prototype.hasOwnProperty.call(config, 'client_secret')) {
+    return { error: 'missing-client-secret' };
+  }
+  if (!Object.prototype.hasOwnProperty.call(config, 'server_hostname')) {
+    return { error: 'missing-server-hostname' };
+  }
 
-    // Beyond verifying that the configuration exists, we do not attempt
-    // to check if the configuration is actually correct.
-    // If the user improperly configures this during bootstrap, there is
-    // no way to recover without manually editing the database. However,
-    // this might not be a real issue since an analogous situation happens
-    // if they forget their password.
-    let accountDb = getAccountDb();
-    accountDb.mutate(
-      "INSERT INTO auth (method, extra_data) VALUES ('openid', ?)",
-      [JSON.stringify(config)],
-    );
+  // Beyond verifying that the configuration exists, we do not attempt
+  // to check if the configuration is actually correct.
+  // If the user improperly configures this during bootstrap, there is
+  // no way to recover without manually editing the database. However,
+  // this might not be a real issue since an analogous situation happens
+  // if they forget their password.
+  let accountDb = getAccountDb();
+  accountDb.mutate(
+    "INSERT INTO auth (method, extra_data) VALUES ('openid', ?)",
+    [JSON.stringify(config)],
+  );
 
-    return {};
+  return {};
 }
 
 async function setupOpenIdClient(config) {
@@ -139,4 +139,3 @@ export async function loginWithOpenIdFinalize(body) {
   let { token } = accountDb.first('SELECT token FROM sessions');
   return { url: `${return_url}/login/openid-cb?token=${token}` };
 }
-
