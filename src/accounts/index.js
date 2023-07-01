@@ -27,8 +27,9 @@ export default function getAccountDb() {
   return _accountDb;
 }
 
-function runMigrations(db) {
-  const migrationsDir = join(sqlDir, 'migrations');
+// This function is not for public usage but needs to be exported to support unit tests.
+export function runMigrations(db) {
+  const migrationsDir = join(sqlDir, 'account', 'migrations');
   let migrations = fs.readdirSync(migrationsDir);
   migrations.sort();
 
