@@ -25,6 +25,10 @@ function expectCorrectSchema(db) {
       sql: 'CREATE TABLE pending_openid_requests\n  (state TEXT PRIMARY KEY,\n   code_verifier TEXT,\n   return_url TEXT,\n   expiry_time INTEGER)',
     },
     {
+      tbl_name: 'secrets',
+      sql: 'CREATE TABLE secrets (\n  name TEXT PRIMARY KEY,\n  value BLOB\n)',
+    },
+    {
       tbl_name: 'sessions',
       sql: 'CREATE TABLE sessions\n  (token TEXT PRIMARY KEY)',
     },
@@ -35,6 +39,7 @@ function expectAllMigrations(db) {
   expect(db.all('select id from migrations order by id')).toEqual([
     { id: '20000000_old_schema.sql' },
     { id: '20230625_extend_auth.sql' },
+    { id: '20230701_integrate_secretsdb.sql' },
   ]);
 }
 

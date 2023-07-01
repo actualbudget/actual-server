@@ -41,11 +41,6 @@ class SecretsDb {
     if (!this.db) {
       this.db = this.open();
     }
-
-    this.debug(`initializing secrets table'`);
-    //Create secret table if it doesn't exist
-    const initSql = fs.readFileSync(join(sqlDir, 'secrets.sql'), 'utf8');
-    this.db.exec(initSql);
   }
 
   open() {
