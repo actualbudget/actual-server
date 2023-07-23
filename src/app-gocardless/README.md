@@ -3,7 +3,7 @@
 Find in [doc](https://docs.google.com/spreadsheets/d/1ogpzydzotOltbssrc3IQ8rhBLlIZbQgm5QCiiNJrkyA/edit#gid=489769432) what is id of bank which you want to integrate
 
 Add the `institution_id` and your name to list of possible options in the frontend
-project `actual/packages/loot-design/src/components/modals/GoCardlessExternalMsg.js`
+project `actual` in file `GoCardlessExternalMsg.js`
 
 ```jsx
 <Strong>Choose your banks:</Strong>
