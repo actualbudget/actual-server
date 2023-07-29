@@ -1,6 +1,6 @@
 import createDebug from 'debug';
 import fs from 'node:fs';
-import config, { sqlDir } from '../load-config.js';
+import { sqlDir } from '../load-config.js';
 import { join } from 'node:path';
 import getAccountDb from '../account-db.js';
 
