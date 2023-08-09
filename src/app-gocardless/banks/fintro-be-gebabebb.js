@@ -69,7 +69,11 @@ export default {
         ].filter(Boolean);
       }
     }
-    return transaction;
+
+    return {
+      ...transaction,
+      date: transaction.valueDate,
+    };
   },
 
   sortTransactions(transactions = []) {

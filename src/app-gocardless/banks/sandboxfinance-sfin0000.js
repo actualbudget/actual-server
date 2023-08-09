@@ -1,4 +1,8 @@
-import { printIban, amountToInteger } from '../utils.js';
+import {
+  printIban,
+  amountToInteger,
+  sortByBookingDateOrValueDate,
+} from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -16,8 +20,19 @@ export default {
     };
   },
 
+  /**
+   * Following the GoCardless documentation[0] we should prefer `bookingDate`
+   * here, though some of their bank integrations uses the date field
+   * differently from what's describen in their documentation and so it's
+   * sometimes necessary to use `valueDate` instead.
+   *
+   *   [0]: https://nordigen.zendesk.com/hc/en-gb/articles/7899367372829-valueDate-and-bookingDate-for-transactions
+   */
   normalizeTransaction(transaction, _booked) {
-    return transaction;
+    return {
+      ...transaction,
+      date: transaction.bookingDate || transaction.valueDate,
+    };
   },
 
   sortTransactions(transactions = []) {
