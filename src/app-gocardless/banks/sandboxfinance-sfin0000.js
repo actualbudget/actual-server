@@ -36,12 +36,7 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    return transactions.sort((a, b) => {
-      const [aTime, aSeq] = a.transactionId.split('-');
-      const [bTime, bSeq] = b.transactionId.split('-');
-
-      return Number(bTime) - Number(aTime) || Number(bSeq) - Number(aSeq);
-    });
+    return sortByBookingDateOrValueDate(transactions);
   },
 
   /**
