@@ -4,7 +4,7 @@ import IntegrationBank from './banks/integration-bank.js';
 import MbankRetailBrexplpw from './banks/mbank-retail-brexplpw.js';
 import NorwegianXxNorwnok1 from './banks/norwegian-xx-norwnok1.js';
 import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
-import FintroBeGebabebb from './banks/fintro-be-gebabebb.js'
+import FintroBeGebabebb from './banks/fintro-be-gebabebb.js';
 
 const banks = [
   AmericanExpressAesudef1,
