@@ -85,6 +85,18 @@ const finalConfig = {
           ...(config.https || {}),
         }
       : config.https,
+  upload:
+    process.env.ACTUAL_FILE_SYNC_LIMIT &&
+    process.env.ACTUAL_SYNC_ENCRYPTED_FILE_LIMIT &&
+    process.env.ACTUAL_FILE_LIMIT
+      ? {
+          fileSyncLimit: +process.env.ACTUAL_FILE_SYNC_LIMIT || 20,
+          syncEncryptedFileLimit:
+            +process.env.ACTUAL_SYNC_ENCRYPTED_FILE_LIMIT || 50,
+          fileLimit: +process.env.ACTUAL_FILE_LIMIT || 20,
+          ...(config.upload || {}),
+        }
+      : config.upload,
 };
 
 debug(`using port ${finalConfig.port}`);
@@ -98,6 +110,14 @@ if (finalConfig.https) {
   debugSensitive(`using https key ${finalConfig.https.key}`);
   debug(`using https cert: ${'*'.repeat(finalConfig.https.cert.length)}`);
   debugSensitive(`using https cert ${finalConfig.https.cert}`);
+}
+
+if (finalConfig.upload) {
+  debug(`using file sync limit ${finalConfig.upload.fileSyncLimit}`);
+  debug(
+    `using sync encrypted file limit ${finalConfig.upload.syncEncryptedFileLimit}`,
+  );
+  debug(`using file limit ${finalConfig.upload.fileLimit}`);
 }
 
 export default finalConfig;

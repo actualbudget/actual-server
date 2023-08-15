@@ -26,9 +26,19 @@ app.use(
     standardHeaders: true,
   }),
 );
-app.use(bodyParser.json({ limit: '40mb' }));
-app.use(bodyParser.raw({ type: 'application/actual-sync', limit: '40mb' }));
-app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '100mb' }));
+app.use(bodyParser.json({ limit: `${config.upload.fileLimit}` }));
+app.use(
+  bodyParser.raw({
+    type: 'application/actual-sync',
+    limit: `${config.upload.fileSyncLimit}mb`,
+  }),
+);
+app.use(
+  bodyParser.raw({
+    type: 'application/encrypted-file',
+    limit: `${config.upload.syncEncryptedFileLimit}mb`,
+  }),
+);
 
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
