@@ -10,7 +10,10 @@ const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 debug(`project root: '${projectRoot}'`);
 export const sqlDir = path.join(projectRoot, 'src', 'sql');
 
-let defaultDataDir = fs.existsSync(path.join(projectRoot, 'config.json')) ? projectRoot : '/data';
+let defaultDataDir = fs.existsSync(path.join(projectRoot, 'config.json'))
+  ? projectRoot
+  : '/data';
+
 debug(`default data directory: '${defaultDataDir}'`);
 
 function parseJSON(path, allowMissing = false) {
