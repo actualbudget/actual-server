@@ -27,7 +27,7 @@ app.use(
     standardHeaders: true,
   }),
 );
-app.use(bodyParser.json({ limit: `${config.upload.fileLimit}` }));
+app.use(bodyParser.json({ limit: `${config.upload.fileSizeLimitMB}mb` }));
 app.use(
   bodyParser.raw({
     type: 'application/actual-sync',
