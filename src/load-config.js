@@ -96,9 +96,9 @@ const finalConfig = {
     process.env.ACTUAL_SYNC_ENCRYPTED_FILE_LIMIT &&
     process.env.ACTUAL_FILE_LIMIT
       ? {
-          fileSyncLimit: +process.env.ACTUAL_FILE_SYNC_LIMIT || 20,
+          fileSyncLimit: +process.env.ACTUAL_FILE_SYNC_LIMIT || +process.env.ACTUAL_FILE_SIZE_LIMIT_MB || 20,
           syncEncryptedFileLimit:
-            +process.env.ACTUAL_SYNC_ENCRYPTED_FILE_LIMIT || 50,
+            +process.env.ACTUAL_SYNC_ENCRYPTED_FILE_LIMIT || +process.env.ACTUAL_FILE_SIZE_LIMIT_MB || 50,
           fileLimit: +process.env.ACTUAL_FILE_LIMIT || 20,
           ...(config.upload || {}),
         }
