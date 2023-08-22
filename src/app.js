@@ -37,7 +37,7 @@ app.use(
 app.use(
   bodyParser.raw({
     type: 'application/encrypted-file',
-    limit: `${config.upload.syncEncryptedFileLimit}mb`,
+    limit: `${config.upload.syncEncryptedFileSizeLimitMB}mb`,
   }),
 );
 
