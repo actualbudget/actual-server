@@ -55,6 +55,11 @@ let defaultConfig = {
     'web',
     'build',
   ),
+  upload: {
+    fileSizeSyncLimitMB: 20,
+    syncEncryptedFileSizeLimitMB: 50,
+    fileSizeLimitMB: 20,
+  },
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -104,7 +109,7 @@ const finalConfig = {
             +process.env.ACTUAL_SYNC_ENCRYPTED_FILE_LIMIT ||
             +process.env.ACTUAL_FILE_SIZE_LIMIT_MB ||
             50,
-          fileLimit: +process.env.ACTUAL_FILE_LIMIT || 20,
+          fileLimit: +process.env.ACTUAL_FILE_SIZE_LIMIT_MB || 20,
           ...(config.upload || {}),
         }
       : config.upload,
