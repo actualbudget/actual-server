@@ -119,11 +119,11 @@ if (finalConfig.https) {
 }
 
 if (finalConfig.upload) {
-  debug(`using file sync limit ${finalConfig.upload.fileSyncLimit}`);
+  debug(`using file sync limit ${finalConfig.upload.fileSizeSyncLimitMB}mb`);
   debug(
-    `using sync encrypted file limit ${finalConfig.upload.syncEncryptedFileLimit}`,
+    `using sync encrypted file limit ${finalConfig.upload.syncEncryptedFileSizeLimitMB}mb`,
   );
-  debug(`using file limit ${finalConfig.upload.fileLimit}`);
+  debug(`using file limit ${finalConfig.upload.fileSizeLimitMB}mb`);
 }
 
 export default finalConfig;
