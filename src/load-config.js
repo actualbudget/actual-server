@@ -97,17 +97,17 @@ const finalConfig = {
         }
       : config.https,
   upload:
-    process.env.ACTUAL_FILE_SYNC_LIMIT ||
-    process.env.ACTUAL_SYNC_ENCRYPTED_FILE_LIMIT ||
-    process.env.ACTUAL_FILE_LIMIT
+    process.env.ACTUAL_FILE_SIZE_SYNC_LIMIT_MB ||
+    process.env.ACTUAL_SYNC_ENCRYPTED_FILE_SIZE_LIMIT_MB ||
+    process.env.ACTUAL_FILE_SIZE_LIMIT_MB
       ? {
           fileSyncLimit:
-            +process.env.ACTUAL_FILE_SYNC_LIMIT ||
-            +process.env.ACTUAL_FILE_SIZE_LIMIT_MB ||
+            process.env.ACTUAL_FILE_SIZE_SYNC_LIMIT_MB ||
+            process.env.ACTUAL_FILE_SIZE_LIMIT_MB ||
             20,
           syncEncryptedFileLimit:
-            +process.env.ACTUAL_SYNC_ENCRYPTED_FILE_LIMIT ||
-            +process.env.ACTUAL_FILE_SIZE_LIMIT_MB ||
+            process.env.ACTUAL_SYNC_ENCRYPTED_FILE_SIZE_LIMIT_MB ||
+            process.env.ACTUAL_FILE_SIZE_LIMIT_MB ||
             50,
           fileLimit: +process.env.ACTUAL_FILE_SIZE_LIMIT_MB || 20,
           ...(config.upload || {}),
