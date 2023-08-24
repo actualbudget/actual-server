@@ -97,20 +97,21 @@ const finalConfig = {
         }
       : config.https,
   upload:
-    process.env.ACTUAL_FILE_SIZE_SYNC_LIMIT_MB ||
-    process.env.ACTUAL_SYNC_ENCRYPTED_FILE_SIZE_LIMIT_MB ||
-    process.env.ACTUAL_FILE_SIZE_LIMIT_MB
+    process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
+    process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
+    process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB
       ? {
           fileSizeSyncLimitMB:
-            process.env.ACTUAL_FILE_SIZE_SYNC_LIMIT_MB ||
-            process.env.ACTUAL_FILE_SIZE_LIMIT_MB ||
-            20,
+            +process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
+            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+            config.upload.fileSizeSyncLimitMB,
           syncEncryptedFileSizeLimitMB:
-            process.env.ACTUAL_SYNC_ENCRYPTED_FILE_SIZE_LIMIT_MB ||
-            process.env.ACTUAL_FILE_SIZE_LIMIT_MB ||
-            50,
-          fileSizeLimitMB: +process.env.ACTUAL_FILE_SIZE_LIMIT_MB || 20,
-          ...(config.upload || {}),
+            +process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
+            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+            config.upload.syncEncryptedFileSizeLimitMB,
+          fileSizeLimitMB:
+            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+            config.upload.fileSizeLimitMB,
         }
       : config.upload,
 };
