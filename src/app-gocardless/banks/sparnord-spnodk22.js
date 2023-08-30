@@ -39,7 +39,7 @@ export default {
     return {
       ...transaction,
       date: transaction.bookingDate,
-      remittanceInformationUnstructured: transaction.additionalInformation
+      remittanceInformationUnstructured: transaction.additionalInformation,
     };
   },
 

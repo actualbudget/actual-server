@@ -16,7 +16,7 @@ const banks = [
   NorwegianXxNorwnok1,
   FintroBeGebabebb,
   DanskeBankDabNO22,
-  SparNordSpNoDK22
+  SparNordSpNoDK22,
 ];
 
 export default (institutionId) =>
