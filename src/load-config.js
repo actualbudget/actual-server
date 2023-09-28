@@ -34,8 +34,14 @@ if (process.env.ACTUAL_CONFIG_PATH) {
   );
   userConfig = parseJSON(process.env.ACTUAL_CONFIG_PATH);
 } else {
-  debug(`loading config from default path: '${defaultDataDir}/config.json'`);
-  userConfig = parseJSON(path.join(defaultDataDir, 'config.json'), true);
+  let configFile = path.join(projectRoot, 'config.json');
+
+  if (!fs.existsSync(configFile)) {
+    configFile = path.join(defaultDataDir, 'config.json');
+  }
+
+  debug(`loading config from default path: '${configFile}'`);
+  userConfig = parseJSON(configFile, true);
 }
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'serverFiles' | 'userFiles'>} */
@@ -49,6 +55,11 @@ let defaultConfig = {
     'web',
     'build',
   ),
+  upload: {
+    fileSizeSyncLimitMB: 20,
+    syncEncryptedFileSizeLimitMB: 50,
+    fileSizeLimitMB: 20,
+  },
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -85,15 +96,24 @@ const finalConfig = {
           ...(config.https || {}),
         }
       : config.https,
-  nordigen:
-    process.env.ACTUAL_NORDIGEN_SECRET_ID &&
-    process.env.ACTUAL_NORDIGEN_SECRET_KEY
+  upload:
+    process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
+    process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
+    process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB
       ? {
-          secretId: process.env.ACTUAL_NORDIGEN_SECRET_ID,
-          secretKey: process.env.ACTUAL_NORDIGEN_SECRET_KEY,
-          ...(config.nordigen || {}),
+          fileSizeSyncLimitMB:
+            +process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
+            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+            config.upload.fileSizeSyncLimitMB,
+          syncEncryptedFileSizeLimitMB:
+            +process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
+            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+            config.upload.syncEncryptedFileSizeLimitMB,
+          fileSizeLimitMB:
+            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+            config.upload.fileSizeLimitMB,
         }
-      : config.nordigen,
+      : config.upload,
 };
 
 debug(`using port ${finalConfig.port}`);
@@ -109,19 +129,12 @@ if (finalConfig.https) {
   debugSensitive(`using https cert ${finalConfig.https.cert}`);
 }
 
-if (finalConfig.nordigen) {
+if (finalConfig.upload) {
+  debug(`using file sync limit ${finalConfig.upload.fileSizeSyncLimitMB}mb`);
   debug(
-    `using nordigen secret id: ${'*'.repeat(
-      finalConfig.nordigen.secretId.length,
-    )}`,
+    `using sync encrypted file limit ${finalConfig.upload.syncEncryptedFileSizeLimitMB}mb`,
   );
-  debugSensitive(`using nordigen secret id ${finalConfig.nordigen.secretId}`);
-  debug(
-    `using nordigen secret key: ${'*'.repeat(
-      finalConfig.nordigen.secretKey.length,
-    )}`,
-  );
-  debugSensitive(`using nordigen secret key ${finalConfig.nordigen.secretKey}`);
+  debug(`using file limit ${finalConfig.upload.fileSizeLimitMB}mb`);
 }
 
 export default finalConfig;

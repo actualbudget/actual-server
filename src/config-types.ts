@@ -11,8 +11,9 @@ export interface Config {
     key: string;
     cert: string;
   } & ServerOptions;
-  nordigen?: {
-    secretId: string;
-    secretKey: string;
+  upload?: {
+    fileSizeSyncLimitMB: number;
+    syncEncryptedFileSizeLimitMB: number;
+    fileSizeLimitMB: number;
   };
 }

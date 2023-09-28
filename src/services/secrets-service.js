@@ -1,5 +1,4 @@
 import createDebug from 'debug';
-import config from '../load-config.js';
 import getAccountDb from '../accounts/index.js';
 
 /**
@@ -17,22 +16,6 @@ class SecretsDb {
     this.debug = createDebug('actual:secrets-db');
     this.db = null;
     this.initialize();
-    this.migrateNordigen();
-  }
-
-  /// Migrates nordigen from config.json or process.env to app secret
-  migrateNordigen() {
-    if (
-      config.nordigen &&
-      (!this.get(SecretName.nordigen_secretId) ||
-        !this.get(SecretName.nordigen_secretKey))
-    ) {
-      this.set(SecretName.nordigen_secretId, config.nordigen.secretId);
-      this.set(SecretName.nordigen_secretKey, config.nordigen.secretKey);
-      this.debug(
-        'Migrated Nordigen keys from config.json/environment to app secrets',
-      );
-    }
   }
 
   initialize() {

@@ -1,6 +1,6 @@
 {
   "name": "actual-sync",
-  "version": "23.6.0",
+  "version": "23.9.0",
   "license": "MIT",
   "description": "actual syncing server",
   "type": "module",
@@ -15,19 +15,20 @@
     "health-check": "node src/scripts/health-check.js"
   },
   "dependencies": {
-    "@actual-app/crdt": "1.0.0",
-    "@actual-app/web": "23.6.0",
+    "@actual-app/crdt": "2.1.0",
+    "@actual-app/web": "23.9.0",
     "bcrypt": "^5.1.0",
     "better-sqlite3": "^8.2.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
+    "date-fns": "^2.30.0",
     "debug": "^4.3.4",
     "express": "4.18.2",
     "express-actuator": "1.8.4",
     "express-rate-limit": "^6.7.0",
     "express-response-size": "^0.0.3",
     "jws": "^4.0.0",
-    "nordigen-node": "^1.2.3",
+    "nordigen-node": "^1.2.6",
     "openid-client": "^5.4.2",
     "uuid": "^9.0.0"
   },

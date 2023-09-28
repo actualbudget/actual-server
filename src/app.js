@@ -8,7 +8,7 @@ import rateLimit from 'express-rate-limit';
 
 import * as accountApp from './app-account.js';
 import * as syncApp from './app-sync.js';
-import * as nordigenApp from './app-nordigen/app-nordigen.js';
+import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as secretApp from './app-secrets.js';
 
 const app = express();
@@ -17,6 +17,7 @@ process.on('unhandledRejection', (reason) => {
   console.log('Rejection:', reason);
 });
 
+app.disable('x-powered-by');
 app.use(cors());
 app.use(
   rateLimit({
@@ -26,13 +27,24 @@ app.use(
     standardHeaders: true,
   }),
 );
-app.use(bodyParser.json({ limit: '20mb' }));
-app.use(bodyParser.raw({ type: 'application/actual-sync', limit: '20mb' }));
-app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
+app.use(bodyParser.json({ limit: `${config.upload.fileSizeLimitMB}mb` }));
+app.use(
+  bodyParser.raw({
+    type: 'application/actual-sync',
+    limit: `${config.upload.fileSizeSyncLimitMB}mb`,
+  }),
+);
+app.use(
+  bodyParser.raw({
+    type: 'application/encrypted-file',
+    limit: `${config.upload.syncEncryptedFileSizeLimitMB}mb`,
+  }),
+);
 
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
-app.use('/nordigen', nordigenApp.handlers);
+app.use('/nordigen', goCardlessApp.handlers);
+app.use('/gocardless', goCardlessApp.handlers);
 app.use('/secret', secretApp.handlers);
 
 app.get('/mode', (req, res) => {
