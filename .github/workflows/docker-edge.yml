@@ -9,8 +9,7 @@ on:
       - README.md
       - LICENSE.txt
   pull_request:
-    branches:
-      - master
+    branches: '*'
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
