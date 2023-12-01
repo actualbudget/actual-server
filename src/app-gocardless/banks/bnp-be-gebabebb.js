@@ -16,7 +16,11 @@ const SORTED_BALANCE_TYPE_LIST = [
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: ['FINTRO_BE_GEBABEBB', 'HELLO_BE_GEBABEBB', 'BNP_BE_GEBABEBB'],
+  institutionIds: [
+    'FINTRO_BE_GEBABEBB', 
+    'HELLO_BE_GEBABEBB',
+    'BNP_BE_GEBABEBB'
+  ],
 
   normalizeAccount(account) {
     return {
