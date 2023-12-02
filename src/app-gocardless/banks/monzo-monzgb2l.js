@@ -7,7 +7,7 @@ import {
 import { applyPatterns } from '../util/apply-pattern.js';
 import { writeFileSync } from 'fs';
 
-const TRANSACTION_CODE_DESCRIPTION = {
+const TRANSACTION_CODES = {
   '3dsecure': 'Online security-authenticated transaction',
   account_interest: 'Account interest credit',
   bacs: 'Regular BACS payment',
@@ -133,7 +133,7 @@ export default {
     updatedTransaction = applyPatterns(updatedTransaction, FIELD_PATTERNS);
     updatedTransaction = applyTransactionMapping(
       updatedTransaction,
-      TRANSACTION_CODE_DESCRIPTION,
+      TRANSACTION_CODES,
     );
 
     return {
