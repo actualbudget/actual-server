@@ -33,7 +33,7 @@ const TRANSACTION_CODES = {
   topup: 'Account top-up',
   uk_business_pot: 'UK business financial transaction',
   uk_cash_deposits_paypoint: 'UK PayPoint cash deposit',
-  uk_retail_pot: 'UK retail financial transaction',
+  // uk_retail_pot: 'UK retail financial transaction',
 };
 
 const FIELD_PATTERNS = [
@@ -67,7 +67,15 @@ const FIELD_PATTERNS = [
           credited: 'debtorName',
           debited: 'creditorName',
         },
-        replacement: 'Savings Pot ($1)',
+        replacement: 'Savings Account',
+      },
+      {
+        regex: /^(.+)$/i,
+        targetField: {
+          credited: 'remittanceInformationUnstructured',
+          debited: 'remittanceInformationUnstructured',
+        },
+        replacement: 'Savings Account $1',
       },
     ],
   },
