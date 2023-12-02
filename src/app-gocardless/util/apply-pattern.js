@@ -45,3 +45,16 @@ export const applyPatterns = (transaction, patternsConfig) => {
 
   return updatedTransaction;
 };
+
+export const applyTransactionMapping = (transaction, descriptions) => {
+  const description = descriptions[transaction.proprietaryBankTransactionCode];
+  return description
+    ? { ...transaction, remittanceInformationUnstructured: description }
+    : transaction;
+};
+
+export const getTransactionDate = (transaction) =>
+  transaction.bookingDate ||
+  transaction.bookingDateTime ||
+  transaction.valueDate ||
+  transaction.valueDateTime;

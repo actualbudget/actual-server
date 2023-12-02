@@ -1,11 +1,8 @@
-import * as d from 'date-fns';
 import {
-  sortByBookingDateOrValueDate,
-  amountToInteger,
-  printIban,
-} from '../utils.js';
-import { applyPatterns } from '../util/apply-pattern.js';
-import { writeFileSync } from 'fs';
+  applyPatterns,
+  applyTransactionMapping,
+} from '../util/apply-pattern.js';
+import * as ib from './integration-bank.js';
 
 const TRANSACTION_CODES = {
   '3dsecure': 'Online security-authenticated transaction',
@@ -92,88 +89,35 @@ const FIELD_PATTERNS = [
   },
 ];
 
-const SORTED_BALANCE_TYPE_LIST = [
-  'closingBooked',
-  'expected',
-  'forwardAvailable',
-  'interimAvailable',
-  'interimBooked',
-  'nonInvoiced',
-  'openingBooked',
-];
-
-const getTransactionDate = (transaction) =>
-  transaction.bookingDate ||
-  transaction.bookingDateTime ||
-  transaction.valueDate ||
-  transaction.valueDateTime;
-
-const applyTransactionMapping = (transaction, descriptions) => {
-  const description = descriptions[transaction.proprietaryBankTransactionCode];
-  return description
-    ? { ...transaction, remittanceInformationUnstructured: description }
-    : transaction;
-};
-
 export default {
   institutionIds: ['MONZO_MONZGB2L'],
   normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.name, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: `integration-${account.institution_id}`,
-      type: 'checking',
-    };
+    return ib.default.normalizeAccount(account);
   },
 
   normalizeTransaction(transaction, _booked) {
-    const date = getTransactionDate(transaction);
-    if (!date) {
+    let updatedTransaction = ib.default.normalizeTransaction(
+      transaction,
+      _booked,
+    );
+    if (!updatedTransaction) {
       return null;
     }
 
-    let updatedTransaction = { ...transaction };
     updatedTransaction = applyPatterns(updatedTransaction, FIELD_PATTERNS);
     updatedTransaction = applyTransactionMapping(
       updatedTransaction,
       TRANSACTION_CODES,
     );
 
-    return {
-      ...updatedTransaction,
-      date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-    };
+    return updatedTransaction;
   },
 
   sortTransactions(transactions = []) {
-    console.log(
-      'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-      { top10Transactions: JSON.stringify(transactions.slice(0, 10)) },
-    );
-    writeFileSync(
-      '/data/transactionsSorted.json',
-      JSON.stringify(transactions),
-    );
-    return sortByBookingDateOrValueDate(transactions);
+    return ib.default.sortTransactions(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    const currentBalance = balances
-      .filter((item) => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
-      .sort(
-        (a, b) =>
-          SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
-          SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
-      )[0];
-
-    return sortedTransactions.reduce(
-      (total, trans) => total - amountToInteger(trans.transactionAmount.amount),
-      amountToInteger(currentBalance?.balanceAmount?.amount || 0),
-    );
+    return ib.default.calculateStartingBalance(sortedTransactions, balances);
   },
 };
