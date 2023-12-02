@@ -1,0 +1,182 @@
+[
+    {
+        "transactionId": "tx_0000AcNjwB8SAbNaocHt4L",
+        "bookingDate": "2023-12-02",
+        "bookingDateTime": "2023-12-02T00:15:43.171Z",
+        "transactionAmount": {
+            "amount": "-19.8200",
+            "currency": "GBP"
+        },
+        "currencyExchange": {
+            "instructedAmount": {
+                "amount": "24.9900",
+                "currency": "USD"
+            },
+            "sourceCurrency": "USD",
+            "exchangeRate": "1.2608476287",
+            "unitCurrency": "GBP",
+            "targetCurrency": "GBP"
+        },
+        "creditorName": "Paulsklarxfit",
+        "remittanceInformationUnstructured": "Mastercard network transaction.",
+        "proprietaryBankTransactionCode": "mastercard",
+        "merchantCategoryCode": "5815",
+        "internalTransactionId": "84faec961cdbd553cf92da195502cc32",
+        "date": "2023-12-02",
+        "booked": true
+    },
+    {
+        "transactionId": "tx_0000AcMWi9YziyaLJDeeC9",
+        "bookingDate": "2023-12-01",
+        "bookingDateTime": "2023-12-01T10:12:48.298Z",
+        "transactionAmount": {
+            "amount": "-600.0000",
+            "currency": "GBP"
+        },
+        "remittanceInformationUnstructured": "UK retail financial transaction.",
+        "proprietaryBankTransactionCode": "uk_retail_pot",
+        "internalTransactionId": "a351a981587784aeb770a9eaed068377",
+        "date": "2023-12-01",
+        "booked": true
+    },
+    {
+        "transactionId": "tx_0000AcM2kskXhG3Dz9SBCT",
+        "bookingDate": "2023-12-01",
+        "bookingDateTime": "2023-12-01T04:37:08.862Z",
+        "transactionAmount": {
+            "amount": "-300.0000",
+            "currency": "GBP"
+        },
+        "creditorName": "Aj Bell Securities",
+        "creditorAccount": {
+            "bban": "12273406000096"
+        },
+        "remittanceInformationUnstructured": "Regular BACS payment.",
+        "proprietaryBankTransactionCode": "bacs",
+        "internalTransactionId": "f57e86abc857f24dece921ba738cebae",
+        "date": "2023-12-01",
+        "booked": true
+    },
+    {
+        "transactionId": "tx_0000AcM2krH5BIfDSPn2FF",
+        "bookingDate": "2023-12-01",
+        "bookingDateTime": "2023-12-01T04:37:08.731Z",
+        "transactionAmount": {
+            "amount": "28.3600",
+            "currency": "GBP"
+        },
+        "remittanceInformationUnstructured": "UK retail financial transaction.",
+        "proprietaryBankTransactionCode": "uk_retail_pot",
+        "internalTransactionId": "16fa782bcb4d8f39fbcb7404d855c8ad",
+        "date": "2023-12-01",
+        "booked": true
+    },
+    {
+        "transactionId": "tx_0000AcM04A3bGyQghoiGvJ",
+        "bookingDate": "2023-12-01",
+        "bookingDateTime": "2023-12-01T04:07:01.104Z",
+        "transactionAmount": {
+            "amount": "-96.3200",
+            "currency": "GBP"
+        },
+        "creditorName": "Octopus Energy",
+        "creditorAccount": {
+            "bban": "40032843807509"
+        },
+        "remittanceInformationUnstructured": "Regular BACS payment.",
+        "proprietaryBankTransactionCode": "bacs",
+        "internalTransactionId": "fedac469a916469ed416a984a7628a71",
+        "date": "2023-12-01",
+        "booked": true
+    },
+    {
+        "transactionId": "tx_0000AcM049CQSg3fRfPqCX",
+        "bookingDate": "2023-12-01",
+        "bookingDateTime": "2023-12-01T04:07:00.998Z",
+        "transactionAmount": {
+            "amount": "96.3200",
+            "currency": "GBP"
+        },
+        "remittanceInformationUnstructured": "UK retail financial transaction.",
+        "proprietaryBankTransactionCode": "uk_retail_pot",
+        "internalTransactionId": "ceb199ce58faceda49771ac31cb47468",
+        "date": "2023-12-01",
+        "booked": true
+    },
+    {
+        "transactionId": "tx_0000AcLuaYY39RqJbYbJEx",
+        "bookingDate": "2023-12-01",
+        "bookingDateTime": "2023-12-01T03:05:38.52Z",
+        "transactionAmount": {
+            "amount": "-13.2500",
+            "currency": "GBP"
+        },
+        "creditorName": "Tv Licence Mbp",
+        "creditorAccount": {
+            "bban": "60800930287634"
+        },
+        "remittanceInformationUnstructured": "Regular BACS payment.",
+        "proprietaryBankTransactionCode": "bacs",
+        "internalTransactionId": "28c48519f01519f84b91232d41ed17ef",
+        "date": "2023-12-01",
+        "booked": true
+    },
+    {
+        "transactionId": "tx_0000AcLuaXdKYK6vxtde1B",
+        "bookingDate": "2023-12-01",
+        "bookingDateTime": "2023-12-01T03:05:38.379Z",
+        "transactionAmount": {
+            "amount": "13.2500",
+            "currency": "GBP"
+        },
+        "remittanceInformationUnstructured": "UK retail financial transaction.",
+        "proprietaryBankTransactionCode": "uk_retail_pot",
+        "internalTransactionId": "b7ea0f4014e4d9207f2d5d51c383c5e4",
+        "date": "2023-12-01",
+        "booked": true
+    },
+    {
+        "transactionId": "tx_0000AcJyrVS5vVTHfdw3Ri",
+        "bookingDate": "2023-11-30",
+        "bookingDateTime": "2023-11-30T04:44:06.322Z",
+        "transactionAmount": {
+            "amount": "-10.3900",
+            "currency": "GBP"
+        },
+        "currencyExchange": {
+            "instructedAmount": {
+                "amount": "11.9900",
+                "currency": "EUR"
+            },
+            "sourceCurrency": "EUR",
+            "exchangeRate": "1.1539942252",
+            "unitCurrency": "GBP",
+            "targetCurrency": "GBP"
+        },
+        "creditorName": "Netflix",
+        "remittanceInformationUnstructured": "Mastercard network transaction.",
+        "proprietaryBankTransactionCode": "mastercard",
+        "merchantCategoryCode": "4899",
+        "internalTransactionId": "0ec3e82c20cbaf6ca5b2959bcbf86e3b",
+        "date": "2023-11-30",
+        "booked": true
+    },
+    {
+        "transactionId": "tx_0000AcJqNNU0BylQdLwycz",
+        "bookingDate": "2023-11-30",
+        "bookingDateTime": "2023-11-30T03:09:01.125Z",
+        "transactionAmount": {
+            "amount": "-109.9900",
+            "currency": "GBP"
+        },
+        "creditorName": "Virgin Active",
+        "creditorAccount": {
+            "bban": "20658280662801"
+        },
+        "remittanceInformationUnstructured": "Regular BACS payment.",
+        "proprietaryBankTransactionCode": "bacs",
+        "internalTransactionId": "df41e6bc9ceda4020234a245a37e15d5",
+        "date": "2023-11-30",
+        "booked": true
+    }
+]
