@@ -100,7 +100,7 @@ const getTransactionDate = (transaction) =>
   transaction.valueDate ||
   transaction.valueDateTime;
 
-const updateTransactionInfo = (transaction, descriptions) => {
+const applyTransactionMapping = (transaction, descriptions) => {
   const description = descriptions[transaction.proprietaryBankTransactionCode];
   return description
     ? { ...transaction, remittanceInformationUnstructured: description }
@@ -131,7 +131,7 @@ export default {
 
     let updatedTransaction = { ...transaction };
     updatedTransaction = applyPatterns(updatedTransaction, FIELD_PATTERNS);
-    updatedTransaction = updateTransactionInfo(
+    updatedTransaction = applyTransactionMapping(
       updatedTransaction,
       TRANSACTION_CODE_DESCRIPTION,
     );
