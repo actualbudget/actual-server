@@ -123,4 +123,15 @@ export const FIELD_PATTERNS = [
       },
     ],
   },
+  {
+    transactionCode: 'CASHBACK',
+    patterns: [
+      {
+        regex: /^.+Direct Debit Payment.+$/i,
+        sourceField: 'remittanceInformationUnstructured',
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Santander',
+      },
+    ],
+  },
 ];
