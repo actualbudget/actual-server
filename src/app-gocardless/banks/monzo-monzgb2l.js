@@ -1,4 +1,5 @@
 import { FIELD_PATTERNS } from '../patterns/monzo.js';
+import { VENDOR_PATTERNS } from '../patterns/vendors.js';
 import {
   applyTransactionPatterns as applyTransactionPatterns,
   applyTransactionMapping,
@@ -54,6 +55,10 @@ export default {
     updatedTransaction = applyTransactionPatterns(
       updatedTransaction,
       FIELD_PATTERNS,
+    );
+    updatedTransaction = applyTransactionPatterns(
+      updatedTransaction,
+      VENDOR_PATTERNS,
     );
     updatedTransaction = applyTransactionMapping(
       updatedTransaction,
