@@ -87,6 +87,11 @@ export const VENDOR_PATTERNS = [
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
       },
+      {
+        regex: /^Indiegogo\*(.+)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
     ],
   },
 ];
