@@ -1,88 +1,51 @@
-import * as d from 'date-fns';
+import { writeFileSync } from 'fs';
+import { VENDOR_PATTERNS } from '../patterns/vendors.js';
 import {
-  sortByBookingDateOrValueDate,
-  amountToInteger,
-  printIban,
-} from '../utils.js';
+  applyTransactionPatterns as applyTransactionPatterns,
+  normalizeCreditorAndDebtorNames,
+  toTitleCase,
+} from '../util/apply-pattern.js';
+import * as ib from './integration-bank.js';
 
-const SORTED_BALANCE_TYPE_LIST = [
-  'closingBooked',
-  'expected',
-  'forwardAvailable',
-  'interimAvailable',
-  'interimBooked',
-  'nonInvoiced',
-  'openingBooked',
-];
-
-/** @type {import('./bank.interface.js').IBank} */
 export default {
   institutionIds: ['REVOLUT_REVOGB21'],
   normalizeAccount(account) {
-    console.log(
-      'Available account properties for new institution integration',
-      { account: JSON.stringify(account) },
-    );
-
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.name, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: `integration-${account.institution_id}`,
-      type: 'checking',
-    };
+    return ib.default.normalizeAccount(account);
   },
 
   normalizeTransaction(transaction, _booked) {
-    const date =
-      transaction.bookingDate ||
-      transaction.bookingDateTime ||
-      transaction.valueDate ||
-      transaction.valueDateTime;
-    // If we couldn't find a valid date field we filter out this transaction
-    // and hope that we will import it again once the bank has processed the
-    // transaction further.
-    if (!date) {
+    let updatedTransaction = ib.default.normalizeTransaction(
+      transaction,
+      _booked,
+    );
+    if (!updatedTransaction) {
       return null;
     }
-    return {
-      ...transaction,
-      date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-    };
-  },
 
-  sortTransactions(transactions = []) {
-    console.log(
-      'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-      { top10Transactions: JSON.stringify(transactions.slice(0, 10)) },
+    updatedTransaction = normalizeCreditorAndDebtorNames(updatedTransaction);
+    updatedTransaction = applyTransactionPatterns(
+      updatedTransaction,
+      VENDOR_PATTERNS,
     );
-    return sortByBookingDateOrValueDate(transactions);
-  },
 
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    console.log(
-      'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
-      {
-        balances: JSON.stringify(balances),
-        top10SortedTransactions: JSON.stringify(
-          sortedTransactions.slice(0, 10),
-        ),
+    ['debtorName', 'creditorName', 'remittanceInformationUnstructured'].forEach(
+      (fieldName) => {
+        let fieldValue = updatedTransaction[fieldName];
+        if (fieldValue) {
+          updatedTransaction[fieldName] = toTitleCase(fieldValue);
+        }
       },
     );
 
-    const currentBalance = balances
-      .filter((item) => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
-      .sort(
-        (a, b) =>
-          SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
-          SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
-      )[0];
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
+    return updatedTransaction;
+  },
+
+  sortTransactions(transactions = []) {
+    writeFileSync('/data/transactions.json', JSON.stringify(transactions));
+    return ib.default.sortTransactions(transactions);
+  },
+
+  calculateStartingBalance(sortedTransactions = [], balances = []) {
+    return ib.default.calculateStartingBalance(sortedTransactions, balances);
   },
 };
