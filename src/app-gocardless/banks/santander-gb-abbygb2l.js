@@ -3,6 +3,7 @@ import {
   applyPatterns,
   applyTransactionMapping,
   titleCaseObjectStrings,
+  toTitleCase,
 } from '../util/apply-pattern.js';
 import * as ib from './integration-bank.js';
 
@@ -181,6 +182,15 @@ export default {
     updatedTransaction = applyTransactionMapping(
       updatedTransaction,
       TRANSACTION_CODES,
+    );
+
+    ['debtorName', 'creditorName', 'remittanceInformationUnstructured'].forEach(
+      (fieldName) => {
+        let fieldValue = updatedTransaction[fieldName];
+        if (fieldValue) {
+          updatedTransaction[fieldName] = toTitleCase(fieldValue);
+        }
+      },
     );
 
     return titleCaseObjectStrings(updatedTransaction);
