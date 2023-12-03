@@ -1,3 +1,4 @@
+import { MASTERCARD_CODES } from '../patterns/mastercard.js';
 import { FIELD_PATTERNS, TRANSACTION_CODES } from '../patterns/monzo.js';
 import { VENDOR_PATTERNS } from '../patterns/vendors.js';
 import {
@@ -35,6 +36,24 @@ export default {
       updatedTransaction,
       TRANSACTION_CODES,
     );
+
+    const {
+      merchantCategoryCode,
+      proprietaryBankTransactionCode,
+      remittanceInformationUnstructured,
+    } = updatedTransaction || {};
+
+    if (
+      merchantCategoryCode &&
+      proprietaryBankTransactionCode === 'mastercard'
+    ) {
+      const merchanCategory = MASTERCARD_CODES[merchantCategoryCode];
+      if (merchanCategory) {
+        updatedTransaction[
+          'remittanceInformationUnstructured'
+        ] = `${remittanceInformationUnstructured}. Category ${merchanCategory}`;
+      }
+    }
 
     return updatedTransaction;
   },
