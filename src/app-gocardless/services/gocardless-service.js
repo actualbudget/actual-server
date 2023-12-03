@@ -441,7 +441,7 @@ export const goCardlessService = {
   getTransactions: async ({ institutionId, accountId, startDate, endDate }) => {
     const response = await client.getTransactions({
       accountId,
-      dateFrom: '2022-12-30',
+      dateFrom: startDate,
       dateTo: endDate,
     });
 
