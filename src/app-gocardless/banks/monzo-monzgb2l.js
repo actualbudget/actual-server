@@ -52,7 +52,7 @@ export default {
       if (merchanCategory) {
         updatedTransaction[
           'remittanceInformationUnstructured'
-        ] = `${remittanceInformationUnstructured}. Category ${merchanCategory}`;
+        ] = `${remittanceInformationUnstructured} Of ${merchanCategory}`;
       }
     }
 
