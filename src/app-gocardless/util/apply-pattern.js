@@ -1,18 +1,16 @@
-import { amountToInteger } from '../utils.js';
-
-export const applyPatterns = (transaction, patternsConfig) => {
-  const transactionCode = transaction.proprietaryBankTransactionCode;
+export const applyTransactionPatterns = (transaction, patternsConfig) => {
+  const transactionCode =
+    transaction.proprietaryBankTransactionCode.toUpperCase();
 
   // Filter all applicable pattern groups, including 'any'
   const applicablePatternGroups = patternsConfig.filter(
     (patternGroup) =>
       patternGroup.transactionCode === 'any' ||
-      patternGroup.transactionCode == transactionCode,
+      patternGroup.transactionCode.toUpperCase() == transactionCode,
   );
 
   if (applicablePatternGroups.length === 0) return transaction;
 
-  // minus sign is typically used to denote debit, so check for absence of minus sign for credit
   const isCredited =
     transaction.transactionAmount.amount > 0 ||
     Object.is(Number(transaction.transactionAmount.amount), 0);
@@ -27,7 +25,7 @@ export const applyPatterns = (transaction, patternsConfig) => {
 
       let fieldValue;
 
-      if (pattern.sourceField) {
+      if (pattern?.sourceField) {
         // Handle mappings
         fieldValue = updatedTransaction[pattern.sourceField];
       } else {
@@ -70,3 +68,22 @@ export const toTitleCase = (str) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
     .trim();
+
+export const normalizeCreditorAndDebtorNames = (transaction) => {
+  const isCredited =
+    transaction.amount > 0 || Object.is(Number(transaction.amount), 0);
+
+  if (isCredited) {
+    if (!transaction.debtorName) {
+      transaction.debtorName = transaction.creditorName || null;
+      transaction.creditorName = null;
+    }
+  } else {
+    if (!transaction.creditorName) {
+      transaction.creditorName = transaction.debtorName || null;
+      transaction.debtorName = null;
+    }
+  }
+
+  return transaction;
+};

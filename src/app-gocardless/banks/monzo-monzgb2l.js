@@ -1,5 +1,5 @@
 import {
-  applyPatterns,
+  applyTransactionPatterns as applyTransactionPatterns,
   applyTransactionMapping,
 } from '../util/apply-pattern.js';
 import * as ib from './integration-bank.js';
@@ -104,7 +104,10 @@ export default {
       return null;
     }
 
-    updatedTransaction = applyPatterns(updatedTransaction, FIELD_PATTERNS);
+    updatedTransaction = applyTransactionPatterns(
+      updatedTransaction,
+      FIELD_PATTERNS,
+    );
     updatedTransaction = applyTransactionMapping(
       updatedTransaction,
       TRANSACTION_CODES,

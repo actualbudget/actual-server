@@ -1,8 +1,9 @@
 import { writeFileSync } from 'fs';
 import {
-  applyPatterns,
+  applyTransactionPatterns,
   applyTransactionMapping,
   toTitleCase,
+  normalizeCreditorAndDebtorNames,
 } from '../util/apply-pattern.js';
 import * as ib from './integration-bank.js';
 
@@ -177,7 +178,11 @@ export default {
       return null;
     }
 
-    updatedTransaction = applyPatterns(updatedTransaction, FIELD_PATTERNS);
+    updatedTransaction = normalizeCreditorAndDebtorNames(updatedTransaction);
+    updatedTransaction = applyTransactionPatterns(
+      updatedTransaction,
+      FIELD_PATTERNS,
+    );
     updatedTransaction = applyTransactionMapping(
       updatedTransaction,
       TRANSACTION_CODES,
