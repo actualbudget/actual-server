@@ -72,6 +72,21 @@ export const VENDOR_PATTERNS = [
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'Uber',
       },
+      {
+        regex: /^Uber\* Eats (Pending){0,1}$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Uber Eats',
+      },
+      {
+        regex: /^Sumup \*(.+)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+      {
+        regex: /^Zettle_\*(.+)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
     ],
   },
 ];
