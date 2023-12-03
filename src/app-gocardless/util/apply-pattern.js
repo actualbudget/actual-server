@@ -58,3 +58,24 @@ export const getTransactionDate = (transaction) =>
   transaction.bookingDateTime ||
   transaction.valueDate ||
   transaction.valueDateTime;
+
+const toTitleCase = (str) =>
+  str
+    .toLowerCase()
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+export const titleCaseObjectStrings = (obj) =>
+  Object.entries(obj).reduce(
+    (newObj, [key, value]) => {
+      newObj[key] =
+        typeof value === 'string'
+          ? toTitleCase(value)
+          : value && typeof value === 'object'
+          ? titleCaseObjectStrings(value)
+          : value;
+      return newObj;
+    },
+    Array.isArray(obj) ? [] : {},
+  );

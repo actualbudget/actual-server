@@ -9,6 +9,7 @@ import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
 import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import MonzoMonzGb21 from './banks/monzo-monzgb2l.js';
+import SantanderGbAbbyGb21 from './banks/santander-gb-abbygb2l.js';
 
 const banks = [
   AmericanExpressAesudef1,
@@ -21,6 +22,7 @@ const banks = [
   SparNordSpNoDK22,
   Belfius,
   MonzoMonzGb21,
+  SantanderGbAbbyGb21,
 ];
 
 export default (institutionId) =>

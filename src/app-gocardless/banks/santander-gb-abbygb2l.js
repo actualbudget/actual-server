@@ -1,88 +1,197 @@
-import * as d from 'date-fns';
+import { writeFileSync } from 'fs';
 import {
-  sortByBookingDateOrValueDate,
-  amountToInteger,
-  printIban,
-} from '../utils.js';
+  applyPatterns,
+  applyTransactionMapping,
+  titleCaseObjectStrings,
+} from '../util/apply-pattern.js';
+import * as ib from './integration-bank.js';
 
-const SORTED_BALANCE_TYPE_LIST = [
-  'closingBooked',
-  'expected',
-  'forwardAvailable',
-  'interimAvailable',
-  'interimBooked',
-  'nonInvoiced',
-  'openingBooked',
+const TRANSACTION_CODES = {
+  '3dsecure': 'Online security-authenticated transaction',
+  account_interest: 'Account interest credit',
+  bacs: 'Regular BACS payment',
+  card_delivery: 'Bank card delivery charge',
+  chaps: 'High-value same-day transfer',
+  collections_settlement: 'Collections or debt settlement',
+  emergency_cash: 'Emergency cash withdrawal',
+  faster_payments: 'Immediate Faster Payments transfer',
+  instalment_loan: 'Instalment loan repayment',
+  ledger_adjustment: 'Ledger correction adjustment',
+  locked_money: 'Locked funds transaction',
+  mastercard: 'Mastercard network transaction',
+  monzo_business_account_billing: 'Monzo business account service billing',
+  monzo_flex: 'Monzo Flex plan transaction',
+  monzo_paid: 'Monzo service payment',
+  overdraft: 'Overdraft transaction',
+  p2p_payment: 'Peer-to-peer payment',
+  payport_faster_payments: 'Payport Faster Payments transaction',
+  rbs_cheque: 'RBS cheque transaction',
+  sepa: 'SEPA network transaction',
+  signup_referral: 'Signup referral transaction',
+  spread_the_cost: 'Cost-spreading service transaction',
+  topup: 'Account top-up',
+  uk_business_pot: 'UK business financial transaction',
+  uk_cash_deposits_paypoint: 'UK PayPoint cash deposit',
+  // uk_retail_pot: 'UK retail financial transaction',
+};
+
+const FIELD_PATTERNS = [
+  {
+    transactionCode: 'all',
+    patterns: [
+      {
+        regex: /^\s+$/gi,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: ' ',
+      },
+    ],
+  },
+  {
+    transactionCode: 'OTT DEBIT',
+    patterns: [
+      {
+        regex: /^(?:SQ [*]{0,1}){0,1}([A-Za-z0-9\s]+)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+      {
+        regex: /^FOREIGN CURRENCY CONVERSION FEE$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Santander',
+      },
+      {
+        regex: /^([A-Za-z0-9\s]+) [0-9]{2,2}[A-Z]{3,3} [A-Z0-9]+$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+    ],
+  },
+  {
+    transactionCode: 'BANK TRANSFER CREDIT',
+    patterns: [
+      {
+        regex: /^BANK GIRO CREDIT REF (.+?)[,]? \d{2}-\d{2}-\d{2}$/i,
+        sourceField: 'remittanceInformationUnstructured',
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+    ],
+  },
+  {
+    transactionCode: 'BANK TRANSFER DEBIT',
+    patterns: [
+      {
+        regex:
+          /^(.+?) REFERENCE ([A-Za-z0-9\s]+){1,1}(-[A-Za-z0-9]+){0,1} [A-Za-z0-9\s]+?$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+      {
+        regex: /^(.+?) REFERENCE ([A-Za-z0-9\s]+){1,1} [A-Za-z0-9\s]+$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+      {
+        regex: /^(.+?) REFERENCE (.+)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+    ],
+  },
+  {
+    transactionCode: 'FASTER PAYMENT RECEIPT',
+    patterns: [
+      {
+        regex: /^([A-Za-z0-9\s]+?) FROM ([A-Za-z0-9\s]+?)"$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$2',
+      },
+    ],
+  },
+  {
+    transactionCode: 'DEBIT CARD CASH WITHDRAWAL',
+    patterns: [
+      {
+        regex:
+          /^CASH WITHDRAWAL HANDLING CHARGE \(% \d+\.\d{2}: MAX (\d{1,3})(,\d{1,3}){1,2}(\.\d{2,2}){1}$/i,
+        sourceField: 'remittanceInformationUnstructured',
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Santander',
+      },
+      {
+        regex:
+          /^CASH WITHDRAWAL AT ATM ([A-Za-z\s]+), ([A-Za-z\s]+),? (\d{1,3}(,?\d{3})*\.\d{2}) [A-Z]{3},? RATE \d+\.\d{4} [A-Z]{3} ON (\d{2}-\d{2}-\d{4})$/i,
+        sourceField: 'remittanceInformationUnstructured',
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Santander',
+      },
+    ],
+  },
+  {
+    transactionCode: 'CREDIT INTEREST',
+    patterns: [
+      {
+        regex: /^INTEREST PAID AFTER TAX (\d{1,3}(,?\d{3})*\.\d{2}) DEDUCTED$/i,
+        sourceField: 'remittanceInformationUnstructured',
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Santander',
+      },
+    ],
+  },
+  {
+    transactionCode: 'MONTHLY ACCOUNT FEE',
+    patterns: [
+      {
+        regex: /^.+$/i,
+        sourceField: 'remittanceInformationUnstructured',
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Santander',
+      },
+    ],
+  },
+  {
+    transactionCode: 'APPLE PAY IN-APP',
+    patterns: [
+      {
+        regex: /^.+$/i,
+        sourceField: 'remittanceInformationUnstructured',
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Apple Pay',
+      },
+    ],
+  },
 ];
 
-/** @type {import('./bank.interface.js').IBank} */
 export default {
   institutionIds: ['SANTANDER_GB_ABBYGB2L'],
   normalizeAccount(account) {
-    console.log(
-      'Available account properties for new institution integration',
-      { account: JSON.stringify(account) },
-    );
-
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.name, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: `integration-${account.institution_id}`,
-      type: 'checking',
-    };
+    return ib.default.normalizeAccount(account);
   },
 
   normalizeTransaction(transaction, _booked) {
-    const date =
-      transaction.bookingDate ||
-      transaction.bookingDateTime ||
-      transaction.valueDate ||
-      transaction.valueDateTime;
-    // If we couldn't find a valid date field we filter out this transaction
-    // and hope that we will import it again once the bank has processed the
-    // transaction further.
-    if (!date) {
+    let updatedTransaction = ib.default.normalizeTransaction(
+      transaction,
+      _booked,
+    );
+    if (!updatedTransaction) {
       return null;
     }
-    return {
-      ...transaction,
-      date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-    };
+
+    updatedTransaction = applyPatterns(updatedTransaction, FIELD_PATTERNS);
+    updatedTransaction = applyTransactionMapping(
+      updatedTransaction,
+      TRANSACTION_CODES,
+    );
+
+    return titleCaseObjectStrings(updatedTransaction);
   },
 
   sortTransactions(transactions = []) {
-    console.log(
-      'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-      { top10Transactions: JSON.stringify(transactions.slice(0, 10)) },
-    );
-    return sortByBookingDateOrValueDate(transactions);
+    writeFileSync('/data/santander.json', JSON.stringify(transactions));
+    return ib.default.sortTransactions(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    console.log(
-      'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
-      {
-        balances: JSON.stringify(balances),
-        top10SortedTransactions: JSON.stringify(
-          sortedTransactions.slice(0, 10),
-        ),
-      },
-    );
-
-    const currentBalance = balances
-      .filter((item) => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
-      .sort(
-        (a, b) =>
-          SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
-          SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
-      )[0];
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
+    return ib.default.calculateStartingBalance(sortedTransactions, balances);
   },
 };
