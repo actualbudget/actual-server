@@ -1,7 +1,6 @@
 import { writeFileSync } from 'fs';
 import {
   applyTransactionPatterns,
-  applyTransactionMapping,
   toTitleCase,
   normalizeCreditorAndDebtorNames,
 } from '../util/apply-pattern.js';

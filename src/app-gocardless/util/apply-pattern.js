@@ -1,3 +1,8 @@
+export const isCreditedTransaction = (transaction) => {
+  const transAmount = transaction.transactionAmount.amount;
+  return transAmount > 0 || Object.is(Number(transAmount), 0);
+};
+
 export const applyTransactionPatterns = (transaction, patternsConfig) => {
   const transactionCode =
     transaction.proprietaryBankTransactionCode.toUpperCase();
@@ -11,8 +16,7 @@ export const applyTransactionPatterns = (transaction, patternsConfig) => {
 
   if (applicablePatternGroups.length === 0) return transaction;
 
-  const transAmount = transaction.transactionAmount.amount;
-  const isCredited = transAmount > 0 || Object.is(Number(transAmount), 0);
+  const isCredited = isCreditedTransaction(transaction);
 
   let updatedTransaction = { ...transaction };
 
@@ -69,8 +73,7 @@ export const toTitleCase = (str) =>
     .trim();
 
 export const normalizeCreditorAndDebtorNames = (transaction) => {
-  const transAmount = transaction.transactionAmount.amount;
-  const isCredited = transAmount > 0 || Object.is(Number(transAmount), 0);
+  const isCredited = isCreditedTransaction(transaction);
 
   let updatedTransaction = { ...transaction };
   if (isCredited) {
