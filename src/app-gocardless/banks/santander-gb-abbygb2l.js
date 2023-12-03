@@ -45,6 +45,26 @@ const FIELD_PATTERNS = [
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: ' ',
       },
+      {
+        regex: /^Amazon\.Co\.Uk\*[a-zA-Z0-9]+$/gi,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Amazon',
+      },
+      {
+        regex: /^American Exp [0-9]+$/gi,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'American Express',
+      },
+      {
+        regex: /^Amex Cbr Bacs$/gi,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'American Express',
+      },
+      {
+        regex: /^British A[0-9]+$/gi,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'British Airways',
+      },
     ],
   },
   {
@@ -71,7 +91,7 @@ const FIELD_PATTERNS = [
     transactionCode: 'BANK TRANSFER CREDIT',
     patterns: [
       {
-        regex: /^BANK GIRO CREDIT REF (.+?)[,]? \d{2}-\d{2}-\d{2}$/i,
+        regex: /^BANK GIRO CREDIT REF (.+?), (.+)$/i,
         sourceField: 'remittanceInformationUnstructured',
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
@@ -103,7 +123,7 @@ const FIELD_PATTERNS = [
     transactionCode: 'FASTER PAYMENT RECEIPT',
     patterns: [
       {
-        regex: /^([A-Za-z0-9\s]+?) FROM ([A-Za-z0-9\s]+?)"$/i,
+        regex: /^([A-Za-z0-9\s]+?) FROM ([A-Za-z0-9\s]+?)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$2',
       },

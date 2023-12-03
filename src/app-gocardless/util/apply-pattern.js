@@ -11,9 +11,8 @@ export const applyTransactionPatterns = (transaction, patternsConfig) => {
 
   if (applicablePatternGroups.length === 0) return transaction;
 
-  const isCredited =
-    transaction.transactionAmount.amount > 0 ||
-    Object.is(Number(transaction.transactionAmount.amount), 0);
+  const transAmount = transaction.transactionAmount.amount;
+  const isCredited = transAmount > 0 || Object.is(Number(transAmount), 0);
 
   let updatedTransaction = { ...transaction };
 
@@ -70,20 +69,21 @@ export const toTitleCase = (str) =>
     .trim();
 
 export const normalizeCreditorAndDebtorNames = (transaction) => {
-  const isCredited =
-    transaction.amount > 0 || Object.is(Number(transaction.amount), 0);
+  const transAmount = transaction.transactionAmount.amount;
+  const isCredited = transAmount > 0 || Object.is(Number(transAmount), 0);
 
+  let updatedTransaction = { ...transaction };
   if (isCredited) {
     if (!transaction.debtorName) {
-      transaction.debtorName = transaction.creditorName || null;
-      transaction.creditorName = null;
+      updatedTransaction.debtorName = transaction.creditorName || null;
+      updatedTransaction.creditorName = null;
     }
   } else {
     if (!transaction.creditorName) {
-      transaction.creditorName = transaction.debtorName || null;
-      transaction.debtorName = null;
+      updatedTransaction.creditorName = transaction.debtorName || null;
+      updatedTransaction.debtorName = null;
     }
   }
 
-  return transaction;
+  return updatedTransaction;
 };

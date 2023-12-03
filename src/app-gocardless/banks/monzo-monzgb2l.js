@@ -1,6 +1,7 @@
 import {
   applyTransactionPatterns as applyTransactionPatterns,
   applyTransactionMapping,
+  normalizeCreditorAndDebtorNames,
 } from '../util/apply-pattern.js';
 import * as ib from './integration-bank.js';
 
@@ -104,6 +105,7 @@ export default {
       return null;
     }
 
+    updatedTransaction = normalizeCreditorAndDebtorNames(updatedTransaction);
     updatedTransaction = applyTransactionPatterns(
       updatedTransaction,
       FIELD_PATTERNS,

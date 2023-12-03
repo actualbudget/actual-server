@@ -265,7 +265,7 @@ export const goCardlessService = {
       institutionId,
       referenceId: uuid.v4(),
       accessValidForDays,
-      maxHistoricalDays: 90,
+      maxHistoricalDays: 360,
       userLanguage: 'en',
       ssn: null,
       redirectImmediate: false,
@@ -441,7 +441,7 @@ export const goCardlessService = {
   getTransactions: async ({ institutionId, accountId, startDate, endDate }) => {
     const response = await client.getTransactions({
       accountId,
-      dateFrom: startDate,
+      dateFrom: '2022-12-30',
       dateTo: endDate,
     });
 
