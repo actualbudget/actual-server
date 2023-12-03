@@ -1,4 +1,5 @@
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
+import AmericanEexpressAesugb21 from './banks/american-express-aesugb21.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
 import CaixaGeralDepositorsCgdPtPl from './banks/caixa-geral-depositos-cgdiptpl.js';
@@ -14,6 +15,7 @@ import SantanderGbAbbyGb21 from './banks/santander-gb-abbygb2l.js';
 import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 
 const banks = [
+  AmericanEexpressAesugb21,
   AmericanExpressAesudef1,
   Belfius,
   BnpBeGebabebb,
