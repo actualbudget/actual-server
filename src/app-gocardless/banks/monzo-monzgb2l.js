@@ -1,3 +1,4 @@
+import { FIELD_PATTERNS } from '../patterns/monzo.js';
 import {
   applyTransactionPatterns as applyTransactionPatterns,
   applyTransactionMapping,
@@ -33,62 +34,6 @@ const TRANSACTION_CODES = {
   uk_cash_deposits_paypoint: 'UK PayPoint cash deposit',
   // uk_retail_pot: 'UK retail financial transaction',
 };
-
-const FIELD_PATTERNS = [
-  {
-    transactionCode: 'mastercard',
-    patterns: [
-      {
-        regex: /^(.+?) From (.+?) Pot$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
-      },
-    ],
-  },
-  {
-    transactionCode: 'account_interest',
-    patterns: [
-      {
-        regex: /^Interest for (\w+ [0-9]{4})$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
-      },
-    ],
-  },
-  {
-    transactionCode: 'uk_retail_pot',
-    patterns: [
-      {
-        regex: /^(.+)$/i,
-        sourceField: 'remittanceInformationUnstructured',
-        targetField: {
-          credited: 'debtorName',
-          debited: 'creditorName',
-        },
-        replacement: 'Savings Account',
-      },
-      {
-        regex: /^(.+)$/i,
-        targetField: {
-          credited: 'remittanceInformationUnstructured',
-          debited: 'remittanceInformationUnstructured',
-        },
-        replacement: 'Savings Account $1',
-      },
-    ],
-  },
-  {
-    transactionCode: 'p2p_payment',
-    patterns: [
-      {
-        regex: /^(.+)$/i,
-        sourceField: 'remittanceInformationUnstructured',
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
-      },
-    ],
-  },
-];
 
 export default {
   institutionIds: ['MONZO_MONZGB2L'],
