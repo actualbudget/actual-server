@@ -50,7 +50,7 @@ const FIELD_PATTERNS = [
     transactionCode: 'OTT DEBIT',
     patterns: [
       {
-        regex: /^(?:SQ [*]{0,1}){0,1}([A-Za-z0-9\s]+)$/i,
+        regex: /^(?:SQ [*]{0,1}){1,1}([A-Za-z0-9\s]+)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
       },

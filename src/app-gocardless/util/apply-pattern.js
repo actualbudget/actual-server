@@ -5,7 +5,7 @@ export const applyPatterns = (transaction, patternsConfig) => {
   const applicablePatternGroups = patternsConfig.filter(
     (patternGroup) =>
       patternGroup.transactionCode === 'any' ||
-      patternGroup.transactionCode === transactionCode,
+      patternGroup.transactionCode == transactionCode,
   );
 
   if (applicablePatternGroups.length === 0) return transaction;
