@@ -1,7 +1,7 @@
+import { writeFileSync } from 'fs';
 import { VENDOR_PATTERNS } from '../patterns/vendors.js';
 import {
   applyTransactionPatterns as applyTransactionPatterns,
-  applyTransactionMapping,
   normalizeCreditorAndDebtorNames,
   toTitleCase,
 } from '../util/apply-pattern.js';
@@ -27,10 +27,6 @@ export default {
       updatedTransaction,
       VENDOR_PATTERNS,
     );
-    updatedTransaction = applyTransactionMapping(
-      updatedTransaction,
-      TRANSACTION_CODES,
-    );
 
     ['debtorName', 'creditorName', 'remittanceInformationUnstructured'].forEach(
       (fieldName) => {
@@ -45,6 +41,7 @@ export default {
   },
 
   sortTransactions(transactions = []) {
+    writeFileSync('/data/transactions.json', JSON.stringify(transactions));
     return ib.default.sortTransactions(transactions);
   },
 
