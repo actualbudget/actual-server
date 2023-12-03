@@ -92,6 +92,11 @@ export const VENDOR_PATTERNS = [
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
       },
+      {
+        regex: /^Lpc\*(.+)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
     ],
   },
 ];
