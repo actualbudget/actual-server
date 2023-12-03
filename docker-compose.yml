@@ -4,7 +4,6 @@ services:
     image: registry.internaleb.com/actualbudget/actual-server:latest
     restart: always
     build:
-
       context: .
     ports:
       # This line makes Actual available at port 5006 of the device you run the server on,
