@@ -37,7 +37,7 @@ const TRANSACTION_CODES = {
 
 const FIELD_PATTERNS = [
   {
-    transactionCode: 'all',
+    transactionCode: 'any',
     patterns: [
       {
         regex: /^\s+$/gi,

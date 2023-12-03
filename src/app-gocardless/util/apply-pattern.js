@@ -11,9 +11,11 @@ export const applyPatterns = (transaction, patternsConfig) => {
   if (applicablePatternGroups.length === 0) return transaction;
 
   // minus sign is typically used to denote debit, so check for absence of minus sign for credit
-  const isCredited = transaction.transactionAmount.amount.charAt(0) !== '-';
+  const isCredited =
+    transaction.transactionAmount.amount > 0 ||
+    Object.is(Number(transaction.transactionAmount.amount), 0);
 
-  const updatedTransaction = { ...transaction };
+  let updatedTransaction = { ...transaction };
 
   applicablePatternGroups.forEach((patternGroup) => {
     patternGroup.patterns.forEach((pattern) => {
@@ -59,23 +61,10 @@ export const getTransactionDate = (transaction) =>
   transaction.valueDate ||
   transaction.valueDateTime;
 
-const toTitleCase = (str) =>
+export const toTitleCase = (str) =>
   str
     .toLowerCase()
     .split(' ')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-
-export const titleCaseObjectStrings = (obj) =>
-  Object.entries(obj).reduce(
-    (newObj, [key, value]) => {
-      newObj[key] =
-        typeof value === 'string'
-          ? toTitleCase(value)
-          : value && typeof value === 'object'
-          ? titleCaseObjectStrings(value)
-          : value;
-      return newObj;
-    },
-    Array.isArray(obj) ? [] : {},
-  );
+    .join(' ')
+    .trim();
