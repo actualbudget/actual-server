@@ -1,3 +1,5 @@
+import { amountToInteger } from '../utils.js';
+
 export const applyPatterns = (transaction, patternsConfig) => {
   const transactionCode = transaction.proprietaryBankTransactionCode;
 

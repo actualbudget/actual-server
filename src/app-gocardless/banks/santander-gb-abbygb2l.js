@@ -2,7 +2,6 @@ import { writeFileSync } from 'fs';
 import {
   applyPatterns,
   applyTransactionMapping,
-  titleCaseObjectStrings,
   toTitleCase,
 } from '../util/apply-pattern.js';
 import * as ib from './integration-bank.js';
@@ -193,7 +192,7 @@ export default {
       },
     );
 
-    return titleCaseObjectStrings(updatedTransaction);
+    return updatedTransaction;
   },
 
   sortTransactions(transactions = []) {
