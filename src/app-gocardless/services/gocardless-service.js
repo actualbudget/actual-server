@@ -265,7 +265,7 @@ export const goCardlessService = {
       institutionId,
       referenceId: uuid.v4(),
       accessValidForDays,
-      maxHistoricalDays: 360,
+      maxHistoricalDays: 90,
       userLanguage: 'en',
       ssn: null,
       redirectImmediate: false,
