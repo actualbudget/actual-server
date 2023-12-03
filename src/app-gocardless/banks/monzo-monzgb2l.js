@@ -5,6 +5,7 @@ import {
   applyTransactionPatterns as applyTransactionPatterns,
   applyTransactionMapping,
   normalizeCreditorAndDebtorNames,
+  toTitleCase,
 } from '../util/apply-pattern.js';
 import * as ib from './integration-bank.js';
 
@@ -54,6 +55,15 @@ export default {
         ] = `${remittanceInformationUnstructured}. Category ${merchanCategory}`;
       }
     }
+
+    ['debtorName', 'creditorName', 'remittanceInformationUnstructured'].forEach(
+      (fieldName) => {
+        let fieldValue = updatedTransaction[fieldName];
+        if (fieldValue) {
+          updatedTransaction[fieldName] = toTitleCase(fieldValue);
+        }
+      },
+    );
 
     return updatedTransaction;
   },
