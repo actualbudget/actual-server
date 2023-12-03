@@ -36,7 +36,7 @@ const TRANSACTION_CODES = {
   // uk_retail_pot: 'UK retail financial transaction',
 };
 
-const FIELD_PATTERNS = [
+const VENDOR_PATTERNS = [
   {
     transactionCode: 'any',
     patterns: [
@@ -46,7 +46,7 @@ const FIELD_PATTERNS = [
         replacement: ' ',
       },
       {
-        regex: /^Amazon\.Co\.Uk\*[a-zA-Z0-9]+$/i,
+        regex: /^Amazon\.Co\.Uk\*[a-zA-Z0-9]+$/gi,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'Amazon',
       },
@@ -84,6 +84,44 @@ const FIELD_PATTERNS = [
         regex: /^Stichting Degiro\. Ref: .+$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'Stichting Degiro',
+      },
+      {
+        regex: /^Amazon Prime\*[a-zA-Z0-9]+$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Amazon Prime',
+      },
+      {
+        regex: /^[-]?Fedex[-]?\*[a-zA-Z0-9]+$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Fedex',
+      },
+      {
+        regex: /^Apple\.Com\/Bill$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Apple Billing',
+      },
+      {
+        regex: /^Lim\*([A-Za-z]+\s{0,1}){1,2}$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Lime',
+      },
+      {
+        regex: /^Ubr\*\s{0,1}Pending\.Uber\.Com$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Uber',
+      },
+    ],
+  },
+];
+
+const FIELD_PATTERNS = [
+  {
+    transactionCode: 'any',
+    patterns: [
+      {
+        regex: /^\s+$/gi,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: ' ',
       },
     ],
   },
@@ -146,11 +184,6 @@ const FIELD_PATTERNS = [
         regex: /^([A-Za-z0-9\s]+?) FROM ([A-Za-z0-9\s]+?)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$2',
-      },
-      {
-        regex: /^([A-Za-z]+ ){2,3} (.+?)\. Ref: .+$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
       },
     ],
   },
@@ -227,6 +260,10 @@ export default {
     updatedTransaction = applyTransactionPatterns(
       updatedTransaction,
       FIELD_PATTERNS,
+    );
+    updatedTransaction = applyTransactionPatterns(
+      updatedTransaction,
+      VENDOR_PATTERNS,
     );
     updatedTransaction = applyTransactionMapping(
       updatedTransaction,
