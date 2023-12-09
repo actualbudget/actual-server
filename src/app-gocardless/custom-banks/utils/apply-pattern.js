@@ -5,7 +5,7 @@ export const isCreditedTransaction = (transaction) => {
 
 export const applyTransactionPatterns = (transaction, patternsConfig) => {
   const transactionCode =
-    transaction.proprietaryBankTransactionCode.toUpperCase();
+    transaction?.proprietaryBankTransactionCode?.toUpperCase();
 
   // Filter all applicable pattern groups, including 'any'
   const applicablePatternGroups = patternsConfig.filter(

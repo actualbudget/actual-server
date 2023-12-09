@@ -1,15 +1,14 @@
 import { writeFileSync } from 'fs';
+import { VENDOR_PATTERNS } from './patterns/vendors.js';
 import {
-  applyTransactionPatterns,
-  toTitleCase,
+  applyTransactionPatterns as applyTransactionPatterns,
   normalizeCreditorAndDebtorNames,
-} from '../util/apply-pattern.js';
-import * as ib from './integration-bank.js';
-import { FIELD_PATTERNS } from '../patterns/santander.js';
-import { VENDOR_PATTERNS } from '../patterns/vendors.js';
+  toTitleCase,
+} from '../custom-banks/utils/apply-pattern.js';
+import * as ib from '../banks/integration-bank.js';
 
 export default {
-  institutionIds: ['SANTANDER_GB_ABBYGB2L'],
+  institutionIds: ['AMERICAN_EXPRESS_AESUGB21'],
   normalizeAccount(account) {
     return ib.default.normalizeAccount(account);
   },
@@ -24,10 +23,6 @@ export default {
     }
 
     updatedTransaction = normalizeCreditorAndDebtorNames(updatedTransaction);
-    updatedTransaction = applyTransactionPatterns(
-      updatedTransaction,
-      FIELD_PATTERNS,
-    );
     updatedTransaction = applyTransactionPatterns(
       updatedTransaction,
       VENDOR_PATTERNS,
@@ -46,7 +41,7 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    writeFileSync('/data/santander.json', JSON.stringify(transactions));
+    writeFileSync('/data/transactions.json', JSON.stringify(transactions));
     return ib.default.sortTransactions(transactions);
   },
 

@@ -1,14 +1,14 @@
 import { writeFileSync } from 'fs';
-import { VENDOR_PATTERNS } from '../patterns/vendors.js';
+import { VENDOR_PATTERNS } from './patterns/vendors.js';
 import {
   applyTransactionPatterns as applyTransactionPatterns,
   normalizeCreditorAndDebtorNames,
   toTitleCase,
-} from '../util/apply-pattern.js';
-import * as ib from './integration-bank.js';
+} from './utils/apply-pattern.js';
+import * as ib from '../banks/integration-bank.js';
 
 export default {
-  institutionIds: ['REVOLUT_REVOGB21'],
+  institutionIds: ['CAIXA_GERAL_DEPOSITOS_CGDIPTPL'],
   normalizeAccount(account) {
     return ib.default.normalizeAccount(account);
   },

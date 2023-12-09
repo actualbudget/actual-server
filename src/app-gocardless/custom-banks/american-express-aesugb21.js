@@ -1,11 +1,12 @@
 import { writeFileSync } from 'fs';
-import { VENDOR_PATTERNS } from '../patterns/vendors.js';
+import { VENDOR_PATTERNS } from './patterns/vendors.js';
 import {
   applyTransactionPatterns as applyTransactionPatterns,
   normalizeCreditorAndDebtorNames,
   toTitleCase,
-} from '../util/apply-pattern.js';
-import * as ib from './integration-bank.js';
+} from './utils/apply-pattern.js';
+import * as ib from '../banks/integration-bank.js';
+import categorise from './utils/other.js';
 
 export default {
   institutionIds: ['AMERICAN_EXPRESS_AESUGB21'],
@@ -42,6 +43,7 @@ export default {
 
   sortTransactions(transactions = []) {
     writeFileSync('/data/transactions.json', JSON.stringify(transactions));
+    categorise(transactions);
     return ib.default.sortTransactions(transactions);
   },
 

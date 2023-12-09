@@ -8,6 +8,11 @@ export const VENDOR_PATTERNS = [
         replacement: ' ',
       },
       {
+        regex: /^Sq\*(.+?)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+      {
         regex: /^Amazon\.Co\.Uk\*[a-zA-Z0-9]+$/gi,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'Amazon Marketplace',

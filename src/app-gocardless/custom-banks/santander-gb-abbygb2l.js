@@ -1,16 +1,15 @@
-import { MASTERCARD_CODES } from '../patterns/mastercard.js';
-import { FIELD_PATTERNS, TRANSACTION_CODES } from '../patterns/monzo.js';
-import { VENDOR_PATTERNS } from '../patterns/vendors.js';
+import { writeFileSync } from 'fs';
 import {
-  applyTransactionPatterns as applyTransactionPatterns,
-  applyTransactionMapping,
-  normalizeCreditorAndDebtorNames,
+  applyTransactionPatterns,
   toTitleCase,
-} from '../util/apply-pattern.js';
-import * as ib from './integration-bank.js';
+  normalizeCreditorAndDebtorNames,
+} from './utils/apply-pattern.js';
+import * as ib from '../banks/integration-bank.js';
+import { FIELD_PATTERNS } from './patterns/santander.js';
+import { VENDOR_PATTERNS } from './patterns/vendors.js';
 
 export default {
-  institutionIds: ['MONZO_MONZGB2L'],
+  institutionIds: ['SANTANDER_GB_ABBYGB2L'],
   normalizeAccount(account) {
     return ib.default.normalizeAccount(account);
   },
@@ -33,28 +32,6 @@ export default {
       updatedTransaction,
       VENDOR_PATTERNS,
     );
-    updatedTransaction = applyTransactionMapping(
-      updatedTransaction,
-      TRANSACTION_CODES,
-    );
-
-    const {
-      merchantCategoryCode,
-      proprietaryBankTransactionCode,
-      remittanceInformationUnstructured,
-    } = updatedTransaction || {};
-
-    if (
-      merchantCategoryCode &&
-      proprietaryBankTransactionCode === 'mastercard'
-    ) {
-      const merchanCategory = MASTERCARD_CODES[merchantCategoryCode];
-      if (merchanCategory) {
-        updatedTransaction[
-          'remittanceInformationUnstructured'
-        ] = `${remittanceInformationUnstructured} Of ${merchanCategory}`;
-      }
-    }
 
     ['debtorName', 'creditorName', 'remittanceInformationUnstructured'].forEach(
       (fieldName) => {
@@ -69,6 +46,7 @@ export default {
   },
 
   sortTransactions(transactions = []) {
+    writeFileSync('/data/santander.json', JSON.stringify(transactions));
     return ib.default.sortTransactions(transactions);
   },
 

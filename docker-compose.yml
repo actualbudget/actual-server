@@ -1,7 +1,6 @@
 version: '3'
 services:
   actual_server:
-    image: registry.internaleb.com/actualbudget/actual-server:latest
     restart: always
     build:
       context: .
