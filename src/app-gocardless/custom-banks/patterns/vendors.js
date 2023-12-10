@@ -18,6 +18,11 @@ export const VENDOR_PATTERNS = [
         replacement: '$1',
       },
       {
+        regex: /^Lpc\*(.+)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+      {
         regex: /^Amazon\.Co\.Uk\*[a-zA-Z0-9]+$/gi,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'Amazon Marketplace',
@@ -104,16 +109,17 @@ export const VENDOR_PATTERNS = [
       },
       {
         regex: /^Zen\s+London$/i,
+        sourceField: 'remittanceInformationUnstructured',
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'ZenHealthcare.co.uk',
+      },
+      {
+        regex: /^Zen$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'ZenHealthcare.co.uk',
       },
       {
         regex: /^Indiegogo\*(.+)$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
-      },
-      {
-        regex: /^Lpc\*(.+)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
       },
