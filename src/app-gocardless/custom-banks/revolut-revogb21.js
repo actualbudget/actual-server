@@ -1,4 +1,3 @@
-import { writeFileSync } from 'fs';
 import { VENDOR_PATTERNS } from './patterns/vendors.js';
 import {
   applyTransactionPatterns as applyTransactionPatterns,
@@ -34,7 +33,6 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    writeFileSync('/data/transactions.json', JSON.stringify(transactions));
     return ib.sortTransactions(transactions);
   },
 

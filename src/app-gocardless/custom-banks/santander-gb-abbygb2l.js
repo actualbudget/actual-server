@@ -1,4 +1,3 @@
-import { writeFileSync } from 'fs';
 import {
   applyTransactionPatterns,
   normalizeCreditorAndDebtorNames,
@@ -39,7 +38,6 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    writeFileSync('/data/santander.json', JSON.stringify(transactions));
     return ib.sortTransactions(transactions);
   },
 
