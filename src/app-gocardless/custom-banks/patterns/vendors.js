@@ -68,6 +68,11 @@ export const VENDOR_PATTERNS = [
         replacement: 'Amazon Marketplace',
       },
       {
+        regex: /^Amazon [A-Z]{2,3} [A-Z]{2} Retail*$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Amazon Marketplace',
+      },
+      {
         regex: /^American Exp [0-9]+$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'American Express',
@@ -151,6 +156,16 @@ export const VENDOR_PATTERNS = [
         regex: /(?<=Ref:\s)([A-Z0-9]{4}\s){2}/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'XXXX XXXX',
+      },
+      {
+        regex: /^\s\s+$/g,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
+      },
+      {
+        regex: /([ ]?-[ ]?|[_])/g,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
       },
     ],
   },
