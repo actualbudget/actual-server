@@ -1,12 +1,12 @@
 import { writeFileSync } from 'fs';
 import {
   applyTransactionPatterns,
-  toTitleCase,
   normalizeCreditorAndDebtorNames,
 } from './utils/apply-pattern.js';
 import * as ib from '../banks/integration-bank.js';
 import { FIELD_PATTERNS } from './patterns/santander.js';
 import { VENDOR_PATTERNS } from './patterns/vendors.js';
+import { applyTitleCaseToFields } from './utils/other.js';
 
 export default {
   institutionIds: ['SANTANDER_GB_ABBYGB2L'],
@@ -33,16 +33,11 @@ export default {
       VENDOR_PATTERNS,
     );
 
-    ['debtorName', 'creditorName', 'remittanceInformationUnstructured'].forEach(
-      (fieldName) => {
-        let fieldValue = updatedTransaction[fieldName];
-        if (fieldValue) {
-          updatedTransaction[fieldName] = toTitleCase(fieldValue);
-        }
-      },
-    );
-
-    return updatedTransaction;
+    return applyTitleCaseToFields(updatedTransaction, [
+      'debtorName',
+      'creditorName',
+      'remittanceInformationUnstructured',
+    ]);
   },
 
   sortTransactions(transactions = []) {

@@ -4,9 +4,9 @@ import {
   applyTransactionPatterns as applyTransactionPatterns,
   applyTransactionMapping,
   normalizeCreditorAndDebtorNames,
-  toTitleCase,
 } from './utils/apply-pattern.js';
 import * as ib from '../banks/integration-bank.js';
+import { applyTitleCaseToFields } from './utils/other.js';
 
 export default {
   institutionIds: ['MONZO_MONZGB2L'],
@@ -37,16 +37,11 @@ export default {
       TRANSACTION_CODES,
     );
 
-    ['debtorName', 'creditorName', 'remittanceInformationUnstructured'].forEach(
-      (fieldName) => {
-        let fieldValue = updatedTransaction[fieldName];
-        if (fieldValue) {
-          updatedTransaction[fieldName] = toTitleCase(fieldValue);
-        }
-      },
-    );
-
-    return updatedTransaction;
+    return applyTitleCaseToFields(updatedTransaction, [
+      'debtorName',
+      'creditorName',
+      'remittanceInformationUnstructured',
+    ]);
   },
 
   sortTransactions(transactions = []) {

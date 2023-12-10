@@ -3,9 +3,9 @@ import { VENDOR_PATTERNS } from './patterns/vendors.js';
 import {
   applyTransactionPatterns as applyTransactionPatterns,
   normalizeCreditorAndDebtorNames,
-  toTitleCase,
 } from './utils/apply-pattern.js';
 import * as ib from '../banks/integration-bank.js';
+import { applyTitleCaseToFields } from './utils/other.js';
 
 export default {
   institutionIds: ['REVOLUT_REVOGB21'],
@@ -28,16 +28,11 @@ export default {
       VENDOR_PATTERNS,
     );
 
-    ['debtorName', 'creditorName', 'remittanceInformationUnstructured'].forEach(
-      (fieldName) => {
-        let fieldValue = updatedTransaction[fieldName];
-        if (fieldValue) {
-          updatedTransaction[fieldName] = toTitleCase(fieldValue);
-        }
-      },
-    );
-
-    return updatedTransaction;
+    return applyTitleCaseToFields(updatedTransaction, [
+      'debtorName',
+      'creditorName',
+      'remittanceInformationUnstructured',
+    ]);
   },
 
   sortTransactions(transactions = []) {

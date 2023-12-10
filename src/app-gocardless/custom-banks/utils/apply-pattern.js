@@ -64,14 +64,6 @@ export const getTransactionDate = (transaction) =>
   transaction.valueDate ||
   transaction.valueDateTime;
 
-export const toTitleCase = (str) =>
-  str
-    .toLowerCase()
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-    .trim();
-
 export const normalizeCreditorAndDebtorNames = (transaction) => {
   const isCredited = isCreditedTransaction(transaction);
 

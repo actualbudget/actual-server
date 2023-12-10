@@ -93,6 +93,11 @@ export const VENDOR_PATTERNS = [
         replacement: '$1',
       },
       {
+        regex: /^Zen\s+London$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'ZenHealthcare.co.uk',
+      },
+      {
         regex: /^Indiegogo\*(.+)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
