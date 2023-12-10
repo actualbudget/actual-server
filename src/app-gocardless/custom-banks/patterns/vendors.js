@@ -3,17 +3,22 @@ export const VENDOR_PATTERNS = [
     transactionCode: 'any',
     patterns: [
       {
-        regex: /^\s\s+$/gi,
+        regex: /^\s\s+$/g,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
+      },
+      {
+        regex: /([ ]?-[ ]?|[_])/g,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
+      },
+      {
+        regex: /\s(US|UK|GB)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '',
       },
       {
         regex: /[.](com|co|eu).*$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '',
-      },
-      {
-        regex: /([ ]?-[ ]?|[_])/,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '',
       },
@@ -48,12 +53,17 @@ export const VENDOR_PATTERNS = [
         replacement: '',
       },
       {
-        regex: /^Amazon[*][A-Z0-9]+$/gi,
+        regex: /^Amazon[*][A-Z0-9]+$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'Amazon Marketplace',
       },
       {
-        regex: /^Amz[*]Amazon$/gi,
+        regex: /^Amz[*]Amazon$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Amazon Marketplace',
+      },
+      {
+        regex: /^Amazon Marketplace.*$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'Amazon Marketplace',
       },
@@ -126,6 +136,11 @@ export const VENDOR_PATTERNS = [
         regex: /^Zen(\sLondon)?$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'Zen Healthcare',
+      },
+      {
+        regex: /^Spotify Music.+$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Spotify',
       },
       {
         regex: /^Tap[0-9]+$/i,
