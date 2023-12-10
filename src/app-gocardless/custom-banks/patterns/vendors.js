@@ -8,7 +8,12 @@ export const VENDOR_PATTERNS = [
         replacement: ' ',
       },
       {
-        regex: /^Sq\*(.+?)$/i,
+        regex: /^Sq[*\s]{1}(.+?)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+      {
+        regex: /^Sp[*\s]{1}(.+?)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
       },
@@ -89,6 +94,11 @@ export const VENDOR_PATTERNS = [
       },
       {
         regex: /^Zettle_\*(.+)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+      {
+        regex: /^3cpayment[*\s]{1}(.+)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
       },
