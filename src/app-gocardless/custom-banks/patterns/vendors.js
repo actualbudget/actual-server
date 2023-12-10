@@ -5,10 +5,10 @@ export const VENDOR_PATTERNS = [
       {
         regex: /^\s\s+$/gi,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: ' ',
+        replacement: '',
       },
       {
-        regex: /^[.](com|co|eu).*$/i,
+        regex: /[.](com|co|eu).*$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '',
       },
@@ -18,9 +18,34 @@ export const VENDOR_PATTERNS = [
         replacement: '',
       },
       {
-        regex: /^(sq|sp|lpc)[*\s]{1}(.+?)$/i,
+        regex: /^(sq|sp|lpc)[*\s]{1}/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$2',
+        replacement: '',
+      },
+      {
+        regex: /^Sumup[ ]?[*]/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
+      },
+      {
+        regex: /^Zettle_[*]/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
+      },
+      {
+        regex: /^3cpayment[*\s]/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
+      },
+      {
+        regex: /^Indiegogo[*]/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
+      },
+      {
+        regex: /^Refund at Paypal[ ]?[*]/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
       },
       {
         regex: /^Amazon[*][A-Z0-9]+$/gi,
@@ -98,40 +123,9 @@ export const VENDOR_PATTERNS = [
         replacement: 'Uber Eats',
       },
       {
-        regex: /^Sumup[ ]?[*](.+)$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
-      },
-      {
-        regex: /^Zettle_[*](.+)$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
-      },
-      {
-        regex: /^3cpayment[*\s]{1}(.+)$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
-      },
-      {
-        regex: /^Zen\s+London$/i,
-        sourceField: 'remittanceInformationUnstructured',
+        regex: /^Zen(\sLondon)?$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'Zen Healthcare',
-      },
-      {
-        regex: /^Zen$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: 'Zen Healthcare',
-      },
-      {
-        regex: /^Indiegogo[*](.+)$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
-      },
-      {
-        regex: /^Refund at Paypal[ ]?[*](.+)$/i,
-        targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: '$1',
       },
       {
         regex: /^Tap[0-9]+$/i,
