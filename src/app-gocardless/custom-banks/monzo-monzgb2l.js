@@ -7,6 +7,7 @@ import {
 } from './utils/apply-pattern.js';
 import ib from '../banks/integration-bank.js';
 import { applyTitleCaseToFields } from './utils/other.js';
+import { writeFileSync } from 'fs';
 
 /** @type {import('../banks/bank.interface.js').IBank} */
 export default {
@@ -43,6 +44,10 @@ export default {
   },
 
   sortTransactions(transactions = []) {
+    writeFileSync(
+      '/data/transactions-monzo.json',
+      JSON.stringify(transactions),
+    );
     return ib.sortTransactions(transactions);
   },
 

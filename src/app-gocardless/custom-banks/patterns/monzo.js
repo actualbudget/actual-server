@@ -58,7 +58,7 @@ export const FIELD_PATTERNS = [
           credited: 'debtorName',
           debited: 'creditorName',
         },
-        replacement: 'Savings Account',
+        replacement: '[Savings Account]',
       },
       {
         regex: /^(.+)$/i,

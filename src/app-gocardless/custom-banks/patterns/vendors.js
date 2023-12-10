@@ -28,6 +28,11 @@ export const VENDOR_PATTERNS = [
         replacement: 'Amazon Marketplace',
       },
       {
+        regex: /^Amz\*Amazon\.Co\.Uk$/gi,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Amazon Marketplace',
+      },
+      {
         regex: /^American Exp [0-9]+$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: 'American Express',
@@ -93,6 +98,11 @@ export const VENDOR_PATTERNS = [
         replacement: 'Uber Eats',
       },
       {
+        regex: /^Uber \* Eats Pending{0,1}$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Uber Eats',
+      },
+      {
         regex: /^Sumup \*(.+)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
@@ -111,17 +121,32 @@ export const VENDOR_PATTERNS = [
         regex: /^Zen\s+London$/i,
         sourceField: 'remittanceInformationUnstructured',
         targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: 'ZenHealthcare.co.uk',
+        replacement: 'Zen Healthcare',
       },
       {
         regex: /^Zen$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
-        replacement: 'ZenHealthcare.co.uk',
+        replacement: 'Zen Healthcare',
       },
       {
         regex: /^Indiegogo\*(.+)$/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '$1',
+      },
+      {
+        regex: /^Refund at Paypal \*(.+)$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '$1',
+      },
+      {
+        regex: /^Tap[0-9]+$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'Tap Air Portugal',
+      },
+      {
+        regex: /(?<=Ref:\s)([A-Z0-9]{4}\s){2}/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: 'XXXX XXXX',
       },
     ],
   },
