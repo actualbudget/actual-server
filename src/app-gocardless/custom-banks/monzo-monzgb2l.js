@@ -5,20 +5,18 @@ import {
   applyTransactionMapping,
   normalizeCreditorAndDebtorNames,
 } from './utils/apply-pattern.js';
-import * as ib from '../banks/integration-bank.js';
+import ib from '../banks/integration-bank.js';
 import { applyTitleCaseToFields } from './utils/other.js';
 
+/** @type {import('../banks/bank.interface.js').IBank} */
 export default {
   institutionIds: ['MONZO_MONZGB2L'],
   normalizeAccount(account) {
-    return ib.default.normalizeAccount(account);
+    return ib.normalizeAccount(account);
   },
 
   normalizeTransaction(transaction, _booked) {
-    let updatedTransaction = ib.default.normalizeTransaction(
-      transaction,
-      _booked,
-    );
+    let updatedTransaction = ib.normalizeTransaction(transaction, _booked);
     if (!updatedTransaction) {
       return null;
     }
@@ -45,10 +43,10 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    return ib.default.sortTransactions(transactions);
+    return ib.sortTransactions(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return ib.default.calculateStartingBalance(sortedTransactions, balances);
+    return ib.calculateStartingBalance(sortedTransactions, balances);
   },
 };

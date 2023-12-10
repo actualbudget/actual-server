@@ -4,26 +4,9 @@ import {
   normalizeCreditorAndDebtorNames,
 } from './utils/apply-pattern.js';
 import ib from '../banks/integration-bank.js';
-import { applyTitleCaseToFields, categorise } from './utils/other.js';
+import { applyTitleCaseToFields } from './utils/other.js';
 
-// Helper function to merge transaction with categorization data
-function mergeTransactionWithCategories(transaction, categoriesData) {
-  const merchant = categoriesData.merchant;
-  const categoriesStr = [
-    transaction.remittanceInformationUnstructured,
-    '. Categories: ',
-    categoriesData.label_group,
-    ...categoriesData.labels,
-  ].join('');
-
-  return {
-    ...transaction,
-    remittanceInformationUnstructured: categoriesStr,
-    debtorName: merchant || transaction.debtorName,
-    creditorName: merchant || transaction.creditorName,
-  };
-}
-
+/** @type {import('../banks/bank.interface.js').IBank} */
 export default {
   institutionIds: ['AMERICAN_EXPRESS_AESUGB21'],
 
@@ -48,16 +31,7 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    let categorizationMap = categorise(transactions);
-
-    return ib.sortTransactions(
-      transactions.map((transaction) => {
-        const categoryData = categorizationMap.get(transaction.transactionId);
-        return categoryData
-          ? mergeTransactionWithCategories(transaction, categoryData)
-          : transaction;
-      }),
-    );
+    return ib.sortTransactions(transactions);
   },
 
   calculateStartingBalance(sortedTransactions, balances) {
