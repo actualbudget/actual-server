@@ -23,6 +23,11 @@ export const VENDOR_PATTERNS = [
         replacement: '',
       },
       {
+        regex: /\s[(][A-Z]{3,30}[)]$/i,
+        targetField: { credited: 'debtorName', debited: 'creditorName' },
+        replacement: '',
+      },
+      {
         regex: /^(sq|sp|lpc)[*\s]{1}/i,
         targetField: { credited: 'debtorName', debited: 'creditorName' },
         replacement: '',
