@@ -9,6 +9,8 @@ import getAccountDb from '../account-db.js';
 export const SecretName = {
   nordigen_secretId: 'nordigen_secretId',
   nordigen_secretKey: 'nordigen_secretKey',
+  simplefin_token: 'simplefin_token',
+  simplefin_accessKey: 'simplefin_accessKey',
 };
 
 class SecretsDb {
