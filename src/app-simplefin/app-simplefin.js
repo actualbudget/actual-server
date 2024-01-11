@@ -93,7 +93,7 @@ app.post('/transactions', async (req, res) => {
     ];
     response.iban = 'thisismadeup';
     response.institutionId = 'thisismadeup';
-    response.startingBalance = balance; // should be named differently in this use case.
+    response.startingBalance = balance; // could be named differently in this use case.
 
     let allTransactions = [];
 
@@ -101,14 +101,14 @@ app.post('/transactions', async (req, res) => {
       let trans = account.transactions[i];
       let newTrans = {};
 
-      //newTrans.bankTransactionCode = don't have, not sure if issue.
+      //newTrans.bankTransactionCode = don't have compared to GoCardless
       newTrans.booked = true;
       newTrans.bookingDate = new Date(trans.posted * 1000)
         .toISOString()
         .split('T')[0];
       newTrans.date = new Date(trans.posted * 1000).toISOString().split('T')[0];
       newTrans.debtorName = trans.payee;
-      //newTrans.debtorAccount = don't have, not sure if issue.
+      //newTrans.debtorAccount = don't have compared to GoCardless
       newTrans.remittanceInformationUnstructured = trans.description;
       newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
       newTrans.transactionId = trans.id;
