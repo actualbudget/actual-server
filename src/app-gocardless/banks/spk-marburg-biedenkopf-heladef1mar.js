@@ -1,8 +1,9 @@
 import {
-  sortByBookingDateOrValueDate,
-  amountToInteger,
   printIban,
+  amountToInteger,
+  sortByBookingDateOrValueDate,
 } from '../utils.js';
+import d from 'date-fns';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -16,7 +17,7 @@ const SORTED_BALANCE_TYPE_LIST = [
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: ['SPARNORD_SPNODK22', 'LAGERNES_BANK_LAPNDKK1'],
+  institutionIds: ['SPK_MARBURG_BIEDENKOPF_HELADEF1MAR'],
 
   normalizeAccount(account) {
     return {
@@ -24,22 +25,45 @@ export default {
       institution: account.institution,
       mask: (account?.iban || '0000').slice(-4),
       iban: account?.iban || null,
-      name: [account.name, printIban(account), account.currency]
+      name: [account.product, printIban(account), account.currency]
         .filter(Boolean)
         .join(' '),
-      official_name: `integration-${account.institution_id}`,
+      official_name: account.product,
       type: 'checking',
     };
   },
 
-  /**
-   * Banks on the BEC backend only give information regarding the transaction in additionalInformation
-   */
   normalizeTransaction(transaction, _booked) {
+    const date =
+      transaction.bookingDate ||
+      transaction.bookingDateTime ||
+      transaction.valueDate ||
+      transaction.valueDateTime;
+
+    // If we couldn't find a valid date field we filter out this transaction
+    // and hope that we will import it again once the bank has processed the
+    // transaction further.
+    if (!date) {
+      return null;
+    }
+
+    let remittanceInformationUnstructured;
+
+    if (transaction.remittanceInformationUnstructured) {
+      remittanceInformationUnstructured =
+        transaction.remittanceInformationUnstructured;
+    } else if (transaction.remittanceInformationStructured) {
+      remittanceInformationUnstructured =
+        transaction.remittanceInformationStructured;
+    } else if (transaction.remittanceInformationStructuredArray?.length > 0) {
+      remittanceInformationUnstructured =
+        transaction.remittanceInformationStructuredArray?.join(' ');
+    }
+
     return {
       ...transaction,
-      date: transaction.bookingDate,
-      remittanceInformationUnstructured: transaction.additionalInformation,
+      date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
+      remittanceInformationUnstructured: remittanceInformationUnstructured,
     };
   },
 
@@ -55,6 +79,7 @@ export default {
           SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
           SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
       )[0];
+
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);
     }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
