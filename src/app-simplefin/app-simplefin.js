@@ -11,7 +11,7 @@ app.post('/status', async (req, res) => {
   let configured = false;
 
   let token = secretsService.get(SecretName.simplefin_token);
-  if (token !== null || token !== undefined || token !== 'Forbidden') {
+  if (token !== null && token !== undefined && token !== 'Forbidden') {
     configured = true;
   }
 
