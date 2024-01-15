@@ -15,12 +15,21 @@ RUN unzip /tmp/desktop-client.zip -d /public
 
 FROM node:18-bullseye-slim as prod
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+ARG USERNAME=appuser
+ARG USER_UID=1001
+ARG USER_GID=$USER_UID
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+RUN mkdir /data && chown -R ${USERNAME}:${USERNAME} /data
+
 WORKDIR /app
-COPY --from=base /app/node_modules /app/node_modules
-COPY --from=base /public /public
-ADD package.json app.js ./
-ADD src ./src
-ADD migrations ./migrations
+COPY --from=base --chown=${USER_UID}:${USER_GID} /app/node_modules /app/node_modules
+COPY --from=base --chown=${USER_UID}:${USER_GID} /public /public
+ADD --chown=${USER_UID}:${USER_GID} package.json app.js ./
+ADD --chown=${USER_UID}:${USER_GID} src ./src
+ADD --chown=${USER_UID}:${USER_GID} migrations ./migrations
+USER ${USERNAME}
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 ENV ACTUAL_WEB_ROOT=/public
 EXPOSE 5006
