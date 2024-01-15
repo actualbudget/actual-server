@@ -20,7 +20,7 @@ COPY --from=base --chown=${USER_UID}:${USER_GID} /app/node_modules /app/node_mod
 ADD --chown=${USER_UID}:${USER_GID} package.json app.js ./
 ADD --chown=${USER_UID}:${USER_GID} src ./src
 ADD --chown=${USER_UID}:${USER_GID} migrations ./migrations
-USER ${USERNAME}
+USER ${USER_UID}
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 EXPOSE 5006
 CMD ["node", "app.js"]
