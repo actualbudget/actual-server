@@ -20,7 +20,6 @@ COPY --from=base /app/node_modules /app/node_modules
 ADD package.json app.js ./
 ADD src ./src
 ADD migrations ./migrations
-USER ${USER_UID}
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 EXPOSE 5006
 CMD ["node", "app.js"]
