@@ -24,11 +24,11 @@ RUN addgroup -S ${USERNAME} -g ${USER_GID} && adduser -S ${USERNAME} -G ${USERNA
 RUN mkdir /data && chown -R ${USERNAME}:${USERNAME} /data
 
 WORKDIR /app
-COPY --from=base --chown=${USER_UID}:${USER_GID} /app/node_modules /app/node_modules
-COPY --from=base --chown=${USER_UID}:${USER_GID} /public /public
-ADD --chown=${USER_UID}:${USER_GID} package.json app.js ./
-ADD --chown=${USER_UID}:${USER_GID} src ./src
-ADD --chown=${USER_UID}:${USER_GID} migrations ./migrations
+COPY --from=base /app/node_modules /app/node_modules
+COPY --from=base /public /public
+ADD package.json app.js ./
+ADD src ./src
+ADD migrations ./migrations
 USER ${USER_UID}
 ENTRYPOINT ["/sbin/tini","-g",  "--"]
 ENV ACTUAL_WEB_ROOT=/public

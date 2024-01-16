@@ -16,10 +16,10 @@ RUN groupadd --gid $USER_GID $USERNAME \
 RUN mkdir /data && chown -R ${USERNAME}:${USERNAME} /data
 
 WORKDIR /app
-COPY --from=base --chown=${USER_UID}:${USER_GID} /app/node_modules /app/node_modules
-ADD --chown=${USER_UID}:${USER_GID} package.json app.js ./
-ADD --chown=${USER_UID}:${USER_GID} src ./src
-ADD --chown=${USER_UID}:${USER_GID} migrations ./migrations
+COPY --from=base /app/node_modules /app/node_modules
+ADD package.json app.js ./
+ADD src ./src
+ADD migrations ./migrations
 USER ${USER_UID}
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 EXPOSE 5006
