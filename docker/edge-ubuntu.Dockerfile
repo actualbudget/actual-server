@@ -3,6 +3,7 @@ RUN apt-get update && apt-get install -y openssl jq
 WORKDIR /app
 ADD .yarn ./.yarn
 ADD yarn.lock package.json .yarnrc.yml ./
+RUN yarn config set taskPoolConcurrency 2 && yarn config set networkConcurrency 5
 RUN yarn workspaces focus --all --production
 
 RUN mkdir /public
