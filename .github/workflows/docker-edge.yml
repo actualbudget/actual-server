@@ -47,6 +47,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
         with:
           config-inline: |
+            debug = true
             [worker.oci]
               max-parallelism = 2
 
