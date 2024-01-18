@@ -8,7 +8,7 @@ RUN yarn workspaces focus --all --production
 FROM node:18-bullseye-slim as prod
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-ARG USERNAME=appuser
+ARG USERNAME=actual
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
 RUN groupadd --gid $USER_GID $USERNAME \

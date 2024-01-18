@@ -9,7 +9,7 @@ RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --bu
 FROM alpine:3.17 as prod
 RUN apk add --no-cache nodejs tini
 
-ARG USERNAME=appuser
+ARG USERNAME=actual
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
 RUN addgroup -S ${USERNAME} -g ${USER_GID} && adduser -S ${USERNAME} -G ${USERNAME} -u ${USER_UID}
