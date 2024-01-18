@@ -8,7 +8,7 @@ RUN yarn workspaces focus --all --production
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 
 FROM alpine:3.17 as prod
-RUN apk add --no-cache nodejs tini
+RUN apk update && apk upgrade && apk add --no-cache nodejs tini
 
 ARG USERNAME=actual
 ARG USER_UID=1001

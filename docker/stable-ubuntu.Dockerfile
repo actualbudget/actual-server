@@ -7,7 +7,7 @@ RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2;
 RUN yarn workspaces focus --all --production
 
 FROM node:18-bullseye-slim as prod
-RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=actual
 ARG USER_UID=1001

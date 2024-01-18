@@ -15,7 +15,7 @@ RUN curl -L -o /tmp/desktop-client.zip --header "Authorization: Bearer ${GITHUB_
 RUN unzip /tmp/desktop-client.zip -d /public
 
 FROM node:18-bullseye-slim as prod
-RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=actual
 ARG USER_UID=1001

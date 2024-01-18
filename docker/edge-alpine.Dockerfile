@@ -16,7 +16,7 @@ RUN curl -L -o /tmp/desktop-client.zip --header "Authorization: Bearer ${GITHUB_
 RUN unzip /tmp/desktop-client.zip -d /public
 
 FROM alpine:3.17 as prod
-RUN apk add --no-cache nodejs tini
+RUN apk update && apk upgrade && apk add --no-cache nodejs tini
 
 ARG USERNAME=actual
 ARG USER_UID=1001
