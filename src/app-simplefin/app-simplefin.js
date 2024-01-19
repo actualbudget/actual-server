@@ -26,13 +26,9 @@ app.post('/status', async (req, res) => {
 app.post('/accounts', async (req, res) => {
   let accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
-  if (
-    accessKey === null ||
-    accessKey === undefined ||
-    accessKey === 'Forbidden'
-  ) {
+  if (accessKey == null || accessKey === 'Forbidden') {
     let token = secretsService.get(SecretName.simplefin_token);
-    if (token == || token === 'Forbidden') {
+    if (token == null || token === 'Forbidden') {
       return;
     } else {
       accessKey = await getAccessKey(token);
@@ -59,11 +55,7 @@ app.post('/transactions', async (req, res) => {
 
   let accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
-  if (
-    accessKey === null ||
-    accessKey === undefined ||
-    accessKey === 'Forbidden'
-  ) {
+  if (accessKey == null || accessKey === 'Forbidden') {
     return;
   }
 
