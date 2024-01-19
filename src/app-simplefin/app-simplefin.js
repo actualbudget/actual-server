@@ -11,7 +11,7 @@ app.post('/status', async (req, res) => {
   let configured = false;
 
   let token = secretsService.get(SecretName.simplefin_token);
-  if (token !== null && token !== undefined && token !== 'Forbidden') {
+  if (token != null && token !== 'Forbidden') {
     configured = true;
   }
 
@@ -32,7 +32,7 @@ app.post('/accounts', async (req, res) => {
     accessKey === 'Forbidden'
   ) {
     let token = secretsService.get(SecretName.simplefin_token);
-    if (token === null || token === undefined || token === 'Forbidden') {
+    if (token == || token === 'Forbidden') {
       return;
     } else {
       accessKey = await getAccessKey(token);
@@ -91,14 +91,13 @@ app.post('/transactions', async (req, res) => {
         referenceDate: date,
       },
     ];
-    response.iban = 'thisismadeup';
-    response.institutionId = 'thisismadeup';
+    //response.iban = don't have compared to GoCardless
+    //response.institutionId = don't have compared to GoCardless
     response.startingBalance = balance; // could be named differently in this use case.
 
     let allTransactions = [];
 
-    for (let i = 0; i < account.transactions.length; i++) {
-      let trans = account.transactions[i];
+    for (let trans of account.transactions) {
       let newTrans = {};
 
       //newTrans.bankTransactionCode = don't have compared to GoCardless
