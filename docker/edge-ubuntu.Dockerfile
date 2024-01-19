@@ -3,6 +3,7 @@ RUN apt-get update && apt-get install -y openssl jq
 WORKDIR /app
 ADD .yarn ./.yarn
 ADD yarn.lock package.json .yarnrc.yml ./
+RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 RUN yarn workspaces focus --all --production
 
 RUN mkdir /public
@@ -15,6 +16,14 @@ RUN unzip /tmp/desktop-client.zip -d /public
 
 FROM node:18-bullseye-slim as prod
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+ARG USERNAME=actual
+ARG USER_UID=1001
+ARG USER_GID=$USER_UID
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+RUN mkdir /data && chown -R ${USERNAME}:${USERNAME} /data
+
 WORKDIR /app
 COPY --from=base /app/node_modules /app/node_modules
 COPY --from=base /public /public
