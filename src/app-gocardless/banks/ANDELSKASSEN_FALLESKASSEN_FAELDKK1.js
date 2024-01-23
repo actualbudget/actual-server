@@ -1,14 +1,14 @@
 import {
   printIban,
   amountToInteger,
-  sortByBookingDateOrValueDate
-} from '../utils.js'
+  sortByBookingDateOrValueDate,
+} from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   institutionIds: ['ANDELSKASSEN_FALLESKASSEN_FAELDKK1'],
 
-  normalizeAccount (account) {
+  normalizeAccount(account) {
     return {
       account_id: account.resourceId,
       institution: account.institution,
@@ -16,8 +16,8 @@ export default {
       iban: account.iban,
       name: [account.name, printIban(account)].join(' '),
       official_name: account.product,
-      type: 'checking'
-    }
+      type: 'checking',
+    };
   },
 
   /**
@@ -28,16 +28,16 @@ export default {
    *
    *   [0]: https://nordigen.zendesk.com/hc/en-gb/articles/7899367372829-valueDate-and-bookingDate-for-transactions
    */
-  normalizeTransaction (transaction, _booked) {
+  normalizeTransaction(transaction, _booked) {
     return {
       ...transaction,
       date: transaction.bookingDate,
-      remittanceInformationUnstructured: transaction.additionalInformation
-    }
+      remittanceInformationUnstructured: transaction.additionalInformation,
+    };
   },
 
-  sortTransactions (transactions = []) {
-    return sortByBookingDateOrValueDate(transactions)
+  sortTransactions(transactions = []) {
+    return sortByBookingDateOrValueDate(transactions);
   },
 
   /**
@@ -48,7 +48,7 @@ export default {
    *  As a current balance we use `interimBooked` balance type because
    *  it includes transaction placed during current day
    */
-  calculateStartingBalance (sortedTransactions = [], balances = []) {
+  calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
       balance => 'closingBooked' === balance.balanceType
     )
