@@ -50,11 +50,11 @@ export default {
    */
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
-      balance => 'closingBooked' === balance.balanceType
-    )
+      balance => 'closingBooked' === balance.balanceType,
+    );
 
     return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount)
-    }, amountToInteger(currentBalance.balanceAmount.amount))
-  }
-}
+      return total - amountToInteger(trans.transactionAmount.amount);
+    }, amountToInteger(currentBalance.balanceAmount.amount));
+  },
+};
