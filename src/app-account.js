@@ -6,6 +6,7 @@ import {
   login,
   changePassword,
   needsBootstrap,
+  getLoginMethod,
 } from './account-db.js';
 
 let app = express();
@@ -22,7 +23,7 @@ export { app as handlers };
 app.get('/needs-bootstrap', (req, res) => {
   res.send({
     status: 'ok',
-    data: { bootstrapped: !needsBootstrap() },
+    data: { bootstrapped: !needsBootstrap(), loginMethod: getLoginMethod() },
   });
 });
 

@@ -25,6 +25,11 @@ export function needsBootstrap() {
   return rows.length === 0;
 }
 
+export function getLoginMethod(){
+  return config.loginMethod || "password";
+}
+
+
 export function bootstrap(password) {
   let accountDb = getAccountDb();
 

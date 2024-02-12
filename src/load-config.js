@@ -46,6 +46,7 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
+  loginMethod: 'password',
   port: 5006,
   hostname: '::',
   webRoot: path.join(
@@ -85,6 +86,7 @@ if (process.env.NODE_ENV === 'test') {
 
 const finalConfig = {
   ...config,
+  loginMethod:  process.env.ACTUAL_LOGIN_METHOD ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase() : config.loginMethod,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
   serverFiles: process.env.ACTUAL_SERVER_FILES || config.serverFiles,
@@ -118,6 +120,7 @@ const finalConfig = {
       : config.upload,
 };
 
+debug(`using login Method ${finalConfig.loginMethod}`);
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);
 debug(`using server files directory ${finalConfig.serverFiles}`);
