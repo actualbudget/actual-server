@@ -39,7 +39,18 @@ app.post('/bootstrap', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  let token = login(req.body.password);
+  let loginMethod = getLoginMethod();
+  let token = null;
+  switch (loginMethod) {
+    case "header":
+      let headerVal = req.get("X-ACTUAL-TOKEN-PASSWORD");
+      token = login(headerVal);
+      break;
+    case "password":
+    default:
+      token = login(req.body.password);
+      break;
+  }
   res.send({ status: 'ok', data: { token } });
 });
 
