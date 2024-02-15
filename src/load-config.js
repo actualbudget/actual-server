@@ -86,7 +86,9 @@ if (process.env.NODE_ENV === 'test') {
 
 const finalConfig = {
   ...config,
-  loginMethod:  process.env.ACTUAL_LOGIN_METHOD ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase() : config.loginMethod,
+  loginMethod:  process.env.ACTUAL_LOGIN_METHOD
+    ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
+    : config.loginMethod,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
   serverFiles: process.env.ACTUAL_SERVER_FILES || config.serverFiles,

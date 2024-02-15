@@ -42,8 +42,8 @@ app.post('/login', (req, res) => {
   let loginMethod = getLoginMethod();
   let token = null;
   switch (loginMethod) {
-    case "header":
-      let headerVal = req.get("x-actual-password") || "";
+    case 'header':
+      let headerVal = req.get('x-actual-password') || '';
       if (headerVal == "") {
         // fail back to default login method if the header is not present
         token = login(req.body.password);
@@ -51,7 +51,7 @@ app.post('/login', (req, res) => {
         token = login(headerVal);
       }
       break;
-    case "password":
+    case 'password':
     default:
       token = login(req.body.password);
       break;
