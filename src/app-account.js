@@ -42,15 +42,16 @@ app.post('/login', (req, res) => {
   let loginMethod = getLoginMethod();
   let token = null;
   switch (loginMethod) {
-    case 'header':
+    case 'header': {
       let headerVal = req.get('x-actual-password') || '';
-      if (headerVal == "") {
+      if (headerVal == '') {
         // fail back to default login method if the header is not present
         token = login(req.body.password);
       } else {
         token = login(headerVal);
       }
       break;
+    }
     case 'password':
     default:
       token = login(req.body.password);
