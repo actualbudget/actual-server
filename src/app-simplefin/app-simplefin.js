@@ -97,15 +97,11 @@ app.post('/transactions', async (req, res) => {
       let dateToUse = 0;
 
       if(trans.posted == 0) {
-
         newTrans.booked = false;
         dateToUse = trans.transacted_at;
-
       } else {
-
         newTrans.booked = true;      
         dateToUse = trans.posted;
-
       }
 
       newTrans.bookingDate = new Date(dateToUse * 1000)
@@ -131,9 +127,9 @@ app.post('/transactions', async (req, res) => {
     }
 
     response.transactions = {
-        all: allTransactions,
-        booked: bookedTransactions,
-        pending: pendingTransactions,
+      all: allTransactions,
+      booked: bookedTransactions,
+      pending: pendingTransactions,
     };
 
     res.send({
@@ -222,7 +218,7 @@ async function getAccounts(accessKey, startDate, endDate) {
   if (endDate) {
     params.push(`end-date=${normalizeDate(endDate)}`);
   }
-  
+
   params.push(`pending=1`);
 
   if (params.length > 0) {
