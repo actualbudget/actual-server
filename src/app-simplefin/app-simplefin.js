@@ -96,11 +96,11 @@ app.post('/transactions', async (req, res) => {
 
       let dateToUse = 0;
 
-      if(trans.posted == 0) {
+      if( trans.posted == 0) {
         newTrans.booked = false;
         dateToUse = trans.transacted_at;
       } else {
-        newTrans.booked = true;      
+        newTrans.booked = true;
         dateToUse = trans.posted;
       }
 
@@ -118,7 +118,7 @@ app.post('/transactions', async (req, res) => {
         .toISOString()
         .split('T')[0];
 
-      if(newTrans.booked) {
+      if( newTrans.booked) {
         bookedTransactions.push(newTrans);
       } else {
         pendingTransactions.push(newTrans);
