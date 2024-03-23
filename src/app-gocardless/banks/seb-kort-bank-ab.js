@@ -57,6 +57,6 @@ export default {
 
     return sortedTransactions.reduce((total, trans) => {
       return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance.balanceAmount.amount));
+    }, -amountToInteger(currentBalance.balanceAmount.amount));
   },
 };
