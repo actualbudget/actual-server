@@ -1,6 +1,6 @@
 import express from 'express';
 import errorMiddleware from './util/error-middleware.js';
-import validateUser from './util/validate-user.js';
+import validateUser , { validateAuthHeader}from './util/validate-user.js';
 import {
   bootstrap,
   login,
@@ -48,7 +48,11 @@ app.post('/login', (req, res) => {
         // fail back to default login method if the header is not present
         token = login(req.body.password);
       } else {
-        token = login(headerVal);
+        if(validateAuthHeader(req)){
+          token = login(headerVal);
+        } else {
+          res.status(401).send("Proxy Trust Failed")
+        }
       }
       break;
     }

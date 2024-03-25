@@ -47,6 +47,7 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
   loginMethod: 'password',
+  trustedProxy: [],
   port: 5006,
   hostname: '::',
   webRoot: path.join(
