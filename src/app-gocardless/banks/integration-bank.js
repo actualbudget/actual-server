@@ -37,7 +37,7 @@ export default {
     };
   },
 
-  normalizeTransaction(transaction, _booked) {
+  normalizeTransaction(transaction) {
     const date =
       transaction.bookingDate ||
       transaction.bookingDateTime ||

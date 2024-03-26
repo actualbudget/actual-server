@@ -23,7 +23,7 @@ export interface IBank {
    */
   normalizeTransaction: (
     transaction: Transaction,
-    booked: boolean,
+    booked?: boolean,
   ) => (Transaction & { date?: string }) | null;
 
   /**
