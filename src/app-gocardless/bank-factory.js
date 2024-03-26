@@ -1,4 +1,5 @@
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
+import AsnBank from './banks/asn-bank.js';
 import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
@@ -15,6 +16,7 @@ import SEBKortBankAB from './banks/seb-kort-bank-ab.js';
 
 const banks = [
   AmericanExpressAesudef1,
+  AsnBank,
   IngIngddeff,
   IngPlIngbplpw,
   MbankRetailBrexplpw,
