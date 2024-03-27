@@ -1,7 +1,7 @@
 import { getSession } from '../account-db.js';
 import config from '../load-config.js';
-import proxyaddr from "proxy-addr"
-import ipaddr from "ipaddr.js"
+import proxyaddr from 'proxy-addr';
+import ipaddr from 'ipaddr.js';
 
 /**
  * @param {import('express').Request} req
@@ -34,18 +34,18 @@ export function validateAuthHeader(req) {
     return true;
   }
 
-  let sender = proxyaddr(req, "uniquelocal");
+  let sender = proxyaddr(req, 'uniquelocal');
   let sender_ip = ipaddr.parse(sender);
   const rangeList = {
-    allowed_ips: config.trustedProxies.map(q => ipaddr.parseCIDR(q))
+    allowed_ips: config.trustedProxies.map((q) => ipaddr.parseCIDR(q)),
   };
   // @ts-ignore
-  var matched = ipaddr.subnetMatch(sender_ip, rangeList, "fail")
-  if( matched == "allowed_ips"){
-    console.info(`Header Auth Login permitted from ${sender}`)
+  var matched = ipaddr.subnetMatch(sender_ip, rangeList, 'fail');
+  if (matched == 'allowed_ips') {
+    console.info(`Header Auth Login permitted from ${sender}`);
     return true;
   } else {
-    console.warn(`Header Auth Login attempted from ${sender}`)
+    console.warn(`Header Auth Login attempted from ${sender}`);
     return false;
   }
 }

@@ -1,6 +1,6 @@
 import express from 'express';
 import errorMiddleware from './util/error-middleware.js';
-import validateUser , { validateAuthHeader}from './util/validate-user.js';
+import validateUser, { validateAuthHeader } from './util/validate-user.js';
 import {
   bootstrap,
   login,
@@ -40,20 +40,20 @@ app.post('/bootstrap', (req, res) => {
 
 app.post('/login', (req, res) => {
   let loginMethod = getLoginMethod(req);
-  console.log("Logging in via " + loginMethod)
+  console.log('Logging in via ' + loginMethod);
   let token = null;
   switch (loginMethod) {
     case 'header': {
       let headerVal = req.get('x-actual-password') || '';
       if (headerVal == '') {
-        res.send({ status: 'ok', data: { error: 'invalid-header' }});
-        return
+        res.send({ status: 'ok', data: { error: 'invalid-header' } });
+        return;
       } else {
-        if(validateAuthHeader(req)){
+        if (validateAuthHeader(req)) {
           token = login(headerVal);
         } else {
-          res.send({ status: 'ok', data: { error: 'proxy-not-trusted' }});
-          return
+          res.send({ status: 'ok', data: { error: 'proxy-not-trusted' } });
+          return;
         }
       }
       break;
