@@ -32,7 +32,7 @@ export function needsBootstrap() {
  * fall back to using password
  */
 export function getLoginMethod(req) {
-  if((req.body || {loginMethod : null}).loginMethod){
+  if(typeof(req) !== "undefined" && (req.body || {loginMethod : null}).loginMethod){
     return req.body.loginMethod;
   }
   return config.loginMethod || 'password';

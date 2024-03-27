@@ -46,13 +46,13 @@ app.post('/login', (req, res) => {
     case 'header': {
       let headerVal = req.get('x-actual-password') || '';
       if (headerVal == '') {
-        // fail back to default login method if the header is not present
-        token = login(req.body.password);
+        res.send({ status: 'ok', data: { error: 'invalid-header' }});
+        return
       } else {
         if(validateAuthHeader(req)){
           token = login(headerVal);
         } else {
-          res.send({ status: 'ok', data: { error: "proxy-not-trusted" }});
+          res.send({ status: 'ok', data: { error: 'proxy-not-trusted' }});
           return
         }
       }
