@@ -39,7 +39,8 @@ app.post('/bootstrap', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  let loginMethod = getLoginMethod();
+  let loginMethod = getLoginMethod(req);
+  console.log("Logging in via " + loginMethod)
   let token = null;
   switch (loginMethod) {
     case 'header': {
@@ -51,7 +52,8 @@ app.post('/login', (req, res) => {
         if(validateAuthHeader(req)){
           token = login(headerVal);
         } else {
-          res.status(401).send("Proxy Trust Failed")
+          res.send({ status: 'ok', data: { error: "proxy-not-trusted" }});
+          return
         }
       }
       break;

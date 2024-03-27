@@ -47,7 +47,8 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
   loginMethod: 'password',
-  trustedProxy: [],
+  // assume local networks are trusted for header authentication
+  trustedProxies: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fc00::/7'],
   port: 5006,
   hostname: '::',
   webRoot: path.join(
@@ -90,6 +91,9 @@ const finalConfig = {
   loginMethod: process.env.ACTUAL_LOGIN_METHOD
     ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
     : config.loginMethod,
+  trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
+    ? process.env.ACTUAL_TRUSTED_PROXY.split(",")
+    : config.trustedProxies,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
   serverFiles: process.env.ACTUAL_SERVER_FILES || config.serverFiles,

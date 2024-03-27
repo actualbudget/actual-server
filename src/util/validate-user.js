@@ -30,16 +30,22 @@ export default function validateUser(req, res) {
 }
 
 export function validateAuthHeader(req) {
-  if (config.trustedProxy.length == 0) {
+  if (config.trustedProxies.length == 0) {
     return true;
   }
 
   let sender = proxyaddr(req, "uniquelocal");
   let sender_ip = ipaddr.parse(sender);
   const rangeList = {
-    allowed_ips: config.trustedProxy.map(q => ipaddr.parseCIDR(q))
+    allowed_ips: config.trustedProxies.map(q => ipaddr.parseCIDR(q))
   };
   // @ts-ignore
   var matched = ipaddr.subnetMatch(sender_ip, rangeList, "fail")
-  return matched == "allowed_ips"
+  if( matched == "allowed_ips"){
+    console.info(`Header Auth Login permitted from ${sender}`)
+    return true;
+  } else {
+    console.warn(`Header Auth Login attempted from ${sender}`)
+    return false;
+  }
 }
