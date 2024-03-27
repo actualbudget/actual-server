@@ -39,10 +39,10 @@ export function validateAuthHeader(req) {
   const rangeList = {
     allowed_ips: config.trustedProxies.map((q) => ipaddr.parseCIDR(q)),
   };
-  /* eslint-disable ban-ts-comment */
+  /* eslint-disable @typescript-eslint/ban-ts-comment */
   // @ts-ignore : there is an error in the ts definition for the function, but this is valid
   var matched = ipaddr.subnetMatch(sender_ip, rangeList, 'fail');
-  /* eslint-enable ban-ts-comment */
+  /* eslint-enable @typescript-eslint/ban-ts-comment */
   if (matched == 'allowed_ips') {
     console.info(`Header Auth Login permitted from ${sender}`);
     return true;
