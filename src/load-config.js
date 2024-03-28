@@ -98,7 +98,7 @@ const finalConfig = {
     ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
     : config.loginMethod,
   trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
-    ? process.env.ACTUAL_TRUSTED_PROXIES.split(',')
+    ? process.env.ACTUAL_TRUSTED_PROXIES.split(',').map(q => q.trim())
     : config.trustedProxies,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
