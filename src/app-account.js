@@ -1,11 +1,12 @@
 import express from 'express';
 import errorMiddleware from './util/error-middleware.js';
-import validateUser from './util/validate-user.js';
+import validateUser, { validateAuthHeader } from './util/validate-user.js';
 import {
   bootstrap,
   login,
   changePassword,
   needsBootstrap,
+  getLoginMethod,
 } from './account-db.js';
 
 let app = express();
@@ -22,7 +23,7 @@ export { app as handlers };
 app.get('/needs-bootstrap', (req, res) => {
   res.send({
     status: 'ok',
-    data: { bootstrapped: !needsBootstrap() },
+    data: { bootstrapped: !needsBootstrap(), loginMethod: getLoginMethod() },
   });
 });
 
@@ -38,7 +39,30 @@ app.post('/bootstrap', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  let token = login(req.body.password);
+  let loginMethod = getLoginMethod(req);
+  console.log('Logging in via ' + loginMethod);
+  let token = null;
+  switch (loginMethod) {
+    case 'header': {
+      let headerVal = req.get('x-actual-password') || '';
+      if (headerVal == '') {
+        res.send({ status: 'ok', data: { error: 'invalid-header' } });
+        return;
+      } else {
+        if (validateAuthHeader(req)) {
+          token = login(headerVal);
+        } else {
+          res.send({ status: 'ok', data: { error: 'proxy-not-trusted' } });
+          return;
+        }
+      }
+      break;
+    }
+    case 'password':
+    default:
+      token = login(req.body.password);
+      break;
+  }
   res.send({ status: 'ok', data: { token } });
 });
 

@@ -46,6 +46,15 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
+  loginMethod: 'password',
+  // assume local networks are trusted for header authentication
+  trustedProxies: [
+    '10.0.0.0/8',
+    '172.16.0.0/12',
+    '192.168.0.0/16',
+    'fc00::/7',
+    '::1/128',
+  ],
   port: 5006,
   hostname: '::',
   webRoot: path.join(
@@ -85,6 +94,12 @@ if (process.env.NODE_ENV === 'test') {
 
 const finalConfig = {
   ...config,
+  loginMethod: process.env.ACTUAL_LOGIN_METHOD
+    ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
+    : config.loginMethod,
+  trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
+    ? process.env.ACTUAL_TRUSTED_PROXIES.split(',').map((q) => q.trim())
+    : config.trustedProxies,
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
   serverFiles: process.env.ACTUAL_SERVER_FILES || config.serverFiles,
@@ -123,6 +138,8 @@ debug(`using hostname ${finalConfig.hostname}`);
 debug(`using server files directory ${finalConfig.serverFiles}`);
 debug(`using user files directory ${finalConfig.userFiles}`);
 debug(`using web root directory ${finalConfig.webRoot}`);
+debug(`using login method ${finalConfig.loginMethod}`);
+debug(`using trusted proxies ${finalConfig.trustedProxies.join(', ')}`);
 
 if (finalConfig.https) {
   debug(`using https key: ${'*'.repeat(finalConfig.https.key.length)}`);

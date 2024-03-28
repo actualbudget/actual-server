@@ -2,6 +2,8 @@ import { ServerOptions } from 'https';
 
 export interface Config {
   mode: 'test' | 'development';
+  loginMethod: 'password' | 'header';
+  trustedProxies: string[];
   dataDir: string;
   port: number;
   hostname: string;
