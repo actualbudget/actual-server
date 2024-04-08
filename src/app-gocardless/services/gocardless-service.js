@@ -257,14 +257,16 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<{requisitionId, link}>}
    */
-  createRequisition: async ({ institutionId, accessValidForDays, host }) => {
+  createRequisition: async ({ institutionId, host }) => {
     await goCardlessService.setToken();
+
+    const bank = BankFactory(institutionId);
 
     const response = await client.initSession({
       redirectUrl: host + '/gocardless/link',
       institutionId,
       referenceId: uuid.v4(),
-      accessValidForDays,
+      accessValidForDays: bank.accessValidForDays,
       maxHistoricalDays: 90,
       userLanguage: 'en',
       ssn: null,
