@@ -35,7 +35,7 @@ export function validateAuthHeader(req) {
   }
 
   let sender = proxyaddr(req, 'uniquelocal');
-  let sender_ip = ipaddr.parse(sender);
+  let sender_ip = ipaddr.process(sender);
   const rangeList = {
     allowed_ips: config.trustedProxies.map((q) => ipaddr.parseCIDR(q)),
   };
