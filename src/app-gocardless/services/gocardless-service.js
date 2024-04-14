@@ -260,6 +260,7 @@ export const goCardlessService = {
   createRequisition: async ({ institutionId, host }) => {
     await goCardlessService.setToken();
 
+    const institution = await goCardlessService.getInstitution(institutionId);
     const bank = BankFactory(institutionId);
 
     const response = await client.initSession({
@@ -267,7 +268,7 @@ export const goCardlessService = {
       institutionId,
       referenceId: uuid.v4(),
       accessValidForDays: bank.accessValidForDays,
-      maxHistoricalDays: 90,
+      maxHistoricalDays: institution.transaction_total_days,
       userLanguage: 'en',
       ssn: null,
       redirectImmediate: false,
