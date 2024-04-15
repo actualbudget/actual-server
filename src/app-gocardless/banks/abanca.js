@@ -2,7 +2,7 @@ import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: ['ABANCA_XXX'], //TODO: get institution ID for Abanca
+  institutionIds: ['ABANCA_CAGLESMM'],
 
   normalizeAccount(account) {
     return Fallback.normalizeAccount(account);
