@@ -38,8 +38,14 @@ app.post('/bootstrap', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  let token = login(req.body.password);
-  res.send({ status: 'ok', data: { token } });
+  let { error, token } = login(req.body.password);
+
+  if (error) {
+    res.status(400).send({ status: 'error', reason: error });
+    return;
+  } else {
+    res.send({ status: 'ok', data: { token } });
+  }
 });
 
 app.post('/change-password', (req, res) => {
