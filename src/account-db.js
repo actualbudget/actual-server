@@ -49,7 +49,7 @@ export function bootstrap(password) {
 }
 
 export function login(password) {
-  if (password == null || password === '') {
+  if (password === undefined || password === '') {
     return { error: 'invalid-password' };
   }
 
