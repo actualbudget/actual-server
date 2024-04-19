@@ -41,7 +41,7 @@ app.post('/bootstrap', (req, res) => {
 app.post('/login', (req, res) => {
   let loginMethod = getLoginMethod(req);
   console.log('Logging in via ' + loginMethod);
-  let token = null;
+  let tokenRes = null;
   switch (loginMethod) {
     case 'header': {
       let headerVal = req.get('x-actual-password') || '';
@@ -50,7 +50,7 @@ app.post('/login', (req, res) => {
         return;
       } else {
         if (validateAuthHeader(req)) {
-          token = login(headerVal);
+          tokenRes = login(headerVal);
         } else {
           res.send({ status: 'ok', data: { error: 'proxy-not-trusted' } });
           return;
@@ -60,9 +60,16 @@ app.post('/login', (req, res) => {
     }
     case 'password':
     default:
-      token = login(req.body.password);
+      tokenRes = login(req.body.password);
       break;
   }
+  let { error, token } = tokenRes;
+
+  if (error) {
+    res.status(400).send({ status: 'error', reason: error });
+    return;
+  }
+
   res.send({ status: 'ok', data: { token } });
 });
 
