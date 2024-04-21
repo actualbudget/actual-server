@@ -1,3 +1,4 @@
+import AbancaCaglesmm from './banks/abanca-caglesmm.js';
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
 import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
@@ -14,6 +15,7 @@ import SEBPrivat from './banks/seb-privat.js';
 import SEBKortBankAB from './banks/seb-kort-bank-ab.js';
 
 const banks = [
+  AbancaCaglesmm,
   AmericanExpressAesudef1,
   IngIngddeff,
   IngPlIngbplpw,
