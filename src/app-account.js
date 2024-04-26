@@ -45,14 +45,15 @@ app.post('/login', (req, res) => {
   switch (loginMethod) {
     case 'header': {
       let headerVal = req.get('x-actual-password') || '';
+      console.debug('HEADER VALUE: ' + headerVal);
       if (headerVal == '') {
-        res.send({ status: 'ok', data: { error: 'invalid-header' } });
+        res.send({ status: 'error', reason: 'invalid-header' });
         return;
       } else {
         if (validateAuthHeader(req)) {
           tokenRes = login(headerVal);
         } else {
-          res.send({ status: 'ok', data: { error: 'proxy-not-trusted' } });
+          res.send({ status: 'error', reason: 'proxy-not-trusted' });
           return;
         }
       }
