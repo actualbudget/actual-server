@@ -6,7 +6,7 @@ import {
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: ['SEB_KORT_AB_SE_SKHSFI21'],
+  institutionIds: ['SEB_KORT_AB_NO_SKHSFI21','SEB_KORT_AB_SE_SKHSFI21'],
 
   accessValidForDays: 180,
 
