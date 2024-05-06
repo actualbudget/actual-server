@@ -1,4 +1,5 @@
 import Fallback from './integration-bank.js';
+import { formatPayeeName } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -18,6 +19,7 @@ export default {
       ...transaction,
       transactionId: transaction.internalTransactionId,
       date: transaction.bookingDate || transaction.valueDate,
+      payeeName: formatPayeeName(transaction),
     };
   },
 

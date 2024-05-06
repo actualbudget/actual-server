@@ -2,6 +2,7 @@ import {
   printIban,
   amountToInteger,
   sortByBookingDateOrValueDate,
+  formatPayeeName,
 } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -61,16 +62,18 @@ export default {
       remittanceInformationUnstructured +=
         ' ' + transaction.additionalInformation;
 
-    const usefulCreditorName =
+    transaction.remittanceInformationUnstructured =
+      remittanceInformationUnstructured;
+
+    transaction.creditorName =
       transaction.ultimateCreditor ||
       transaction.creditorName ||
       transaction.debtorName;
 
     return {
       ...transaction,
-      creditorName: usefulCreditorName,
-      remittanceInformationUnstructured: remittanceInformationUnstructured,
       date: transaction.bookingDate || transaction.valueDate,
+      payeeName: formatPayeeName(transaction),
     };
   },
 

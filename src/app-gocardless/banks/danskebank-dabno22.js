@@ -2,6 +2,7 @@ import {
   printIban,
   amountToInteger,
   sortByBookingDateOrValueDate,
+  formatPayeeName,
 } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -43,6 +44,7 @@ export default {
     return {
       ...transaction,
       date: transaction.bookingDate,
+      payeeName: formatPayeeName(transaction),
     };
   },
 

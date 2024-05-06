@@ -1,4 +1,4 @@
-import { printIban, amountToInteger } from '../utils.js';
+import { printIban, amountToInteger, formatPayeeName } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -26,10 +26,12 @@ export default {
       ? remittanceInformationMatch[1]
       : transaction.remittanceInformationUnstructured;
 
+    transaction.remittanceInformationUnstructured = remittanceInformation;
+
     return {
       ...transaction,
-      remittanceInformationUnstructured: remittanceInformation,
       date: transaction.bookingDate || transaction.valueDate,
+      payeeName: formatPayeeName(transaction),
     };
   },
 

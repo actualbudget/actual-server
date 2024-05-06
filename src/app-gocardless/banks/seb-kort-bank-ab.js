@@ -2,6 +2,7 @@ import {
   printIban,
   amountToInteger,
   sortByBookingDateOrValueDate,
+  formatPayeeName,
 } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -26,11 +27,13 @@ export default {
    * Sign of transaction amount needs to be flipped for SEB credit cards
    */
   normalizeTransaction(transaction, _booked) {
+    // Creditor name is stored in additionInformation for SEB
+    transaction.creditorName = transaction.additionalInformation;
+
     return {
       ...transaction,
-      // Creditor name is stored in additionInformation for SEB
-      creditorName: transaction.additionalInformation,
       date: transaction.valueDate,
+      payeeName: formatPayeeName(transaction),
       transactionAmount: {
         // Flip transaction amount sign
         amount: (-parseFloat(transaction.transactionAmount.amount)).toString(),

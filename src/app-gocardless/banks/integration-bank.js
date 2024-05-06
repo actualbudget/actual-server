@@ -3,6 +3,7 @@ import {
   sortByBookingDateOrValueDate,
   amountToInteger,
   printIban,
+  formatPayeeName,
 } from '../utils.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
@@ -51,15 +52,18 @@ export default {
       transaction.bookingDateTime ||
       transaction.valueDate ||
       transaction.valueDateTime;
+
     // If we couldn't find a valid date field we filter out this transaction
     // and hope that we will import it again once the bank has processed the
     // transaction further.
     if (!date) {
       return null;
     }
+
     return {
       ...transaction,
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
+      payeeName: formatPayeeName(transaction),
     };
   },
 

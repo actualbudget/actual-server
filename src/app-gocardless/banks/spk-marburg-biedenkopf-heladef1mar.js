@@ -2,6 +2,7 @@ import {
   printIban,
   amountToInteger,
   sortByBookingDateOrValueDate,
+  formatPayeeName,
 } from '../utils.js';
 import d from 'date-fns';
 
@@ -62,10 +63,13 @@ export default {
         transaction.remittanceInformationStructuredArray?.join(' ');
     }
 
+    transaction.remittanceInformationUnstructured =
+      remittanceInformationUnstructured;
+
     return {
       ...transaction,
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-      remittanceInformationUnstructured: remittanceInformationUnstructured,
+      payeeName: formatPayeeName(transaction),
     };
   },
 

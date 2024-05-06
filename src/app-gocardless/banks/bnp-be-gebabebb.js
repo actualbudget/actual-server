@@ -2,6 +2,7 @@ import {
   sortByBookingDateOrValueDate,
   amountToInteger,
   printIban,
+  formatPayeeName,
 } from '../utils.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
@@ -96,6 +97,7 @@ export default {
       ...transaction,
       creditorName: creditorName,
       date: transaction.valueDate || transaction.bookingDate,
+      payeeName: formatPayeeName(transaction),
     };
   },
 

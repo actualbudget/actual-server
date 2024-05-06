@@ -3,6 +3,7 @@ import {
   sortByBookingDateOrValueDate,
   amountToInteger,
   printIban,
+  formatPayeeName,
 } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -31,17 +32,21 @@ export default {
       transaction.bookingDateTime ||
       transaction.valueDate ||
       transaction.valueDateTime;
+
     // If we couldn't find a valid date field we filter out this transaction
     // and hope that we will import it again once the bank has processed the
     // transaction further.
     if (!date) {
       return null;
     }
+
+    // Creditor name is stored in additionInformation for SEB
+    transaction.creditorName = transaction.additionalInformation;
+
     return {
       ...transaction,
-      // Creditor name is stored in additionInformation for SEB
-      creditorName: transaction.additionalInformation,
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
+      payeeName: formatPayeeName(transaction),
     };
   },
 
