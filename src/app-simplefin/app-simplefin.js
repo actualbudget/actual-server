@@ -109,7 +109,7 @@ app.post('/transactions', async (req, res) => {
         .split('T')[0];
 
       newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
-      newTrans.debtorName = trans.payee;
+      newTrans.payeeName = trans.payee;
       //newTrans.debtorAccount = don't have compared to GoCardless
       newTrans.remittanceInformationUnstructured = trans.description;
       newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
