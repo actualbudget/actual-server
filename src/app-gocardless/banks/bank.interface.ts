@@ -9,6 +9,8 @@ export interface IBank {
 
   accessValidForDays: number;
 
+  overwriteMaxHistoricalDays?: string;
+
   /**
    * Returns normalized object with required data for the frontend
    */

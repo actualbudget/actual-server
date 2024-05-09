@@ -268,7 +268,8 @@ export const goCardlessService = {
       institutionId,
       referenceId: uuid.v4(),
       accessValidForDays: bank.accessValidForDays,
-      maxHistoricalDays: institution.transaction_total_days,
+      maxHistoricalDays:
+        bank.overwriteMaxHistoricalDays ?? institution.transaction_total_days,
       userLanguage: 'en',
       ssn: null,
       redirectImmediate: false,
