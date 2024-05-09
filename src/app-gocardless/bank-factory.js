@@ -1,4 +1,5 @@
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
+import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
@@ -16,6 +17,7 @@ import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 
 const banks = [
   AmericanExpressAesudef1,
+  BankinterBkbkesmm,
   Belfius,
   BnpBeGebabebb,
   DanskeBankDabNO22,
