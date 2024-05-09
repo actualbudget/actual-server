@@ -20,10 +20,7 @@ export default {
 
   accessValidForDays: 90,
 
-  overwriteMaxHistoricalDays: '89',
-
   normalizeAccount(account) {
-    console.log('normalizeAccount', account);
     return {
       account_id: account.id,
       institution: account.institution,
@@ -36,7 +33,6 @@ export default {
   },
 
   normalizeTransaction(transaction, _booked) {
-    console.log('normalizeTransaction', transaction, _booked);
     return {
       ...transaction,
       debtorName: transaction.debtorName?.replaceAll(';', ' '),
