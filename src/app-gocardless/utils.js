@@ -24,21 +24,35 @@ export const amountToInteger = (n) => Math.round(n * 100);
 export const formatPayeeName = (trans) => {
   const nameParts = [];
 
-  const name =
+  // get the correct name and account fields for the transaction amount
+  let name;
+  let account;
+  if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
+    name = trans.debtorName;
+    account = trans.debtorAccount;
+  } else {
+    name = trans.creditorName;
+    account = trans.creditorAccount;
+  }
+
+  // use the correct fields for the amount if it was found
+  // if not, use whatever we can find
+  name =
+    name ||
     trans.debtorName ||
     trans.creditorName ||
     trans.remittanceInformationUnstructured ||
     (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
     trans.additionalInformation;
 
+  account = account || trans.debtorAccount || trans.creditorAccount;
+
   if (name) {
     nameParts.push(title(name));
   }
 
-  if (trans.debtorAccount && trans.debtorAccount.iban) {
-    nameParts.push(formatPayeeIban(trans.debtorAccount.iban));
-  } else if (trans.creditorAccount && trans.creditorAccount.iban) {
-    nameParts.push(formatPayeeIban(trans.creditorAccount.iban));
+  if (account && account.iban) {
+    nameParts.push(formatPayeeIban(account.iban));
   }
 
   return nameParts.join(' ');
