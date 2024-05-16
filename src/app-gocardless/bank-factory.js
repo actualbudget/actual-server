@@ -13,6 +13,7 @@ import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
 import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
+import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 
 const banks = [
   AmericanExpressAesudef1,
@@ -29,6 +30,7 @@ const banks = [
   SparNordSpNoDK22,
   SpkMarburgBiedenkopfHeladef1mar,
   SpkKarlsruhekarsde66,
+  Berliner_Sparkasse_beladebexxx,
 ];
 
 export default (institutionId) =>
