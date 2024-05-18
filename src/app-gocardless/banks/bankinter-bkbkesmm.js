@@ -1,7 +1,7 @@
 import {
-  sortByBookingDateOrValueDate,
-  amountToInteger,
   printIban,
+  amountToInteger,
+  sortByBookingDateOrValueDate,
 } from '../utils.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
@@ -16,36 +16,32 @@ const SORTED_BALANCE_TYPE_LIST = [
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: [
-    'SPARNORD_SPNODK22',
-    'LAGERNES_BANK_LAPNDKK1',
-    'ANDELSKASSEN_FALLESKASSEN_FAELDKK1',
-  ],
+  institutionIds: ['BANKINTER_BKBKESMM'],
 
-  accessValidForDays: 180,
+  accessValidForDays: 90,
 
   normalizeAccount(account) {
     return {
       account_id: account.id,
       institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.name, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: `integration-${account.institution_id}`,
+      mask: account.iban.slice(-4),
+      iban: account.iban,
+      name: [account.name, printIban(account)].join(' '),
+      official_name: account.product,
       type: 'checking',
     };
   },
 
-  /**
-   * Banks on the BEC backend only give information regarding the transaction in additionalInformation
-   */
   normalizeTransaction(transaction, _booked) {
     return {
       ...transaction,
-      date: transaction.bookingDate,
-      remittanceInformationUnstructured: transaction.additionalInformation,
+      debtorName: transaction.debtorName?.replaceAll(';', ' '),
+      creditorName: transaction.creditorName?.replaceAll(';', ' '),
+      remittanceInformationUnstructured:
+        transaction.remittanceInformationUnstructured
+          .replaceAll(/\/Txt\/(\w\|)?/gi, '')
+          .replaceAll(';', ' '),
+      date: transaction.bookingDate || transaction.valueDate,
     };
   },
 
