@@ -1,0 +1,44 @@
+import Fallback from './integration-bank.js';
+
+/** @type {import('./bank.interface.js').IBank} */
+export default {
+  institutionIds: ['VIRGIN_NRNBGB22'],
+
+  accessValidForDays: 90,
+
+  normalizeAccount(account) {
+    return Fallback.normalizeAccount(account);
+  },
+
+  normalizeTransaction(transaction, booked) {
+    const transferPrefixes = ['MOB', 'FPS'];
+    const methodRegex = /(Card|WLT)\s\d*/;
+
+    const parts = transaction.remittanceInformationUnstructured.split(', ');
+
+    if (transferPrefixes.includes(parts[0])) {
+      // Transfer remittance information begins with either "MOB" or "FPS"
+      // the second field contains the payee and the third contains the
+      // reference
+
+      transaction.creditorName = parts[1];
+      transaction.debtorName = parts[1];
+      transaction.remittanceInformationUnstructured = parts[2];
+    } else if (parts[0].match(methodRegex)) {
+      // The payee is prefixed with the payment method, eg "Card 11, {payee}"
+
+      transaction.creditorName = parts[1];
+      transaction.debtorName = parts[1];
+    }
+
+    return Fallback.normalizeTransaction(transaction, booked);
+  },
+
+  sortTransactions(transactions = []) {
+    return Fallback.sortTransactions(transactions);
+  },
+
+  calculateStartingBalance(sortedTransactions = [], balances = []) {
+    return Fallback.calculateStartingBalance(sortedTransactions, balances);
+  },
+};
