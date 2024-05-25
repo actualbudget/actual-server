@@ -1,4 +1,6 @@
-import { amountToInteger, sortByBookingDateOrValueDate } from '../utils.js';
+import Fallback from './integration-bank.js';
+
+import { amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -30,7 +32,7 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
+    return Fallback.sortTransactions(transactions);
   },
 
   /**

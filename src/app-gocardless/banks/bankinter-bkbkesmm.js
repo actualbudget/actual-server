@@ -1,18 +1,6 @@
-import {
-  printIban,
-  amountToInteger,
-  sortByBookingDateOrValueDate,
-} from '../utils.js';
+import Fallback from './integration-bank.js';
 
-const SORTED_BALANCE_TYPE_LIST = [
-  'closingBooked',
-  'expected',
-  'forwardAvailable',
-  'interimAvailable',
-  'interimBooked',
-  'nonInvoiced',
-  'openingBooked',
-];
+import { printIban } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -46,19 +34,10 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
+    return Fallback.sortTransactions(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    const currentBalance = balances
-      .filter((item) => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
-      .sort(
-        (a, b) =>
-          SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
-          SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
-      )[0];
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
+    return Fallback.calculateStartingBalance(sortedTransactions, balances);
   },
 };
