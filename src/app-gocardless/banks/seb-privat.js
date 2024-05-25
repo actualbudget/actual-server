@@ -3,8 +3,8 @@ import {
   sortByBookingDateOrValueDate,
   amountToInteger,
   printIban,
-  formatPayeeName,
 } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {

@@ -2,8 +2,8 @@ import {
   printIban,
   amountToInteger,
   sortByBookingDateOrValueDate,
-  formatPayeeName,
 } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 import d from 'date-fns';
 
 const SORTED_BALANCE_TYPE_LIST = [

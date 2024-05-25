@@ -1,4 +1,5 @@
-import { printIban, amountToInteger, formatPayeeName } from '../utils.js';
+import { printIban, amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
