@@ -3,7 +3,6 @@ import {
   amountToInteger,
   sortByBookingDateOrValueDate,
 } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -62,18 +61,16 @@ export default {
       remittanceInformationUnstructured +=
         ' ' + transaction.additionalInformation;
 
-    transaction.remittanceInformationUnstructured =
-      remittanceInformationUnstructured;
-
-    transaction.creditorName =
+    const usefulCreditorName =
       transaction.ultimateCreditor ||
       transaction.creditorName ||
       transaction.debtorName;
 
     return {
       ...transaction,
+      creditorName: usefulCreditorName,
+      remittanceInformationUnstructured: remittanceInformationUnstructured,
       date: transaction.bookingDate || transaction.valueDate,
-      payeeName: formatPayeeName(transaction),
     };
   },
 

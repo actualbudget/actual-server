@@ -3,7 +3,6 @@ import {
   amountToInteger,
   printIban,
 } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -43,13 +42,10 @@ export default {
    * Banks on the BEC backend only give information regarding the transaction in additionalInformation
    */
   normalizeTransaction(transaction, _booked) {
-    transaction.remittanceInformationUnstructured =
-      transaction.additionalInformation;
-
     return {
       ...transaction,
       date: transaction.bookingDate,
-      payeeName: formatPayeeName(transaction),
+      remittanceInformationUnstructured: transaction.additionalInformation,
     };
   },
 

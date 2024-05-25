@@ -3,7 +3,6 @@ import {
   amountToInteger,
   sortByBookingDateOrValueDate,
 } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -35,7 +34,6 @@ export default {
     return {
       ...transaction,
       date: transaction.bookingDate || transaction.valueDate,
-      payeeName: formatPayeeName(transaction),
     };
   },
 

@@ -4,7 +4,6 @@ import {
   amountToInteger,
   printIban,
 } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -52,18 +51,15 @@ export default {
       transaction.bookingDateTime ||
       transaction.valueDate ||
       transaction.valueDateTime;
-
     // If we couldn't find a valid date field we filter out this transaction
     // and hope that we will import it again once the bank has processed the
     // transaction further.
     if (!date) {
       return null;
     }
-
     return {
       ...transaction,
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-      payeeName: formatPayeeName(transaction),
     };
   },
 

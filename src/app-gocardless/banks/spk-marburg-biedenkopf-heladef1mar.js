@@ -3,7 +3,6 @@ import {
   amountToInteger,
   sortByBookingDateOrValueDate,
 } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
 import d from 'date-fns';
 
 const SORTED_BALANCE_TYPE_LIST = [
@@ -63,13 +62,10 @@ export default {
         transaction.remittanceInformationStructuredArray?.join(' ');
     }
 
-    transaction.remittanceInformationUnstructured =
-      remittanceInformationUnstructured;
-
     return {
       ...transaction,
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-      payeeName: formatPayeeName(transaction),
+      remittanceInformationUnstructured: remittanceInformationUnstructured,
     };
   },
 

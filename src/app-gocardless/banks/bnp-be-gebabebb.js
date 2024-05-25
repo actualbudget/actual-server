@@ -3,7 +3,6 @@ import {
   amountToInteger,
   printIban,
 } from '../utils.js';
-import { formatPayeeName } from '../../util/payee-name.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -97,7 +96,6 @@ export default {
       ...transaction,
       creditorName: creditorName,
       date: transaction.valueDate || transaction.bookingDate,
-      payeeName: formatPayeeName(transaction),
     };
   },
 

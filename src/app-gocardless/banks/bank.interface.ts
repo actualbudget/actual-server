@@ -27,7 +27,7 @@ export interface IBank {
   normalizeTransaction: (
     transaction: Transaction,
     booked: boolean,
-  ) => (Transaction & { date?: string; payeeName?: string }) | null;
+  ) => (Transaction & { date?: string }) | null;
 
   /**
    * Function sorts an array of transactions from newest to oldest
