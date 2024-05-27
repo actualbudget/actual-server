@@ -75,7 +75,7 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
+    return Fallback.sortTransactions(transactions);
   },
 
   /**
