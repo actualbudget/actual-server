@@ -1,4 +1,4 @@
-import { printIban, amountToInteger,} from '../utils.js';
+import { printIban, amountToInteger } from '../utils.js';
 
 import Fallback from './integration-bank.js';
 
