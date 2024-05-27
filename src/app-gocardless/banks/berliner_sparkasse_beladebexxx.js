@@ -4,6 +4,8 @@ import {
   sortByBookingDateOrValueDate,
 } from '../utils.js';
 
+import Fallback from './integration-bank.js';
+
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   institutionIds: ['BERLINER_SPARKASSE_BELADEBEXXX'],
