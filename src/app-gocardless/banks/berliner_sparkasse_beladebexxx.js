@@ -1,7 +1,6 @@
 import {
   printIban,
   amountToInteger,
-  sortByBookingDateOrValueDate,
 } from '../utils.js';
 
 import Fallback from './integration-bank.js';
