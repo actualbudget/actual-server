@@ -2,13 +2,11 @@ import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['NATIONWIDE_NAIAGB21'],
 
   accessValidForDays: 90,
-
-  normalizeAccount(account) {
-    return Fallback.normalizeAccount(account);
-  },
 
   normalizeTransaction(transaction, booked) {
     // Nationwide returns pending transactions with a date representing
@@ -35,13 +33,5 @@ export default {
     }
 
     return Fallback.normalizeTransaction(transaction, booked);
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return Fallback.calculateStartingBalance(sortedTransactions, balances);
   },
 };
