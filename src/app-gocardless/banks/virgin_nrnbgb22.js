@@ -12,7 +12,7 @@ export default {
 
   normalizeTransaction(transaction, booked) {
     const transferPrefixes = ['MOB', 'FPS'];
-    const methodRegex = /(Card|WLT)\s\d*/;
+    const methodRegex = /^(Card|WLT)\s\d+/;
 
     const parts = transaction.remittanceInformationUnstructured.split(', ');
 
