@@ -29,6 +29,11 @@ export default {
 
       transaction.creditorName = parts[1];
       transaction.debtorName = parts[1];
+    } else {
+      // Simple payee name
+
+      transaction.creditorName = transaction.remittanceInformationUnstructured;
+      transaction.debtorName = transaction.remittanceInformationUnstructured;
     }
 
     return Fallback.normalizeTransaction(transaction, booked);
