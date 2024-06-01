@@ -18,7 +18,7 @@ export const formatPayeeName = (trans) => {
     account = trans.creditorAccount;
   }
 
-  // use the correct fields for the amount if it was found
+  // use the correct name field if it was found
   // if not, use whatever we can find
   name =
     name ||
