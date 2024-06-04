@@ -5,6 +5,8 @@ import d from 'date-fns';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['SPK_MARBURG_BIEDENKOPF_HELADEF1MAR'],
 
   accessValidForDays: 180,
@@ -55,13 +57,5 @@ export default {
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
       remittanceInformationUnstructured: remittanceInformationUnstructured,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return Fallback.calculateStartingBalance(sortedTransactions, balances);
   },
 };

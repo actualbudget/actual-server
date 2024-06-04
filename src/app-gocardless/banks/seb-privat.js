@@ -5,13 +5,11 @@ import { amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['SEB_ESSESESS_PRIVATE'],
 
   accessValidForDays: 180,
-
-  normalizeAccount(account) {
-    return Fallback.normalizeAccount(account);
-  },
 
   normalizeTransaction(transaction, _booked) {
     const date =
@@ -31,10 +29,6 @@ export default {
       creditorName: transaction.additionalInformation,
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {

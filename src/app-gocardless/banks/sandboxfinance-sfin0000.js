@@ -4,6 +4,8 @@ import { printIban, amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['SANDBOXFINANCE_SFIN0000'],
 
   accessValidForDays: 90,
@@ -33,10 +35,6 @@ export default {
       ...transaction,
       date: transaction.bookingDate || transaction.valueDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
   },
 
   /**

@@ -2,6 +2,8 @@ import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: [
     'FINTRO_BE_GEBABEBB',
     'HELLO_BE_GEBABEBB',
@@ -9,10 +11,6 @@ export default {
   ],
 
   accessValidForDays: 180,
-
-  normalizeAccount(account) {
-    return Fallback.normalizeAccount(account);
-  },
 
   /** BNP_BE_GEBABEBB provides a lot of useful information via the 'additionalField'
    *  There does not seem to be a specification of this field, but the following information is contained in its subfields:
@@ -73,13 +71,5 @@ export default {
       creditorName: creditorName,
       date: transaction.valueDate || transaction.bookingDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return Fallback.calculateStartingBalance(sortedTransactions, balances);
   },
 };

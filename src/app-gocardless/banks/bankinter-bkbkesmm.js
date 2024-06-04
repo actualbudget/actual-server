@@ -4,6 +4,8 @@ import { printIban } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['BANKINTER_BKBKESMM'],
 
   accessValidForDays: 90,
@@ -31,13 +33,5 @@ export default {
           .replaceAll(';', ' '),
       date: transaction.bookingDate || transaction.valueDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return Fallback.calculateStartingBalance(sortedTransactions, balances);
   },
 };

@@ -4,6 +4,8 @@ import { printIban, amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: [
     'NORWEGIAN_NO_NORWNOK1',
     'NORWEGIAN_SE_NORWNOK1',
@@ -68,10 +70,6 @@ export default {
     }
 
     return null;
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
   },
 
   /**

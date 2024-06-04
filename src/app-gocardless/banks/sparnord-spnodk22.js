@@ -2,6 +2,8 @@ import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: [
     'SPARNORD_SPNODK22',
     'LAGERNES_BANK_LAPNDKK1',
@@ -9,10 +11,6 @@ export default {
   ],
 
   accessValidForDays: 180,
-
-  normalizeAccount(account) {
-    return Fallback.normalizeAccount(account);
-  },
 
   /**
    * Banks on the BEC backend only give information regarding the transaction in additionalInformation
@@ -23,13 +21,5 @@ export default {
       date: transaction.bookingDate,
       remittanceInformationUnstructured: transaction.additionalInformation,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return Fallback.calculateStartingBalance(sortedTransactions, balances);
   },
 };

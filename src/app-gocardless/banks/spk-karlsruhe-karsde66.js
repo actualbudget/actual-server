@@ -4,6 +4,8 @@ import { printIban, amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['SPK_KARLSRUHE_KARSDE66XXX'],
 
   accessValidForDays: 90,
@@ -70,10 +72,6 @@ export default {
       remittanceInformationUnstructured: remittanceInformationUnstructured,
       date: transaction.bookingDate || transaction.valueDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
   },
 
   /**
