@@ -8,10 +8,6 @@ export default {
 
   accessValidForDays: 180,
 
-  normalizeAccount(account) {
-    return Fallback.normalizeAccount(account);
-  },
-
   // Abanca transactions doesn't get the creditorName/debtorName properly
   normalizeTransaction(transaction, _booked) {
     return {
