@@ -16,7 +16,6 @@ import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 
-
 export const banks = [
   AbancaCaglesmm,
   AmericanExpressAesudef1,
