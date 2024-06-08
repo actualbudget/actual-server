@@ -21,12 +21,4 @@ export default {
       date: transaction.bookingDate || transaction.valueDate,
     };
   },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return Fallback.calculateStartingBalance(sortedTransactions, balances);
-  },
 };
