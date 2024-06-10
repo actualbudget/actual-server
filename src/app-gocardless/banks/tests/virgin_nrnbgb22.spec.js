@@ -15,8 +15,6 @@ describe('Virgin', () => {
         true,
       );
 
-      console.log(normalizedTransaction);
-
       expect(normalizedTransaction.creditorName).toEqual(
         'DIRECT DEBIT PAYMENT',
       );
