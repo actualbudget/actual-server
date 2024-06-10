@@ -36,14 +36,16 @@ describe('Nationwide', () => {
         false,
       );
 
-      expect((new Date(normalizedTransaction.date)).getTime()).toBeLessThan(d.getTime());
+      expect(new Date(normalizedTransaction.date).getTime()).toBeLessThan(
+        d.getTime(),
+      );
     });
 
     it('keeps transactionId if in the correct format', () => {
-      const transactionId = "a896729bb8b30b5ca862fe70bd5967185e2b5d3a";
+      const transactionId = 'a896729bb8b30b5ca862fe70bd5967185e2b5d3a';
       const transaction = {
         bookingDate: '2024-01-01T00:00:00Z',
-	transactionId,
+        transactionId,
         transactionAmount: mockTransactionAmount,
       };
 
@@ -58,7 +60,7 @@ describe('Nationwide', () => {
     it('unsets transactionId if not 40 chars', () => {
       const transaction = {
         bookingDate: '2024-01-01T00:00:00Z',
-	transactionId: '0123456789',
+        transactionId: '0123456789',
         transactionAmount: mockTransactionAmount,
       };
 
@@ -73,7 +75,7 @@ describe('Nationwide', () => {
     it('unsets transactionId if debit placeholder found', () => {
       const transaction = {
         bookingDate: '2024-01-01T00:00:00Z',
-	transactionId: '00DEBIT202401010000000000-1000SUPERMARKET',
+        transactionId: '00DEBIT202401010000000000-1000SUPERMARKET',
         transactionAmount: mockTransactionAmount,
       };
 
@@ -88,7 +90,7 @@ describe('Nationwide', () => {
     it('unsets transactionId if credit placeholder found', () => {
       const transaction = {
         bookingDate: '2024-01-01T00:00:00Z',
-	transactionId: '00CREDIT202401010000000000-1000SUPERMARKET',
+        transactionId: '00CREDIT202401010000000000-1000SUPERMARKET',
         transactionAmount: mockTransactionAmount,
       };
 

@@ -15,7 +15,7 @@ export default {
     // and the transactionID from Nationwide changes when a transaction is
     // booked
     if (!booked) {
-      const d = new Date(transaction.bookingDate)
+      const d = new Date(transaction.bookingDate);
       d.setDate(d.getDate() - 8);
 
       const useDate = new Date(Math.min(d.getTime(), new Date().getTime()));
@@ -27,8 +27,11 @@ export default {
     // that are malformed and can even change after import. This will ignore
     // these ids and unset them. When a correct ID is returned then it will
     // update via the deduplication logic
-    const debitCreditRegex = /^00(DEB|CRED)IT.+$/
-    if (transaction.transactionId?.match(debitCreditRegex) || transaction.transactionId?.length !== 40) {
+    const debitCreditRegex = /^00(DEB|CRED)IT.+$/;
+    if (
+      transaction.transactionId?.match(debitCreditRegex) ||
+      transaction.transactionId?.length !== 40
+    ) {
       transaction.transactionId = null;
     }
 
