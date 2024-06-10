@@ -2,13 +2,11 @@ import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['VIRGIN_NRNBGB22'],
 
   accessValidForDays: 90,
-
-  normalizeAccount(account) {
-    return Fallback.normalizeAccount(account);
-  },
 
   normalizeTransaction(transaction, booked) {
     const transferPrefixes = ['MOB', 'FPS'];
@@ -37,13 +35,5 @@ export default {
     }
 
     return Fallback.normalizeTransaction(transaction, booked);
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return Fallback.calculateStartingBalance(sortedTransactions, balances);
   },
 };
