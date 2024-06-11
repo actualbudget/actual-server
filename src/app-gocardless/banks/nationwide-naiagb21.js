@@ -23,14 +23,21 @@ export default {
       transaction.bookingDate = useDate.toISOString().slice(0, 10);
     }
 
+    console.log(transaction);
+
     // Nationwide also occasionally returns erroneous transaction_ids
     // that are malformed and can even change after import. This will ignore
     // these ids and unset them. When a correct ID is returned then it will
     // update via the deduplication logic
     const debitCreditRegex = /^00(DEB|CRED)IT.+$/;
+    const validLengths = [
+      40, // Nationwide credit cards
+      32, // Nationwide current accounts
+    ];
+
     if (
       transaction.transactionId?.match(debitCreditRegex) ||
-      transaction.transactionId?.length !== 40
+      !validLengths.includes(transaction.transactionId?.length)
     ) {
       transaction.transactionId = null;
     }

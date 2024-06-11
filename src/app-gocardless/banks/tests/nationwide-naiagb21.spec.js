@@ -57,7 +57,7 @@ describe('Nationwide', () => {
       expect(normalizedTransaction.transactionId).toBe(transactionId);
     });
 
-    it('unsets transactionId if not 40 chars', () => {
+    it('unsets transactionId if not valid length', () => {
       const transaction = {
         bookingDate: '2024-01-01T00:00:00Z',
         transactionId: '0123456789',
