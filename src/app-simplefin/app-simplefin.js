@@ -78,6 +78,20 @@ app.post(
 
       const account = results.accounts.find((a) => a.id === accountId);
 
+      const needsAttention = results.errors.find((e) => e === `Connection to ${account.org.name} may need attention`);
+      if (needsAttention) {
+        res.send({
+          status: 'ok',
+          data: {
+            error_type: 'ACCOUNT_NEEDS_ATTENTION',
+            error_code: 'ACCOUNT_NEEDS_ATTENTION',
+            status: 'rejected',
+            reason:
+              'The account needs your attention at <a href="https://beta-bridge.simplefin.org/auth/login">SimpleFIN</a>.',
+          },
+        });
+      }
+
       const response = {};
 
       const balance = parseInt(account.balance.replace('.', ''));
