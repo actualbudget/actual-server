@@ -8,6 +8,7 @@ import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
 import MbankRetailBrexplpw from './banks/mbank-retail-brexplpw.js';
+import NationwideNaiaGB21 from './banks/nationwide-naiagb21.js';
 import NorwegianXxNorwnok1 from './banks/norwegian-xx-norwnok1.js';
 import SEBKortBankAB from './banks/seb-kort-bank-ab.js';
 import SEBPrivat from './banks/seb-privat.js';
@@ -15,6 +16,7 @@ import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
 import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
+import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
 
 export const banks = [
   AbancaCaglesmm,
@@ -26,6 +28,7 @@ export const banks = [
   IngIngddeff,
   IngPlIngbplpw,
   MbankRetailBrexplpw,
+  NationwideNaiaGB21,
   NorwegianXxNorwnok1,
   SEBKortBankAB,
   SEBPrivat,
@@ -33,6 +36,7 @@ export const banks = [
   SparNordSpNoDK22,
   SpkMarburgBiedenkopfHeladef1mar,
   SpkKarlsruhekarsde66,
+  VirginNrnbgb22,
 ];
 
 export default (institutionId) =>
