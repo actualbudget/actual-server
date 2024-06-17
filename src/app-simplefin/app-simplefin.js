@@ -78,7 +78,9 @@ app.post(
 
       const account = results.accounts.find((a) => a.id === accountId);
 
-      const needsAttention = results.errors.find((e) => e === `Connection to ${account.org.name} may need attention`);
+      const needsAttention = results.errors.find(
+        (e) => e === `Connection to ${account.org.name} may need attention`,
+      );
       if (needsAttention) {
         res.send({
           status: 'ok',
