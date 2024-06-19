@@ -34,20 +34,35 @@ export function validateAuthHeader(req) {
     return true;
   }
 
-  let sender = proxyaddr(req, 'uniquelocal');
-  let sender_ip = ipaddr.process(sender);
+  // Retrieve all addresses except the last one
+  let proxies = proxyaddr.all(req, 'uniquelocal');
+  let client_ip = ipaddr.process(proxies[proxies.length - 1]); // Store client IP for later use
+  proxies.pop(); // Remove the last address, which is the client's address
+
   const rangeList = {
     allowed_ips: config.trustedProxies.map((q) => ipaddr.parseCIDR(q)),
   };
-  /* eslint-disable @typescript-eslint/ban-ts-comment */
-  // @ts-ignore : there is an error in the ts definition for the function, but this is valid
-  var matched = ipaddr.subnetMatch(sender_ip, rangeList, 'fail');
-  /* eslint-enable @typescript-eslint/ban-ts-comment */
-  if (matched == 'allowed_ips') {
-    console.info(`Header Auth Login permitted from ${sender}`);
-    return true;
-  } else {
-    console.warn(`Header Auth Login attempted from ${sender}`);
-    return false;
+
+  // Check if all of the proxies are within the trusted range
+  for (let proxy of proxies) {
+    let proxy_ip = ipaddr.process(proxy);
+    /* eslint-disable @typescript-eslint/ban-ts-comment */
+    // @ts-ignore : there is an error in the ts definition for the function, but this is valid
+    var matched = ipaddr.subnetMatch(proxy_ip, rangeList, 'fail');
+    /* eslint-enable @typescript-eslint/ban-ts-comment */
+    if (matched != 'allowed_ips') {
+      console.warn(`blocked Header Auth Login attempt from ${proxy_ip}`);
+      console.info(`Client IP: ${client_ip}`);
+      return false;
+    }
   }
+
+  // If all of the proxies matched the allowed IPs
+  let proxy_ips = [];
+  for (let proxy of proxies) {
+    proxy_ips.push(ipaddr.process(proxy));
+  }
+  console.info(`permitted Header Auth Login from ${proxy_ips.join(', ')}`);
+  console.info(`Client IP: ${client_ip}`);
+  return true;
 }
