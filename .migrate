@@ -1,0 +1,21 @@
+{
+  "lastRun": "1702667624000-rename-nordigen-secrets.js",
+  "migrations": [
+    {
+      "title": "1694360000000-create-folders.js",
+      "timestamp": 1718651296479
+    },
+    {
+      "title": "1694360479680-create-account-db.js",
+      "timestamp": 1718651296520
+    },
+    {
+      "title": "1694362247011-create-secret-table.js",
+      "timestamp": 1718651296526
+    },
+    {
+      "title": "1702667624000-rename-nordigen-secrets.js",
+      "timestamp": 1718651296527
+    }
+  ]
+}
