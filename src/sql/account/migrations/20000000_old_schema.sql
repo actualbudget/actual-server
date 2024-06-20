@@ -14,3 +14,4 @@ CREATE TABLE files
    encrypt_test TEXT,
    deleted BOOLEAN DEFAULT FALSE,
    name TEXT);
+

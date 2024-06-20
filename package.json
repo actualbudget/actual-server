@@ -1,6 +1,6 @@
 {
   "name": "actual-sync",
-  "version": "23.9.0",
+  "version": "24.6.0",
   "license": "MIT",
   "description": "actual syncing server",
   "type": "module",
@@ -16,26 +16,27 @@
   },
   "dependencies": {
     "@actual-app/crdt": "2.1.0",
-    "@actual-app/web": "23.9.0",
+    "@actual-app/web": "24.6.0",
     "bcrypt": "^5.1.0",
-    "better-sqlite3": "^8.2.0",
+    "better-sqlite3": "^9.6.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "debug": "^4.3.4",
-    "express": "4.18.2",
+    "express": "4.19.2",
     "express-actuator": "1.8.4",
     "express-rate-limit": "^6.7.0",
     "express-response-size": "^0.0.3",
     "jws": "^4.0.0",
-    "nordigen-node": "^1.2.6",
+    "migrate": "^2.0.1",
+    "nordigen-node": "^1.4.0",
     "openid-client": "^5.4.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.20.2",
     "@types/bcrypt": "^5.0.0",
-    "@types/better-sqlite3": "^7.6.3",
+    "@types/better-sqlite3": "^7.6.7",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/express-actuator": "^1.8.0",
@@ -52,5 +53,8 @@
     "supertest": "^6.3.1",
     "typescript": "^4.9.5"
   },
-  "packageManager": "yarn@3.4.1"
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "yarn@4.0.1"
 }

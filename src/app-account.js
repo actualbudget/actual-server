@@ -1,10 +1,11 @@
 import express from 'express';
 import errorMiddleware from './util/error-middleware.js';
-import validateUser from './util/validate-user.js';
+import validateUser, { validateAuthHeader } from './util/validate-user.js';
 import {
   bootstrap,
   listLoginMethods,
   needsBootstrap,
+  getLoginMethod,
 } from './accounts/index.js';
 import { loginWithPassword, changePassword } from './accounts/password.js';
 import {
@@ -17,10 +18,6 @@ app.use(errorMiddleware);
 
 export { app as handlers };
 
-export function init() {
-  // eslint-disable-previous-line @typescript-eslint/no-empty-function
-}
-
 // Non-authenticated endpoints:
 //
 // /needs-bootstrap
@@ -30,7 +27,7 @@ export function init() {
 app.get('/needs-bootstrap', (req, res) => {
   res.send({
     status: 'ok',
-    data: { bootstrapped: !needsBootstrap() },
+    data: { bootstrapped: !needsBootstrap(), loginMethod: getLoginMethod() },
   });
 });
 
@@ -43,6 +40,13 @@ app.post('/bootstrap', (req, res) => {
   } else {
     res.send({ status: 'ok' });
   }
+
+  res.send({ status: 'ok', data: { token } });
+});
+
+app.get('/login-methods', (req, res) => {
+  let methods = listLoginMethods();
+  res.send({ status: 'ok', methods });
 });
 
 app.get('/login-methods', (req, res) => {
@@ -51,6 +55,38 @@ app.get('/login-methods', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+  let loginMethod = getLoginMethod(req);
+  console.log('Logging in via ' + loginMethod);
+  let tokenRes = null;
+  switch (loginMethod) {
+    case 'header': {
+      let headerVal = req.get('x-actual-password') || '';
+      console.debug('HEADER VALUE: ' + headerVal);
+      if (headerVal == '') {
+        res.send({ status: 'error', reason: 'invalid-header' });
+        return;
+      } else {
+        if (validateAuthHeader(req)) {
+          tokenRes = login(headerVal);
+        } else {
+          res.send({ status: 'error', reason: 'proxy-not-trusted' });
+          return;
+        }
+      }
+      break;
+    }
+    case 'password':
+    default:
+      tokenRes = login(req.body.password);
+      break;
+  }
+  let { error, token } = tokenRes;
+
+  if (error) {
+    res.status(400).send({ status: 'error', reason: error });
+    return;
+  }
+
   let token = loginWithPassword(req.body.password);
   res.send({ status: 'ok', data: { token } });
 });

@@ -1,4 +1,4 @@
-import BankFactory from '../bank-factory.js';
+import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
 import {
   RequisitionNotLinked,
   AccountNotLinedToRequisition,
@@ -17,17 +17,23 @@ import jwt from 'jws';
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 
 const GoCardlessClient = nordigenNode.default;
-const goCardlessClient = new GoCardlessClient({
-  secretId: secretsService.get(SecretName.nordigen_secretId),
-  secretKey: secretsService.get(SecretName.nordigen_secretKey),
-});
 
-secretsService.onUpdate(SecretName.nordigen_secretId, (newSecret) => {
-  goCardlessClient.secretId = newSecret;
-});
-secretsService.onUpdate(SecretName.nordigen_secretKey, (newSecret) => {
-  goCardlessClient.secretKey = newSecret;
-});
+const clients = new Map();
+
+const getGocardlessClient = () => {
+  const secrets = {
+    secretId: secretsService.get(SecretName.gocardless_secretId),
+    secretKey: secretsService.get(SecretName.gocardless_secretKey),
+  };
+
+  const hash = JSON.stringify(secrets);
+
+  if (!clients.has(hash)) {
+    clients.set(hash, new GoCardlessClient(secrets));
+  }
+
+  return clients.get(hash);
+};
 
 export const handleGoCardlessError = (response) => {
   switch (response.status_code) {
@@ -58,7 +64,9 @@ export const goCardlessService = {
    * @returns {boolean}
    */
   isConfigured: () => {
-    return !!(goCardlessClient.secretId && goCardlessClient.secretKey);
+    return !!(
+      getGocardlessClient().secretId && getGocardlessClient().secretKey
+    );
   },
 
   /**
@@ -76,7 +84,7 @@ export const goCardlessService = {
       return clockTimestamp >= payload.exp;
     };
 
-    if (isExpiredJwtToken(goCardlessClient.token)) {
+    if (isExpiredJwtToken(getGocardlessClient().token)) {
       // Generate new access token. Token is valid for 24 hours
       // Note: access_token is automatically injected to other requests after you successfully obtain it
       const tokenData = await client.generateToken();
@@ -249,15 +257,22 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<{requisitionId, link}>}
    */
-  createRequisition: async ({ institutionId, accessValidForDays, host }) => {
+  createRequisition: async ({ institutionId, host }) => {
     await goCardlessService.setToken();
 
+    const institution = await goCardlessService.getInstitution(institutionId);
+    const bank = BankFactory(institutionId);
+
     const response = await client.initSession({
-      redirectUrl: host + '/nordigen/link',
+      redirectUrl: host + '/gocardless/link',
       institutionId,
       referenceId: uuid.v4(),
-      accessValidForDays,
-      maxHistoricalDays: 90,
+      accessValidForDays: bank.accessValidForDays,
+      maxHistoricalDays: BANKS_WITH_LIMITED_HISTORY.includes(institutionId)
+        ? Number(institution.transaction_total_days) >= 90
+          ? '89'
+          : institution.transaction_total_days
+        : institution.transaction_total_days,
       userLanguage: 'en',
       ssn: null,
       redirectImmediate: false,
@@ -479,25 +494,25 @@ export const goCardlessService = {
  */
 export const client = {
   getBalances: async (accountId) =>
-    await goCardlessClient.account(accountId).getBalances(),
+    await getGocardlessClient().account(accountId).getBalances(),
   getTransactions: async ({ accountId, dateFrom, dateTo }) =>
-    await goCardlessClient.account(accountId).getTransactions({
+    await getGocardlessClient().account(accountId).getTransactions({
       dateFrom,
       dateTo,
       country: undefined,
     }),
   getInstitutions: async (country) =>
-    await goCardlessClient.institution.getInstitutions({ country }),
+    await getGocardlessClient().institution.getInstitutions({ country }),
   getInstitutionById: async (institutionId) =>
-    await goCardlessClient.institution.getInstitutionById(institutionId),
+    await getGocardlessClient().institution.getInstitutionById(institutionId),
   getDetails: async (accountId) =>
-    await goCardlessClient.account(accountId).getDetails(),
+    await getGocardlessClient().account(accountId).getDetails(),
   getMetadata: async (accountId) =>
-    await goCardlessClient.account(accountId).getMetadata(),
+    await getGocardlessClient().account(accountId).getMetadata(),
   getRequisitionById: async (requisitionId) =>
-    await goCardlessClient.requisition.getRequisitionById(requisitionId),
+    await getGocardlessClient().requisition.getRequisitionById(requisitionId),
   deleteRequisition: async (requisitionId) =>
-    await goCardlessClient.requisition.deleteRequisition(requisitionId),
+    await getGocardlessClient().requisition.deleteRequisition(requisitionId),
   initSession: async ({
     redirectUrl,
     institutionId,
@@ -509,7 +524,7 @@ export const client = {
     redirectImmediate,
     accountSelection,
   }) =>
-    await goCardlessClient.initSession({
+    await getGocardlessClient().initSession({
       redirectUrl,
       institutionId,
       referenceId,
@@ -520,7 +535,7 @@ export const client = {
       redirectImmediate,
       accountSelection,
     }),
-  generateToken: async () => await goCardlessClient.generateToken(),
+  generateToken: async () => await getGocardlessClient().generateToken(),
   exchangeToken: async ({ refreshToken }) =>
-    await goCardlessClient.exchangeToken({ refreshToken }),
+    await getGocardlessClient().exchangeToken({ refreshToken }),
 };
