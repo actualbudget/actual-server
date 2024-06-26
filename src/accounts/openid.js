@@ -138,7 +138,7 @@ export async function loginWithOpenIdFinalize(body) {
     if (c === undefined) {
       userId = uuid.v4();
       accountDb.mutate(
-        'INSERT INTO users (user_id, email, enabled, master) VALUES (?, ?, 1, 1)',
+        'INSERT INTO users (user_id, user_name, enabled, master) VALUES (?, ?, 1, 1)',
         [userId, userInfo.email],
       );
 
@@ -148,7 +148,7 @@ export async function loginWithOpenIdFinalize(body) {
       );
     } else {
       let { userId: userIdFromDb } = accountDb.first(
-        'SELECT user_id FROM users WHERE email = ?',
+        'SELECT user_id FROM users WHERE user_name = ?',
         userInfo.email,
       );
 
@@ -162,24 +162,13 @@ export async function loginWithOpenIdFinalize(body) {
       userId = userIdFromDb;
     }
 
-    const emptySession = accountDb.first(
-      'SELECT * FROM sessions WHERE expires_in = -1',
-    );
-
-    if (emptySession == null) {
-      return {
-        error: 'openid-grant-failed: no empty session found for this user',
-      };
-    }
-
+    const token = uuid.v4();
     accountDb.mutate(
-      `UPDATE sessions
-        SET expires_in = ?, user_id = ?
-        WHERE token = ?`,
-      [grant.expires_at, userId, emptySession.token],
+      'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
+      [token, grant.expires_at, userId],
     );
 
-    return { url: `${return_url}/openid-cb?token=${emptySession.token}` };
+    return { url: `${return_url}/openid-cb?token=${token}` };
   } catch (err) {
     return { error: 'openid-grant-failed: ' + err };
   }

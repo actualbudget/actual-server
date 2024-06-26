@@ -66,7 +66,6 @@ export function getLoginMethod(req) {
 // }
 export function bootstrap(loginSettings) {
   let accountDb = getAccountDb();
-  // TODO We should use a transaction here to make bootstrap atomic
 
   if (!needsBootstrap()) {
     return { error: 'already-bootstrapped' };
@@ -105,7 +104,7 @@ export function bootstrap(loginSettings) {
 
   const token = uuid.v4();
   accountDb.mutate(
-    'INSERT INTO sessions (token, expires_in, user_id) VALUES (?, -1, ?)',
+    'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, -1, ?)',
     [token, ''],
   );
 
@@ -155,4 +154,20 @@ export function changePassword(newPassword) {
 export function getSession(token) {
   let accountDb = getAccountDb();
   return accountDb.first('SELECT * FROM sessions WHERE token = ?', [token]);
+}
+
+export function getUserInfo(userId) {
+  let accountDb = getAccountDb();
+  return accountDb.first('SELECT * FROM users WHERE user_id = ?', [userId]);
+}
+
+export function getUserPermissions(userId) {
+  let accountDb = getAccountDb();
+  return accountDb.all(
+    `SELECT roles.permissions FROM users
+                              JOIN user_roles ON user_roles.user_id = users.user_id
+                              JOIN roles ON roles.role_id = user_roles.role_id
+                              WHERE users.user_id = ?`,
+    [userId],
+  );
 }

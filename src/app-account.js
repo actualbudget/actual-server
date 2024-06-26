@@ -78,7 +78,7 @@ app.post('/login', async (req, res) => {
       res.send({ status: 'ok', data: { redirect_url: url } });
       return;
     }
-    
+
     case 'password':
     default:
       tokenRes = login(req.body.password);
@@ -119,9 +119,16 @@ app.post('/change-password', (req, res) => {
 });
 
 app.get('/validate', (req, res) => {
-  let user = validateUser(req, res);
-  if (user) {
-    res.send({ status: 'ok', data: { validated: true } });
+  let data = validateUser(req, res);
+  if (data) {
+    res.send({
+      status: 'ok',
+      data: {
+        validated: true,
+        userName: data?.user?.user_name,
+        permissions: data?.permissions,
+      },
+    });
   }
 });
 
