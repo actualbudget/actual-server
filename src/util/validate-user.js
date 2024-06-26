@@ -16,7 +16,7 @@ export default function validateUser(req, res) {
 
   let session = getSession(token);
 
-  if (!session || session.expires_at * 1000 <= Date.now()) {
+  if (!session) {
     res.status(401);
     res.send({
       status: 'error',
@@ -27,7 +27,7 @@ export default function validateUser(req, res) {
   }
 
   if (session.expires_at * 1000 <= Date.now()) {
-    res.status(401);
+    res.status(403);
     res.send({
       status: 'error',
       reason: 'unauthorized',
