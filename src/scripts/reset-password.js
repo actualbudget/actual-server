@@ -1,4 +1,5 @@
-import { needsBootstrap, bootstrap, changePassword } from '../account-db.js';
+import { bootstrap, needsBootstrap } from '../account-db.js';
+import { changePassword } from '../accounts/password.js';
 import { promptPassword } from '../util/prompt.js';
 
 if (needsBootstrap()) {
@@ -7,7 +8,7 @@ if (needsBootstrap()) {
   );
 
   promptPassword().then((password) => {
-    let { error } = bootstrap(password);
+    let { error } = bootstrap({ password });
     if (error) {
       console.log('Error setting password:', error);
       console.log(

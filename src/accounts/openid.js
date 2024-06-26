@@ -1,0 +1,175 @@
+import getAccountDb from '../account-db.js';
+import * as uuid from 'uuid';
+import { generators, Issuer } from 'openid-client';
+
+export function bootstrapOpenId(config) {
+  if (!Object.prototype.hasOwnProperty.call(config, 'issuer')) {
+    return { error: 'missing-issuer' };
+  }
+  if (!Object.prototype.hasOwnProperty.call(config, 'client_id')) {
+    return { error: 'missing-client-id' };
+  }
+  if (!Object.prototype.hasOwnProperty.call(config, 'client_secret')) {
+    return { error: 'missing-client-secret' };
+  }
+  if (!Object.prototype.hasOwnProperty.call(config, 'server_hostname')) {
+    return { error: 'missing-server-hostname' };
+  }
+
+  // Beyond verifying that the configuration exists, we do not attempt
+  // to check if the configuration is actually correct.
+  // If the user improperly configures this during bootstrap, there is
+  // no way to recover without manually editing the database. However,
+  // this might not be a real issue since an analogous situation happens
+  // if they forget their password.
+  let accountDb = getAccountDb();
+  accountDb.mutate('UPDATE auth SET active = 0');
+  accountDb.mutate(
+    "INSERT INTO auth (method, extra_data, active) VALUES ('openid', ?, 1)",
+    [JSON.stringify(config)],
+  );
+
+  return {};
+}
+
+async function setupOpenIdClient(config) {
+  const issuer = await Issuer.discover(config.issuer);
+
+  const client = new issuer.Client({
+    client_id: config.client_id,
+    client_secret: config.client_secret,
+    redirect_uri: config.server_hostname + '/account/login-openid/cb',
+  });
+
+  return client;
+}
+
+export async function loginWithOpenIdSetup(body) {
+  if (!body.return_url) {
+    return { error: 'return-url-missing' };
+  }
+
+  let accountDb = getAccountDb();
+  let config = accountDb.first(
+    "SELECT extra_data FROM auth WHERE method = 'openid'",
+  );
+  if (!config) {
+    return { error: 'openid-not-configured' };
+  }
+  config = JSON.parse(config['extra_data']);
+
+  let client;
+  try {
+    client = await setupOpenIdClient(config);
+  } catch (err) {
+    return { error: 'openid-setup-failed: ' + err };
+  }
+
+  const state = generators.state();
+  const code_verifier = generators.codeVerifier();
+  const code_challenge = generators.codeChallenge(code_verifier);
+
+  const now_time = Date.now();
+  const expiry_time = now_time + 300 * 1000;
+
+  accountDb.mutate(
+    'DELETE FROM pending_openid_requests WHERE expiry_time < ?',
+    [now_time],
+  );
+  accountDb.mutate(
+    'INSERT INTO pending_openid_requests (state, code_verifier, return_url, expiry_time) VALUES (?, ?, ?, ?)',
+    [state, code_verifier, body.return_url, expiry_time],
+  );
+
+  const url = client.authorizationUrl({
+    response_type: 'code',
+    scope: 'openid email',
+    state,
+    code_challenge,
+    code_challenge_method: 'S256',
+  });
+
+  return { url };
+}
+
+export async function loginWithOpenIdFinalize(body) {
+  if (!body.code) {
+    return { error: 'missing-authorization-code' };
+  }
+  if (!body.state) {
+    return { error: 'missing-state' };
+  }
+
+  let accountDb = getAccountDb();
+  let config = accountDb.first(
+    "SELECT extra_data FROM auth WHERE method = 'openid'",
+  );
+  if (!config) {
+    return { error: 'openid-not-configured' };
+  }
+  config = JSON.parse(config['extra_data']);
+
+  let client;
+  try {
+    client = await setupOpenIdClient(config);
+  } catch (err) {
+    return { error: 'openid-setup-failed: ' + err };
+  }
+
+  let { code_verifier, return_url } = accountDb.first(
+    'SELECT code_verifier, return_url FROM pending_openid_requests WHERE state = ? AND expiry_time > ?',
+    [body.state, Date.now()],
+  );
+
+  try {
+    let grant = await client.grant({
+      grant_type: 'authorization_code',
+      code: body.code,
+      code_verifier,
+      redirect_uri: client.redirect_uris[0],
+    });
+    const userInfo = await client.userinfo(grant);
+    if (userInfo.email == null) {
+      return { error: 'openid-grant-failed: no email found for the user' };
+    }
+
+    let { c } = accountDb.first('SELECT count(*) as C FROM users');
+    let userId = null;
+    if (c === undefined) {
+      userId = uuid.v4();
+      accountDb.mutate(
+        'INSERT INTO users (user_id, user_name, enabled, master) VALUES (?, ?, 1, 1)',
+        [userId, userInfo.email],
+      );
+
+      accountDb.mutate(
+        'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
+        [userId, '213733c1-5645-46ad-8784-a7b20b400f93'],
+      );
+    } else {
+      let { userId: userIdFromDb } = accountDb.first(
+        'SELECT user_id FROM users WHERE user_name = ?',
+        userInfo.email,
+      );
+
+      if (userIdFromDb == null) {
+        return {
+          error:
+            'openid-grant-failed: user does not have access to Actual Budget',
+        };
+      }
+
+      userId = userIdFromDb;
+    }
+
+    const token = uuid.v4();
+    accountDb.mutate(
+      'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
+      [token, grant.expires_at, userId],
+    );
+
+    return { url: `${return_url}/openid-cb?token=${token}` };
+  } catch (err) {
+    return { error: 'openid-grant-failed: ' + err };
+  }
+}

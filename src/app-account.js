@@ -3,11 +3,16 @@ import errorMiddleware from './util/error-middleware.js';
 import validateUser, { validateAuthHeader } from './util/validate-user.js';
 import {
   bootstrap,
-  login,
-  changePassword,
   needsBootstrap,
   getLoginMethod,
+  listLoginMethods,
+  login,
 } from './account-db.js';
+import { changePassword } from './accounts/password.js';
+import {
+  loginWithOpenIdSetup,
+  loginWithOpenIdFinalize,
+} from './accounts/openid.js';
 
 let app = express();
 app.use(errorMiddleware);
@@ -28,17 +33,22 @@ app.get('/needs-bootstrap', (req, res) => {
 });
 
 app.post('/bootstrap', (req, res) => {
-  let { error, token } = bootstrap(req.body.password);
+  let { error } = bootstrap(req.body);
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
     return;
+  } else {
+    res.send({ status: 'ok' });
   }
-
-  res.send({ status: 'ok', data: { token } });
 });
 
-app.post('/login', (req, res) => {
+app.get('/login-methods', (req, res) => {
+  let methods = listLoginMethods();
+  res.send({ status: 'ok', methods });
+});
+
+app.post('/login', async (req, res) => {
   let loginMethod = getLoginMethod(req);
   console.log('Logging in via ' + loginMethod);
   let tokenRes = null;
@@ -59,6 +69,16 @@ app.post('/login', (req, res) => {
       }
       break;
     }
+    case 'openid': {
+      let { error, url } = await loginWithOpenIdSetup(req.body);
+      if (error) {
+        res.send({ status: 'error', reason: error });
+        return;
+      }
+      res.send({ status: 'ok', data: { redirect_url: url } });
+      return;
+    }
+
     case 'password':
     default:
       tokenRes = login(req.body.password);
@@ -72,6 +92,16 @@ app.post('/login', (req, res) => {
   }
 
   res.send({ status: 'ok', data: { token } });
+});
+
+app.get('/login-openid/cb', async (req, res) => {
+  let { error, url } = await loginWithOpenIdFinalize(req.query);
+  if (error) {
+    res.send({ error });
+    return;
+  }
+
+  res.redirect(url);
 });
 
 app.post('/change-password', (req, res) => {
@@ -89,9 +119,16 @@ app.post('/change-password', (req, res) => {
 });
 
 app.get('/validate', (req, res) => {
-  let user = validateUser(req, res);
-  if (user) {
-    res.send({ status: 'ok', data: { validated: true } });
+  let data = validateUser(req, res);
+  if (data) {
+    res.send({
+      status: 'ok',
+      data: {
+        validated: true,
+        userName: data?.user?.user_name,
+        permissions: data?.permissions,
+      },
+    });
   }
 });
 

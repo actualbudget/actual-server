@@ -17,6 +17,13 @@ class SecretsDb {
   constructor() {
     this.debug = createDebug('actual:secrets-db');
     this.db = null;
+    this.initialize();
+  }
+
+  initialize() {
+    if (!this.db) {
+      this.db = this.open();
+    }
   }
 
   open() {
