@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
-import getAccountDb from './index.js';
 import * as uuid from 'uuid';
+import getAccountDb from '../account-db.js';
 
 function hashPassword(password) {
   return bcrypt.hashSync(password, 12);

@@ -1,4 +1,5 @@
-import getAccountDb from './index.js';
+import getAccountDb from '../account-db.js';
+import * as uuid from 'uuid';
 import { generators, Issuer } from 'openid-client';
 
 export function bootstrapOpenId(config) {
@@ -22,8 +23,9 @@ export function bootstrapOpenId(config) {
   // this might not be a real issue since an analogous situation happens
   // if they forget their password.
   let accountDb = getAccountDb();
+  accountDb.mutate('UPDATE auth SET active = 0');
   accountDb.mutate(
-    "INSERT INTO auth (method, extra_data) VALUES ('openid', ?)",
+    "INSERT INTO auth (method, extra_data, active) VALUES ('openid', ?, 1)",
     [JSON.stringify(config)],
   );
 
@@ -81,7 +83,7 @@ export async function loginWithOpenIdSetup(body) {
 
   const url = client.authorizationUrl({
     response_type: 'code',
-    scope: 'openid',
+    scope: 'openid email',
     state,
     code_challenge,
     code_challenge_method: 'S256',
@@ -126,16 +128,59 @@ export async function loginWithOpenIdFinalize(body) {
       code_verifier,
       redirect_uri: client.redirect_uris[0],
     });
-    await client.userinfo(grant);
-    // The server requests have succeeded, so the user has been authenticated.
-    // Ideally, we would create a session token here tied to the returned access token
-    // and verify it with the server whenever the user connects.
-    // However, the rest of this server code uses only a single permanent token,
-    // so that is what we do here as well.
+    const userInfo = await client.userinfo(grant);
+    if (userInfo.email == null) {
+      return { error: 'openid-grant-failed: no email found for the user' };
+    }
+
+    let { c } = accountDb.first('SELECT count(*) as C FROM users');
+    let userId = null;
+    if (c === undefined) {
+      userId = uuid.v4();
+      accountDb.mutate(
+        'INSERT INTO users (user_id, email, enabled, master) VALUES (?, ?, 1, 1)',
+        [userId, userInfo.email],
+      );
+
+      accountDb.mutate(
+        'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
+        [userId, '213733c1-5645-46ad-8784-a7b20b400f93'],
+      );
+    } else {
+      let { userId: userIdFromDb } = accountDb.first(
+        'SELECT user_id FROM users WHERE email = ?',
+        userInfo.email,
+      );
+
+      if (userIdFromDb == null) {
+        return {
+          error:
+            'openid-grant-failed: user does not have access to Actual Budget',
+        };
+      }
+
+      userId = userIdFromDb;
+    }
+
+    const emptySession = accountDb.first(
+      'SELECT * FROM sessions WHERE expires_in = -1',
+    );
+
+    if (emptySession == null) {
+      return {
+        error: 'openid-grant-failed: no empty session found for this user',
+      };
+    }
+
+    accountDb.mutate(
+      `UPDATE sessions
+        SET expires_in = ?, user_id = ?
+        WHERE token = ?`,
+      [grant.expires_at, userId, emptySession.token],
+    );
+
+    return { url: `${return_url}/openid-cb?token=${emptySession.token}` };
   } catch (err) {
     return { error: 'openid-grant-failed: ' + err };
   }
-
-  let { token } = accountDb.first('SELECT token FROM sessions');
-  return { url: `${return_url}/login/openid-cb?token=${token}` };
 }
