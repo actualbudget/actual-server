@@ -15,6 +15,7 @@ import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
 import jwt from 'jws';
 import { SecretName, secretsService } from '../../services/secrets-service.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 const GoCardlessClient = nordigenNode.default;
 
@@ -210,6 +211,20 @@ export const goCardlessService = {
       }),
       goCardlessService.getBalances(accountId),
     ]);
+
+    transactions.transactions.booked = transactions.transactions.booked.map(
+      (t) => ({
+        ...t,
+        payeeName: formatPayeeName(t),
+      }),
+    );
+
+    transactions.transactions.pending = transactions.transactions.pending.map(
+      (t) => ({
+        ...t,
+        payeeName: formatPayeeName(t),
+      }),
+    );
 
     const bank = BankFactory(institution_id);
     const sortedBookedTransactions = bank.sortTransactions(
