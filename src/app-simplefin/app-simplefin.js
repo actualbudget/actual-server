@@ -74,99 +74,46 @@ app.post(
       return;
     }
 
+    if (Array.isArray(accountId) != Array.isArray(startDate)) {
+      throw new Error('accountId and startDate must either both be arrays or both be strings');
+    }
+    if (Array.isArray(accountId) && accountId.length !== startDate.length) {
+      throw new Error('accountId and startDate must be the same length');
+    }
+
     try {
-      const results = await getTransactions(accessKey, new Date(startDate));
+      let earliestStartDate = startDate;
+      if (Array.isArray(startDate)) {
+        earliestStartDate = startDate.reduce((a, b) => (a < b ? a : b));
+      }
+      const results = await getTransactions(accessKey, new Date(earliestStartDate));
 
-      const account = results.accounts.find((a) => a.id === accountId);
-
-      const needsAttention = results.errors.find(
-        (e) => e === `Connection to ${account.org.name} may need attention`,
-      );
-      if (needsAttention) {
-        res.send({
-          status: 'ok',
-          data: {
-            error_type: 'ACCOUNT_NEEDS_ATTENTION',
-            error_code: 'ACCOUNT_NEEDS_ATTENTION',
-            status: 'rejected',
-            reason:
-              'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
-          },
-        });
+      let response = {};
+      if (Array.isArray(accountId)) {
+        for (let id of accountId) {
+          response[id] = getAccountResponse(results, id);
+        }
+      } else {
+        response = getAccountResponse(results, accountId);
       }
 
-      const response = {};
-
-      const balance = parseInt(account.balance.replace('.', ''));
-      const date = new Date(account['balance-date'] * 1000)
-        .toISOString()
-        .split('T')[0];
-
-      response.balances = [
-        {
-          balanceAmount: {
-            amount: account.balance,
-            currency: account.currency,
-          },
-          balanceType: 'expected',
-          referenceDate: date,
-        },
-        {
-          balanceAmount: {
-            amount: account.balance,
-            currency: account.currency,
-          },
-          balanceType: 'interimAvailable',
-          referenceDate: date,
-        },
-      ];
-      response.startingBalance = balance; // could be named differently in this use case.
-
-      const allTransactions = [];
-      const bookedTransactions = [];
-      const pendingTransactions = [];
-
-      for (const trans of account.transactions) {
-        const newTrans = {};
-
-        let dateToUse = 0;
-
-        if (trans.posted == 0) {
-          newTrans.booked = false;
-          dateToUse = trans.transacted_at;
-        } else {
-          newTrans.booked = true;
-          dateToUse = trans.posted;
+      results.accounts.forEach((account) => {
+        const needsAttention = results.errors.find(
+          (e) => e === `Connection to ${account.org.name} may need attention`,
+        );
+        if (needsAttention) {
+          res.send({
+            status: 'ok',
+            data: {
+              error_type: 'ACCOUNT_NEEDS_ATTENTION',
+              error_code: 'ACCOUNT_NEEDS_ATTENTION',
+              status: 'rejected',
+              reason:
+                'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
+            },
+          });
         }
-
-        newTrans.bookingDate = new Date(dateToUse * 1000)
-          .toISOString()
-          .split('T')[0];
-
-        newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
-        newTrans.debtorName = trans.payee;
-        newTrans.payeeName = formatPayeeName(trans);
-        //newTrans.debtorAccount = don't have compared to GoCardless
-        newTrans.remittanceInformationUnstructured = trans.description;
-        newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
-        newTrans.transactionId = trans.id;
-        newTrans.valueDate = new Date(dateToUse * 1000)
-          .toISOString()
-          .split('T')[0];
-
-        if (newTrans.booked) {
-          bookedTransactions.push(newTrans);
-        } else {
-          pendingTransactions.push(newTrans);
-        }
-        allTransactions.push(newTrans);
-      }
-
-      response.transactions = {
-        all: allTransactions,
-        booked: bookedTransactions,
-        pending: pendingTransactions,
-      };
+      });
 
       res.send({
         status: 'ok',
@@ -183,6 +130,76 @@ app.post(
     }
   }),
 );
+
+function getAccountResponse(results, accountId) {
+  const account = results.accounts.find((a) => a.id === accountId);
+
+  const balance = parseInt(account.balance.replace('.', ''));
+  const date = new Date(account['balance-date'] * 1000)
+    .toISOString()
+    .split('T')[0];
+
+  const balances = [
+    {
+      balanceAmount: {
+        amount: account.balance,
+        currency: account.currency,
+      },
+      balanceType: 'expected',
+      referenceDate: date,
+    },
+    {
+      balanceAmount: {
+        amount: account.balance,
+        currency: account.currency,
+      },
+      balanceType: 'interimAvailable',
+      referenceDate: date,
+    },
+  ];
+  const startingBalance = balance; // could be named differently in this use case.
+
+  const all = [];
+  const booked = [];
+  const pending = [];
+
+  for (const trans of account.transactions) {
+    const newTrans = {};
+
+    let dateToUse = 0;
+
+    if (trans.posted == 0) {
+      newTrans.booked = false;
+      dateToUse = trans.transacted_at;
+    } else {
+      newTrans.booked = true;
+      dateToUse = trans.posted;
+    }
+
+    newTrans.bookingDate = new Date(dateToUse * 1000)
+      .toISOString()
+      .split('T')[0];
+
+    newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
+    newTrans.debtorName = trans.payee;
+    newTrans.payeeName = formatPayeeName(trans);
+    newTrans.remittanceInformationUnstructured = trans.description;
+    newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
+    newTrans.transactionId = trans.id;
+    newTrans.valueDate = new Date(dateToUse * 1000)
+      .toISOString()
+      .split('T')[0];
+
+    if (newTrans.booked) {
+      booked.push(newTrans);
+    } else {
+      pending.push(newTrans);
+    }
+    all.push(newTrans);
+  }
+
+  return { balances, startingBalance, all, booked, pending };
+}
 
 function invalidToken(res) {
   res.send({
