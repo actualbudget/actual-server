@@ -139,10 +139,8 @@ app.post(
 function getAccountResponse(results, accountId, startDate) {
   const account = results.accounts.find((a) => a.id === accountId);
 
-  const balance = parseInt(account.balance.replace('.', ''));
-  const date = new Date(account['balance-date'] * 1000)
-    .toISOString()
-    .split('T')[0];
+  const startingBalance = parseInt(account.balance.replace('.', ''));
+  const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [
     {
@@ -162,7 +160,6 @@ function getAccountResponse(results, accountId, startDate) {
       referenceDate: date,
     },
   ];
-  const startingBalance = balance; // could be named differently in this use case.
 
   const all = [];
   const booked = [];
@@ -181,20 +178,18 @@ function getAccountResponse(results, accountId, startDate) {
       dateToUse = trans.posted;
     }
 
-    newTrans.bookingDate = new Date(dateToUse * 1000)
-      .toISOString()
-      .split('T')[0];
+    newTrans.bookingDate = getDate(new Date(dateToUse * 1000));
     if (newTrans.bookingDate < startDate) {
       continue;
     }
 
-    newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
+    newTrans.date = newTrans.bookingDate;
     newTrans.debtorName = trans.payee;
     newTrans.payeeName = formatPayeeName(trans);
     newTrans.remittanceInformationUnstructured = trans.description;
     newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
     newTrans.transactionId = trans.id;
-    newTrans.valueDate = new Date(dateToUse * 1000).toISOString().split('T')[0];
+    newTrans.valueDate = newTrans.bookingDate;
 
     if (newTrans.booked) {
       booked.push(newTrans);
@@ -262,12 +257,12 @@ async function getTransactions(accessKey, startDate, endDate) {
   const now = new Date();
   startDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
   endDate = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  console.log(
-    `${startDate.toISOString().split('T')[0]} - ${
-      endDate.toISOString().split('T')[0]
-    }`,
-  );
+  console.log(`${getDate(startDate)} - ${getDate(endDate)}`);
   return await getAccounts(accessKey, startDate, endDate);
+}
+
+function getDate(date) {
+  return date.toISOString().split('T')[0];
 }
 
 function normalizeDate(date) {
