@@ -95,7 +95,11 @@ app.post(
       if (Array.isArray(accountId)) {
         for (let i = 0; i < accountId.length; i++) {
           const id = accountId[i];
-          response[id] = getAccountResponse(results, id, new Date(startDate[i]));
+          response[id] = getAccountResponse(
+            results,
+            id,
+            new Date(startDate[i]),
+          );
         }
       } else {
         response = getAccountResponse(results, accountId, new Date(startDate));
