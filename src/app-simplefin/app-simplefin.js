@@ -75,18 +75,22 @@ app.post(
     }
 
     if (Array.isArray(accountId) != Array.isArray(startDate)) {
-      throw new Error('accountId and startDate must either both be arrays or both be strings');
+      throw new Error(
+        'accountId and startDate must either both be arrays or both be strings',
+      );
     }
     if (Array.isArray(accountId) && accountId.length !== startDate.length) {
       throw new Error('accountId and startDate must be the same length');
     }
 
     try {
-      let earliestStartDate = startDate;
-      if (Array.isArray(startDate)) {
-        earliestStartDate = startDate.reduce((a, b) => (a < b ? a : b));
-      }
-      const results = await getTransactions(accessKey, new Date(earliestStartDate));
+      const earliestStartDate = Array.isArray(startDate)
+        ? startDate.reduce((a, b) => (a < b ? a : b))
+        : startDate;
+      const results = await getTransactions(
+        accessKey,
+        new Date(earliestStartDate),
+      );
 
       let response = {};
       if (Array.isArray(accountId)) {
@@ -186,9 +190,7 @@ function getAccountResponse(results, accountId) {
     newTrans.remittanceInformationUnstructured = trans.description;
     newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
     newTrans.transactionId = trans.id;
-    newTrans.valueDate = new Date(dateToUse * 1000)
-      .toISOString()
-      .split('T')[0];
+    newTrans.valueDate = new Date(dateToUse * 1000).toISOString().split('T')[0];
 
     if (newTrans.booked) {
       booked.push(newTrans);
