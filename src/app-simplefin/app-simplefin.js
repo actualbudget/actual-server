@@ -94,11 +94,12 @@ app.post(
 
       let response = {};
       if (Array.isArray(accountId)) {
-        for (let id of accountId) {
-          response[id] = getAccountResponse(results, id);
+        for (let i = 0; i < accountId.length; i++) {
+          const id = accountId[i];
+          response[id] = getAccountResponse(results, id, new Date(startDate[i]));
         }
       } else {
-        response = getAccountResponse(results, accountId);
+        response = getAccountResponse(results, accountId, new Date(startDate));
       }
 
       results.accounts.forEach((account) => {
@@ -135,7 +136,7 @@ app.post(
   }),
 );
 
-function getAccountResponse(results, accountId) {
+function getAccountResponse(results, accountId, startDate) {
   const account = results.accounts.find((a) => a.id === accountId);
 
   const balance = parseInt(account.balance.replace('.', ''));
@@ -183,6 +184,9 @@ function getAccountResponse(results, accountId) {
     newTrans.bookingDate = new Date(dateToUse * 1000)
       .toISOString()
       .split('T')[0];
+    if (newTrans.bookingDate < startDate) {
+      continue;
+    }
 
     newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
     newTrans.debtorName = trans.payee;
