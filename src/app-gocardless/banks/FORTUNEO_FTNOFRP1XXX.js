@@ -1,3 +1,4 @@
+import { formatPayeeName } from '../../util/payee-name.js';
 import Fallback from './integration-bank.js';
 import * as d from 'date-fns';
 
@@ -49,10 +50,13 @@ export default {
     const creditorName = isCreditorPayee ? payeeName : null;
     const debtorName = isCreditorPayee ? null : payeeName;
 
+
+    transaction.creditorName = creditorName;
+    transaction.debtorName = debtorName;
+
     return {
       ...transaction,
-      creditorName: creditorName,
-      debtorName: debtorName,
+      payeeName: formatPayeeName(transaction),
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
     };
   },
