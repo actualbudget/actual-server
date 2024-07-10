@@ -50,7 +50,6 @@ export default {
     const creditorName = isCreditorPayee ? payeeName : null;
     const debtorName = isCreditorPayee ? null : payeeName;
 
-
     transaction.creditorName = creditorName;
     transaction.debtorName = debtorName;
 
