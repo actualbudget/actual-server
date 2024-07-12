@@ -133,7 +133,7 @@ export async function loginWithOpenIdFinalize(body) {
       return { error: 'openid-grant-failed: no email found for the user' };
     }
 
-    let { c } = accountDb.first('SELECT count(*) as C FROM users');
+    let { c } = accountDb.first('SELECT count(*) as c FROM users');
     let userId = null;
     if (c === undefined) {
       userId = uuid.v4();
@@ -147,9 +147,9 @@ export async function loginWithOpenIdFinalize(body) {
         [userId, '213733c1-5645-46ad-8784-a7b20b400f93'],
       );
     } else {
-      let { userId: userIdFromDb } = accountDb.first(
+      let { user_id: userIdFromDb } = accountDb.first(
         'SELECT user_id FROM users WHERE user_name = ?',
-        userInfo.email,
+        [userInfo.email],
       );
 
       if (userIdFromDb == null) {
