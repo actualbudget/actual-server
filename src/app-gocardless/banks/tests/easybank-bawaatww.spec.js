@@ -36,7 +36,7 @@ describe('easybank', () => {
 
     it('returns the full structured information as payeeName from a transaction with no payee name', () => {
       const transaction = {
-        payeeName: 'some-payee-name',
+        payeeName: '',
         transactionAmount: mockTransactionAmount,
         remittanceInformationStructured:
           'Auszahlung Karte MC/000001234AUTOMAT 00012345 K001 31.12. 23:59',
