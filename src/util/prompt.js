@@ -38,7 +38,7 @@ export async function promptPassword() {
   return password;
 }
 
-async function askForPassword(prompt) {
+export async function askForPassword(prompt) {
   let dataListener, endListener;
 
   let promise = new Promise((resolve) => {

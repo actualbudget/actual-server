@@ -12,6 +12,7 @@
     "types": "tsc --noEmit --incremental",
     "verify": "yarn -s lint && yarn types",
     "reset-password": "node src/scripts/reset-password.js",
+    "reset-password-pikapods": "node src/scripts/reset-password-pikapods.js",
     "health-check": "node src/scripts/health-check.js"
   },
   "dependencies": {
