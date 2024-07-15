@@ -3,7 +3,7 @@ import { ServerOptions } from 'https';
 export interface Config {
   mode: 'test' | 'development';
   loginMethod: 'password' | 'header';
-  trustedProxies: string[];
+  trustedProxies: string[] | number | boolean;
   dataDir: string;
   projectRoot: string;
   port: number;

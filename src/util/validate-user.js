@@ -28,26 +28,3 @@ export default function validateUser(req, res) {
 
   return session;
 }
-
-export function validateAuthHeader(req) {
-  if (config.trustedProxies.length == 0) {
-    return true;
-  }
-
-  let sender = proxyaddr(req, 'uniquelocal');
-  let sender_ip = ipaddr.process(sender);
-  const rangeList = {
-    allowed_ips: config.trustedProxies.map((q) => ipaddr.parseCIDR(q)),
-  };
-  /* eslint-disable @typescript-eslint/ban-ts-comment */
-  // @ts-ignore : there is an error in the ts definition for the function, but this is valid
-  var matched = ipaddr.subnetMatch(sender_ip, rangeList, 'fail');
-  /* eslint-enable @typescript-eslint/ban-ts-comment */
-  if (matched == 'allowed_ips') {
-    console.info(`Header Auth Login permitted from ${sender}`);
-    return true;
-  } else {
-    console.warn(`Header Auth Login attempted from ${sender}`);
-    return false;
-  }
-}

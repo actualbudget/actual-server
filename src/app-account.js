@@ -1,6 +1,6 @@
 import express from 'express';
 import errorMiddleware from './util/error-middleware.js';
-import validateUser, { validateAuthHeader } from './util/validate-user.js';
+import validateUser from './util/validate-user.js';
 import {
   bootstrap,
   login,
@@ -50,12 +50,7 @@ app.post('/login', (req, res) => {
         res.send({ status: 'error', reason: 'invalid-header' });
         return;
       } else {
-        if (validateAuthHeader(req)) {
-          tokenRes = login(headerVal);
-        } else {
-          res.send({ status: 'error', reason: 'proxy-not-trusted' });
-          return;
-        }
+        tokenRes = login(headerVal);
       }
       break;
     }
