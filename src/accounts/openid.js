@@ -135,7 +135,7 @@ export async function loginWithOpenIdFinalize(body) {
 
     let { c } = accountDb.first('SELECT count(*) as c FROM users');
     let userId = null;
-    if (c === undefined) {
+    if (c === 0) {
       userId = uuid.v4();
       accountDb.mutate(
         'INSERT INTO users (user_id, user_name, enabled, master) VALUES (?, ?, 1, 1)',

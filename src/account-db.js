@@ -119,7 +119,7 @@ export function login(password) {
   let accountDb = getAccountDb();
   let row = accountDb.first('SELECT * FROM auth');
 
-  let confirmed = row && bcrypt.compareSync(password, row.password);
+  let confirmed = row && bcrypt.compareSync(password, row.extra_data);
 
   if (!confirmed) {
     return { error: 'invalid-password' };
@@ -130,6 +130,35 @@ export function login(password) {
   // "session" that times out after a long time or something, and
   // maybe each device has a different token
   let sessionRow = accountDb.first('SELECT * FROM sessions');
+
+  let { c } = accountDb.first('SELECT count(*) as c FROM users');
+  let userId = null;
+  if (c === 0) {
+    userId = uuid.v4();
+    accountDb.mutate(
+      'INSERT INTO users (user_id, user_name, enabled, master) VALUES (?, ?, 1, 1)',
+      [userId, ''],
+    );
+
+    accountDb.mutate(
+      'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
+      [userId, '213733c1-5645-46ad-8784-a7b20b400f93'],
+    );
+  } else {
+    let { user_id: userIdFromDb } = accountDb.first(
+      'SELECT user_id FROM users WHERE user_name = ?',
+      [''],
+    );
+
+    userId = userIdFromDb;
+  }  
+
+  accountDb.mutate(
+    'UPDATE sessions SET expires_at = ?, user_id = ? WHERE expires_at = -1',
+    [2147483647, userId],
+  );
+
+
   return { token: sessionRow.token };
 }
 

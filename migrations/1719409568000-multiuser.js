@@ -13,7 +13,7 @@ export const up = async function () {
         permissions TEXT,
         name TEXT);
 
-        INSERT INTO roles VALUES ('213733c1-5645-46ad-8784-a7b20b400f93', 'CAN_EDIT, CAN_VIEW, CAN_DELETE, SETTINGS','Admin');
+        INSERT INTO roles VALUES ('213733c1-5645-46ad-8784-a7b20b400f93', 'CAN_ADD_USER, CAN_VIEW','Admin');
         INSERT INTO roles VALUES ('e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc', 'CAN_VIEW','Basic');
         
         CREATE TABLE user_roles
