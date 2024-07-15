@@ -1,7 +1,4 @@
 import { getSession } from '../account-db.js';
-import config from '../load-config.js';
-import proxyaddr from 'proxy-addr';
-import ipaddr from 'ipaddr.js';
 
 /**
  * @param {import('express').Request} req

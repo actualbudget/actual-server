@@ -27,7 +27,6 @@ function parseJSON(path, allowMissing = false) {
   return JSON.parse(text);
 }
 
-
 function parseTrustedProxiesEnvVar(envVar, defaultValue) {
   if (!envVar) {
     return defaultValue;
@@ -48,7 +47,6 @@ function parseTrustedProxiesEnvVar(envVar, defaultValue) {
   console.warn(`Failed to parse Trusted Proxies value: ${envVar}`);
   return defaultValue;
 }
-
 
 let userConfig;
 if (process.env.ACTUAL_CONFIG_PATH) {
@@ -73,10 +71,7 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 let defaultConfig = {
   loginMethod: 'password',
   // assume local networks are trusted for header authentication
-  trustedProxies: [
-    'uniquelocal',
-    'loopback',
-  ],
+  trustedProxies: ['uniquelocal', 'loopback'],
   port: 5006,
   hostname: '::',
   webRoot: path.join(
