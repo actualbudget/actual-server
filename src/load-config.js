@@ -159,7 +159,14 @@ debug(`using server files directory ${finalConfig.serverFiles}`);
 debug(`using user files directory ${finalConfig.userFiles}`);
 debug(`using web root directory ${finalConfig.webRoot}`);
 debug(`using login method ${finalConfig.loginMethod}`);
-debug(`using trusted proxies ${finalConfig.trustedProxies.join(', ')}`);
+debug(
+  `using trusted proxies ${
+    Object.prototype.toString.call(finalConfig.trustedProxies) ===
+    '[object Array]'
+      ? finalConfig.trustedProxies.join(', ')
+      : finalConfig.trustedProxies
+  }`,
+);
 
 if (finalConfig.https) {
   debug(`using https key: ${'*'.repeat(finalConfig.https.key.length)}`);
