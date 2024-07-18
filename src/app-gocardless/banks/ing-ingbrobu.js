@@ -1,5 +1,4 @@
 import Fallback from './integration-bank.js';
-import { amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -16,33 +15,34 @@ export default {
 
     //For deduplication to work, payeeName needs to be standardized.
     //And converted from a pending transaction form ("payeeName":"Card no: xxxxxxxxxxxx1111"') to a booked transaction form ("payeeName":"Card no: Xxxx Xxxx Xxxx 1111")
-    if (transaction.transactionId === "NOTPROVIDED") {
+    if (transaction.transactionId === 'NOTPROVIDED') {
       if (booked) {
-       transaction.transactionId = transaction.internalTransactionId;
+        transaction.transactionId = transaction.internalTransactionId;
 
-        if (transaction.remittanceInformationUnstructured.toLowerCase().includes('card no:')) {
-          transaction.creditorName = transaction.remittanceInformationUnstructured.split(',')[0];
+        if (
+          transaction.remittanceInformationUnstructured
+            .toLowerCase()
+            .includes('card no:')
+        ) {
+          transaction.creditorName =
+            transaction.remittanceInformationUnstructured.split(',')[0];
         }
-      }
-
-      else {
+      } else {
         transaction.transactionId = null;
-        if (transaction.remittanceInformationUnstructured.toLowerCase().includes('card no:')) {
-          transaction.creditorName = transaction.remittanceInformationUnstructured.replace(/x{4}/g, 'Xxxx ');
+        if (
+          transaction.remittanceInformationUnstructured
+            .toLowerCase()
+            .includes('card no:')
+        ) {
+          transaction.creditorName =
+            transaction.remittanceInformationUnstructured.replace(
+              /x{4}/g,
+              'Xxxx ',
+            );
         }
       }
-    } 
+    }
 
     return Fallback.normalizeTransaction(transaction, booked);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    const currentBalance = balances.find(
-      (balance) => 'expected' === balance.balanceType.toString(),
-    );
-
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance.balanceAmount.amount));
   },
 };
