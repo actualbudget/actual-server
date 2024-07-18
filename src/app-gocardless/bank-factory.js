@@ -19,6 +19,7 @@ import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-hela
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
 import EasybankBawaatww from './banks/easybank-bawaatww.js';
+import IngIngbrobu from './banks/ing-ingbrobu.js';
 
 export const banks = [
   AbancaCaglesmm,
@@ -31,6 +32,7 @@ export const banks = [
   Fortuneo,
   IngIngddeff,
   IngPlIngbplpw,
+  IngIngbrobu,
   MbankRetailBrexplpw,
   NationwideNaiaGB21,
   NorwegianXxNorwnok1,
