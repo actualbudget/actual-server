@@ -1,6 +1,11 @@
 import { needsBootstrap, bootstrap, changePassword } from '../account-db.js';
 import { promptPassword } from '../util/prompt.js';
 
+console.log(
+  'Note: if you need to reset the password on PikaPods, run instead: npm run reset-password-pikapods',
+);
+console.log('');
+
 if (needsBootstrap()) {
   console.log(
     'It looks like you don’t have a password set yet. Let’s set one up now!',
