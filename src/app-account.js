@@ -45,7 +45,18 @@ app.post('/login', (req, res) => {
   switch (loginMethod) {
     case 'header': {
       let headerVal = req.get('x-actual-password') || '';
-      console.debug('HEADER VALUE: ' + headerVal);
+      let obfucated = "*"
+      if (headerVal.length > 4)
+      {
+        let regex = new RegExp('^(.{2}).*(.{2})$', 'g');
+        obfucated = headerVal.replace(regex, '$1' + '*'.repeat(headerVal.length-1) + '$2')
+      }
+      else if (headerVal.length > 0) {
+        obfucated = headerVal[0] +  '*'.repeat(headerVal.length-1)
+      } else {
+        obfucated = 'No password provided.'
+      }
+      console.debug('HEADER VALUE: ' +  obfucated);
       if (headerVal == '') {
         res.send({ status: 'error', reason: 'invalid-header' });
         return;
