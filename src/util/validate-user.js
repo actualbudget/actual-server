@@ -30,8 +30,8 @@ export default function validateUser(req, res) {
     res.status(403);
     res.send({
       status: 'error',
-      reason: 'unauthorized',
-      details: 'token-expired',
+      reason: 'token-expired',
+      details: 'Token Expired. Login again',
     });
     return null;
   }

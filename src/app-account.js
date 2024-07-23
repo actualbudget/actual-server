@@ -127,6 +127,8 @@ app.get('/validate', (req, res) => {
         validated: true,
         userName: data?.user?.user_name,
         permissions: data?.permissions,
+        userId: data?.user_id,
+        displayName: data?.user?.display_name,
       },
     });
   }

@@ -83,7 +83,7 @@ export async function loginWithOpenIdSetup(body) {
 
   const url = client.authorizationUrl({
     response_type: 'code',
-    scope: 'openid email',
+    scope: 'openid email profile',
     state,
     code_challenge,
     code_challenge_method: 'S256',
@@ -138,8 +138,8 @@ export async function loginWithOpenIdFinalize(body) {
     if (c === 0) {
       userId = uuid.v4();
       accountDb.mutate(
-        'INSERT INTO users (user_id, user_name, enabled, master) VALUES (?, ?, 1, 1)',
-        [userId, userInfo.email],
+        'INSERT INTO users (id, user_name, display_name, enabled, master) VALUES (?, ?, ?, 1, 1)',
+        [userId, userInfo.email, userInfo.name ?? userInfo.email],
       );
 
       accountDb.mutate(
@@ -147,16 +147,24 @@ export async function loginWithOpenIdFinalize(body) {
         [userId, '213733c1-5645-46ad-8784-a7b20b400f93'],
       );
     } else {
-      let { user_id: userIdFromDb } = accountDb.first(
-        'SELECT user_id FROM users WHERE user_name = ?',
-        [userInfo.email],
-      );
+      let { id: userIdFromDb, display_name: displayName } =
+        accountDb.first(
+          'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
+          [userInfo.email],
+        ) || {};
 
       if (userIdFromDb == null) {
         return {
           error:
             'openid-grant-failed: user does not have access to Actual Budget',
         };
+      }
+
+      if (!displayName && userInfo.name) {
+        accountDb.mutate('UPDATE users set display_name = ? WHERE id = ?', [
+          userInfo.name,
+          userIdFromDb,
+        ]);
       }
 
       userId = userIdFromDb;

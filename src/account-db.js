@@ -136,8 +136,8 @@ export function login(password) {
   if (c === 0) {
     userId = uuid.v4();
     accountDb.mutate(
-      'INSERT INTO users (user_id, user_name, enabled, master) VALUES (?, ?, 1, 1)',
-      [userId, ''],
+      'INSERT INTO users (id, user_name, display_name, enabled, master) VALUES (?, ?, ?, 1, 1)',
+      [userId, '', ''],
     );
 
     accountDb.mutate(
@@ -145,8 +145,8 @@ export function login(password) {
       [userId, '213733c1-5645-46ad-8784-a7b20b400f93'],
     );
   } else {
-    let { user_id: userIdFromDb } = accountDb.first(
-      'SELECT user_id FROM users WHERE user_name = ?',
+    let { id: userIdFromDb } = accountDb.first(
+      'SELECT id FROM users WHERE user_name = ?',
       [''],
     );
 
@@ -187,16 +187,16 @@ export function getSession(token) {
 
 export function getUserInfo(userId) {
   let accountDb = getAccountDb();
-  return accountDb.first('SELECT * FROM users WHERE user_id = ?', [userId]);
+  return accountDb.first('SELECT * FROM users WHERE id = ?', [userId]);
 }
 
 export function getUserPermissions(userId) {
   let accountDb = getAccountDb();
   return accountDb.all(
     `SELECT roles.permissions FROM users
-                              JOIN user_roles ON user_roles.user_id = users.user_id
-                              JOIN roles ON roles.role_id = user_roles.role_id
-                              WHERE users.user_id = ?`,
+                              JOIN user_roles ON user_roles.user_id = users.id
+                              JOIN roles ON roles.id = user_roles.role_id
+                              WHERE users.id = ?`,
     [userId],
   );
 }

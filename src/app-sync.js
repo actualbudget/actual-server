@@ -263,8 +263,8 @@ app.post('/upload-user-file', async (req, res) => {
     // it's new
     groupId = uuid.v4();
     accountDb.mutate(
-      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta) VALUES (?, ?, ?, ?, ?)',
-      [fileId, groupId, syncFormatVersion, name, encryptMeta],
+      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, owner) VALUES (?, ?, ?, ?, ?, ?)',
+      [fileId, groupId, syncFormatVersion, name, encryptMeta, user.user.id],
     );
     res.send(JSON.stringify({ status: 'ok', groupId }));
   } else {
@@ -342,8 +342,25 @@ app.get('/list-user-files', (req, res) => {
     return;
   }
 
+  const canSeeAll =
+    user.master ||
+    user.permissions.findIndex((permission) => permission === 'ADMINISTRATOR') > -1;
+
   let accountDb = getAccountDb();
-  let rows = accountDb.all('SELECT * FROM files');
+  let rows = canSeeAll
+    ? accountDb.all('SELECT * FROM files')
+    : accountDb.all(
+        `SELECT files.* 
+          FROM files
+          WHERE files.owner = ?
+        UNION
+         SELECT files.*
+          FROM files
+          JOIN user_access
+            ON user_access.file_id = files.id
+            AND user_access.user_id = ?`,
+        [user.user_id, user.user_id],
+      );
 
   res.send(
     JSON.stringify({
@@ -354,6 +371,7 @@ app.get('/list-user-files', (req, res) => {
         groupId: row.group_id,
         name: row.name,
         encryptKeyId: row.encrypt_keyid,
+        owner: row.owner,
       })),
     }),
   );
