@@ -3,6 +3,7 @@ import * as uuid from 'uuid';
 import errorMiddleware from './util/error-middleware.js';
 import validateUser from './util/validate-user.js';
 import getAccountDb from './account-db.js';
+import config from './load-config.js';
 
 let app = express();
 app.use(errorMiddleware);
@@ -158,8 +159,7 @@ app.post('/users/delete-all', (req, res) => {
     const { id: masterId } =
       getAccountDb().first('SELECT id FROM users WHERE master = 1') || {};
 
-    if(item === masterId)
-      return;
+    if (item === masterId) return;
 
     getAccountDb().mutate('DELETE FROM user_roles WHERE user_id = ?', [item]);
     getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [item]);
@@ -444,6 +444,10 @@ app.get('/auth-mode', (req, res) => {
     ) || {};
 
   res.json({ method });
+});
+
+app.get('/multiuser', (req, res) => {
+  res.json(config.multiuser);
 });
 
 app.use(errorMiddleware);

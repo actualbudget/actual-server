@@ -14,7 +14,6 @@ import * as secretApp from './app-secrets.js';
 import * as adminApp from './app-admin.js';
 import getAccountDb, { disableOpenID, enableOpenID } from './account-db.js';
 import { exit } from 'node:process';
-import { bootstrapOpenId } from './accounts/openid.js';
 
 const app = express();
 
