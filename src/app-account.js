@@ -7,6 +7,8 @@ import {
   getLoginMethod,
   listLoginMethods,
   login,
+  enableOpenID,
+  disableOpenID,
 } from './account-db.js';
 import { changePassword } from './accounts/password.js';
 import {
@@ -32,8 +34,8 @@ app.get('/needs-bootstrap', (req, res) => {
   });
 });
 
-app.post('/bootstrap', (req, res) => {
-  let { error } = bootstrap(req.body);
+app.post('/bootstrap', async (req, res) => {
+  let { error } = await bootstrap(req.body);
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
@@ -94,6 +96,29 @@ app.post('/login', async (req, res) => {
   res.send({ status: 'ok', data: { token } });
 });
 
+app.post('/enable-openid', async (req, res) => {
+  let { error } = await enableOpenID(req.body) || {};
+
+  if (error) {
+    res.status(400).send({ status: 'error', reason: error });
+    return;
+  } else {
+    res.send({ status: 'ok' });
+  }
+});
+
+app.post('/enable-password', async (req, res) => {
+  let { error } = await disableOpenID(req.body) || {};
+
+  if (error) {
+    res.status(400).send({ status: 'error', reason: error });
+    return;
+  } else {
+    res.send({ status: 'ok' });
+  }
+});
+
+//
 app.get('/login-openid/cb', async (req, res) => {
   let { error, url } = await loginWithOpenIdFinalize(req.query);
   if (error) {

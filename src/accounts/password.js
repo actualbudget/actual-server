@@ -11,13 +11,18 @@ export function bootstrapPassword(password) {
     return { error: 'invalid-password' };
   }
 
+  getAccountDb().mutate(
+    'DELETE FROM auth WHERE method = ?',['password'],
+  );
+
   // Hash the password. There's really not a strong need for this
   // since this is a self-hosted instance owned by the user.
   // However, just in case we do it.
   let hashed = hashPassword(password);
   let accountDb = getAccountDb();
+  accountDb.mutate('UPDATE auth SET active = 0');
   accountDb.mutate(
-    "INSERT INTO auth (method, extra_data) VALUES ('password', ?)",
+    "INSERT INTO auth (method, extra_data, active) VALUES ('password', ?, 1)",
     [hashed],
   );
 

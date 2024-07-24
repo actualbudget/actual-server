@@ -2,7 +2,7 @@ import getAccountDb from '../account-db.js';
 import * as uuid from 'uuid';
 import { generators, Issuer } from 'openid-client';
 
-export function bootstrapOpenId(config) {
+export async function bootstrapOpenId(config) {
   if (!Object.prototype.hasOwnProperty.call(config, 'issuer')) {
     return { error: 'missing-issuer' };
   }
@@ -15,6 +15,16 @@ export function bootstrapOpenId(config) {
   if (!Object.prototype.hasOwnProperty.call(config, 'server_hostname')) {
     return { error: 'missing-server-hostname' };
   }
+
+  try {
+    await setupOpenIdClient(config);
+  } catch (err) {
+    return { error: 'configuration-error' };
+  }
+
+  getAccountDb().mutate(
+    'DELETE FROM auth WHERE method = ?',['openid'],
+  );
 
   // Beyond verifying that the configuration exists, we do not attempt
   // to check if the configuration is actually correct.
@@ -50,9 +60,9 @@ export async function loginWithOpenIdSetup(body) {
   }
 
   let accountDb = getAccountDb();
-  let config = accountDb.first(
-    "SELECT extra_data FROM auth WHERE method = 'openid'",
-  );
+  let config = accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
+    'openid',
+  ]);
   if (!config) {
     return { error: 'openid-not-configured' };
   }
@@ -102,7 +112,7 @@ export async function loginWithOpenIdFinalize(body) {
 
   let accountDb = getAccountDb();
   let config = accountDb.first(
-    "SELECT extra_data FROM auth WHERE method = 'openid'",
+    "SELECT extra_data FROM auth WHERE method = 'openid' AND active = 1",
   );
   if (!config) {
     return { error: 'openid-not-configured' };
@@ -133,7 +143,10 @@ export async function loginWithOpenIdFinalize(body) {
       return { error: 'openid-grant-failed: no email found for the user' };
     }
 
-    let { c } = accountDb.first('SELECT count(*) as c FROM users');
+    let { c } = accountDb.first(
+      'SELECT count(*) as c FROM users WHERE user_name <> ?',
+      [''],
+    );
     let userId = null;
     if (c === 0) {
       userId = uuid.v4();

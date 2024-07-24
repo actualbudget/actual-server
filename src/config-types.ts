@@ -2,7 +2,7 @@ import { ServerOptions } from 'https';
 
 export interface Config {
   mode: 'test' | 'development';
-  loginMethod: 'password' | 'header';
+  loginMethod: 'password' | 'header' | 'openid';
   trustedProxies: string[];
   dataDir: string;
   projectRoot: string;
@@ -20,4 +20,11 @@ export interface Config {
     syncEncryptedFileSizeLimitMB: number;
     fileSizeLimitMB: number;
   };
+  openId?: {
+    issuer: string;
+    client_id: string;
+    client_secret: string;
+    server_hostname: string;
+  }
+  password?: string;
 }

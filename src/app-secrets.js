@@ -1,6 +1,7 @@
 import express from 'express';
 import validateUser from './util/validate-user.js';
 import { secretsService } from './services/secrets-service.js';
+import getAccountDb from './account-db.js';
 
 const app = express();
 
@@ -16,7 +17,27 @@ app.use(async (req, res, next) => {
 });
 
 app.post('/', async (req, res) => {
+  const { method } =
+    getAccountDb().first('SELECT method FROM auth WHERE active = 1') || {};
+
   const { name, value } = req.body;
+
+  if (method === 'openid') {
+    const user = validateUser(req, res);
+    if (!user) return;
+
+    let canSaveSecrets = user.permissions.indexOf('ADMINISTRATOR') > -1;
+
+    if (!canSaveSecrets) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'not-admin',
+        details: 'You have to be admin to set secrets',
+      });
+
+      return null;
+    }
+  }
 
   secretsService.set(name, value);
 

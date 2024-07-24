@@ -158,6 +158,9 @@ app.post('/users/delete-all', (req, res) => {
     const { id: masterId } =
       getAccountDb().first('SELECT id FROM users WHERE master = 1') || {};
 
+    if(item === masterId)
+      return;
+
     getAccountDb().mutate('DELETE FROM user_roles WHERE user_id = ?', [item]);
     getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [item]);
     getAccountDb().mutate('UPDATE files set owner = ? WHERE owner = ?', [
@@ -431,6 +434,16 @@ app.get('/file/owner', (req, res) => {
   }
 
   return null;
+});
+
+app.get('/auth-mode', (req, res) => {
+  const { method } =
+    getAccountDb().first(
+      `SELECT method from auth
+        where active = 1`,
+    ) || {};
+
+  res.json({ method });
 });
 
 app.use(errorMiddleware);

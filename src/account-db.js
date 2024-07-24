@@ -35,22 +35,24 @@ export function listLoginMethods() {
 
 /*
  * Get the Login Method in the following order
+ * Try to search for active method = openid, if enabled, skip the rest of the checks. Otherwise, follow checks bellow.
  * req (the frontend can say which method in the case it wants to resort to forcing password auth)
  * config options
  * fall back to using password
  */
 export function getLoginMethod(req) {
+  let accountDb = getAccountDb();
+  let row = accountDb.first('SELECT method FROM auth where active = 1');
+
+  if (row !== null && row['method'] === 'openid') {
+    return row['method'];
+  }
+
   if (
     typeof req !== 'undefined' &&
     (req.body || { loginMethod: null }).loginMethod
   ) {
     return req.body.loginMethod;
-  }
-  let accountDb = getAccountDb();
-  let row = accountDb.first('SELECT method FROM auth where active = 1');
-
-  if (row !== null && row['method'] !== null) {
-    return row['method'];
   }
 
   return config.loginMethod || 'password';
@@ -64,7 +66,7 @@ export function getLoginMethod(req) {
 //   "client_secret": "your_client_secret",
 //   "server_hostname": "https://actual.your_website.com"
 // }
-export function bootstrap(loginSettings) {
+export async function bootstrap(loginSettings) {
   let accountDb = getAccountDb();
 
   if (!needsBootstrap()) {
@@ -96,19 +98,43 @@ export function bootstrap(loginSettings) {
   }
 
   if (openIdEnabled) {
-    let { error } = bootstrapOpenId(loginSettings.openid);
+    let { error } = await bootstrapOpenId(loginSettings.openid);
     if (error) {
       return { error };
     }
   }
 
-  const token = uuid.v4();
-  accountDb.mutate(
-    'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, -1, ?)',
-    [token, ''],
-  );
-
   return {};
+}
+
+export async function enableOpenID(loginSettings, checkFileConfig = true) {
+  if (checkFileConfig && config.openId) {
+    return { error: 'unable-to-change-file-config-enabled' };
+  }
+
+  let { error } = (await bootstrapOpenId(loginSettings.openId)) || {};
+  if (error) {
+    return { error };
+  }
+
+  getAccountDb().mutate('DELETE FROM sessions');
+  getAccountDb().mutate('DELETE FROM users');
+  getAccountDb().mutate('DELETE FROM user_roles');
+}
+
+export async function disableOpenID(loginSettings, checkFileConfig = true) {
+  if (checkFileConfig && config.password) {
+    return { error: 'unable-to-change-file-config-enabled' };
+  }
+
+  let { error } = (await bootstrapPassword(loginSettings.password)) || {};
+  if (error) {
+    return { error };
+  }
+
+  getAccountDb().mutate('DELETE FROM sessions');
+  getAccountDb().mutate('DELETE FROM users');
+  getAccountDb().mutate('DELETE FROM user_roles');
 }
 
 export function login(password) {
@@ -117,19 +143,27 @@ export function login(password) {
   }
 
   let accountDb = getAccountDb();
-  let row = accountDb.first('SELECT * FROM auth');
+  const { extra_data: passwordHash } =
+    accountDb.first(
+      'SELECT extra_data FROM auth WHERE method = ? AND active = 1',
+      ['password'],
+    ) || {};
 
-  let confirmed = row && bcrypt.compareSync(password, row.extra_data);
+  let confirmed = passwordHash && bcrypt.compareSync(password, passwordHash);
 
   if (!confirmed) {
     return { error: 'invalid-password' };
   }
 
-  // Right now, tokens are permanent and there's just one in the
-  // system. In the future this should probably evolve to be a
-  // "session" that times out after a long time or something, and
-  // maybe each device has a different token
   let sessionRow = accountDb.first('SELECT * FROM sessions');
+
+  let token = sessionRow ? sessionRow.token : uuid.v4();
+  if (!sessionRow) {
+    accountDb.mutate(
+      'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
+      [token, -1, ''],
+    );
+  }
 
   let { c } = accountDb.first('SELECT count(*) as c FROM users');
   let userId = null;
@@ -151,15 +185,14 @@ export function login(password) {
     );
 
     userId = userIdFromDb;
-  }  
+  }
 
   accountDb.mutate(
     'UPDATE sessions SET expires_at = ?, user_id = ? WHERE expires_at = -1',
     [2147483647, userId],
   );
 
-
-  return { token: sessionRow.token };
+  return { token };
 }
 
 export function changePassword(newPassword) {

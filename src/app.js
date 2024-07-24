@@ -12,6 +12,9 @@ import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as secretApp from './app-secrets.js';
 import * as adminApp from './app-admin.js';
+import getAccountDb, { disableOpenID, enableOpenID } from './account-db.js';
+import { exit } from 'node:process';
+import { bootstrapOpenId } from './accounts/openid.js';
 
 const app = express();
 
@@ -86,5 +89,28 @@ export default async function run() {
   } else {
     app.listen(config.port, config.hostname);
   }
+
+  if(config.loginMethod === "openid") {
+    const { cnt } = getAccountDb().first("SELECT count(*) as cnt FROM auth WHERE method = ? and active = 1",["openid"]);
+    if(cnt == 0) {
+      const { error } = await enableOpenID(config, false) || {}; 
+
+      if(error) {
+        console.error(error);
+        exit(-1);
+      }
+    }
+  } else if (config.loginMethod !== "openid") {
+    const { cnt } = getAccountDb().first("SELECT count(*) as cnt FROM auth WHERE method <> ? and active = 1",["openid"]);
+    if(cnt == 0) {
+      const { error } = await disableOpenID(config, false) || {}; 
+
+      if(error) {
+        console.error(error);
+        exit(-1);
+      }
+    }
+  }
+
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
 }

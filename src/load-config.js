@@ -72,6 +72,7 @@ let defaultConfig = {
     fileSizeLimitMB: 20,
   },
   projectRoot,
+  password: ''
 };
 
 /** @type {import('./config-types.js').Config} */
