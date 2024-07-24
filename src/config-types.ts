@@ -25,7 +25,7 @@ export interface Config {
     client_id: string;
     client_secret: string;
     server_hostname: string;
-  }
+  };
   password?: string;
   multiuser: boolean;
 }

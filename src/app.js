@@ -89,22 +89,28 @@ export default async function run() {
     app.listen(config.port, config.hostname);
   }
 
-  if(config.loginMethod === "openid") {
-    const { cnt } = getAccountDb().first("SELECT count(*) as cnt FROM auth WHERE method = ? and active = 1",["openid"]);
-    if(cnt == 0) {
-      const { error } = await enableOpenID(config, false) || {}; 
+  if (config.loginMethod === 'openid') {
+    const { cnt } = getAccountDb().first(
+      'SELECT count(*) as cnt FROM auth WHERE method = ? and active = 1',
+      ['openid'],
+    );
+    if (cnt == 0) {
+      const { error } = (await enableOpenID(config, false)) || {};
 
-      if(error) {
+      if (error) {
         console.error(error);
         exit(-1);
       }
     }
-  } else if (config.loginMethod !== "openid") {
-    const { cnt } = getAccountDb().first("SELECT count(*) as cnt FROM auth WHERE method <> ? and active = 1",["openid"]);
-    if(cnt == 0) {
-      const { error } = await disableOpenID(config, false) || {}; 
+  } else if (config.loginMethod !== 'openid') {
+    const { cnt } = getAccountDb().first(
+      'SELECT count(*) as cnt FROM auth WHERE method <> ? and active = 1',
+      ['openid'],
+    );
+    if (cnt == 0) {
+      const { error } = (await disableOpenID(config, false)) || {};
 
-      if(error) {
+      if (error) {
         console.error(error);
         exit(-1);
       }

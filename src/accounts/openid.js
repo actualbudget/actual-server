@@ -22,9 +22,7 @@ export async function bootstrapOpenId(config) {
     return { error: 'configuration-error' };
   }
 
-  getAccountDb().mutate(
-    'DELETE FROM auth WHERE method = ?',['openid'],
-  );
+  getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
 
   // Beyond verifying that the configuration exists, we do not attempt
   // to check if the configuration is actually correct.

@@ -344,7 +344,8 @@ app.get('/list-user-files', (req, res) => {
 
   const canSeeAll =
     user.master ||
-    user.permissions.findIndex((permission) => permission === 'ADMINISTRATOR') > -1;
+    user.permissions.findIndex((permission) => permission === 'ADMINISTRATOR') >
+      -1;
 
   let accountDb = getAccountDb();
   let rows = canSeeAll

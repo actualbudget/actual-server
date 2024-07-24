@@ -67,8 +67,6 @@ export function getLoginMethod(req) {
 //   "server_hostname": "https://actual.your_website.com"
 // }
 export async function bootstrap(loginSettings) {
-  let accountDb = getAccountDb();
-
   if (!needsBootstrap()) {
     return { error: 'already-bootstrapped' };
   }

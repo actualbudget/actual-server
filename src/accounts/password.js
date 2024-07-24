@@ -11,9 +11,7 @@ export function bootstrapPassword(password) {
     return { error: 'invalid-password' };
   }
 
-  getAccountDb().mutate(
-    'DELETE FROM auth WHERE method = ?',['password'],
-  );
+  getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['password']);
 
   // Hash the password. There's really not a strong need for this
   // since this is a self-hosted instance owned by the user.

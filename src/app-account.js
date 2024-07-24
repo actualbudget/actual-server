@@ -97,7 +97,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/enable-openid', async (req, res) => {
-  let { error } = await enableOpenID(req.body) || {};
+  let { error } = (await enableOpenID(req.body)) || {};
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
@@ -108,7 +108,7 @@ app.post('/enable-openid', async (req, res) => {
 });
 
 app.post('/enable-password', async (req, res) => {
-  let { error } = await disableOpenID(req.body) || {};
+  let { error } = (await disableOpenID(req.body)) || {};
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
