@@ -89,7 +89,7 @@ app.post(
             error_code: 'ACCOUNT_NEEDS_ATTENTION',
             status: 'rejected',
             reason:
-              'The account needs your attention at <a href="https://beta-bridge.simplefin.org/auth/login">SimpleFIN</a>.',
+              'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
           },
         });
       }
@@ -143,8 +143,7 @@ app.post(
           .split('T')[0];
 
         newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
-        newTrans.debtorName = trans.payee;
-        //newTrans.debtorAccount = don't have compared to GoCardless
+        newTrans.payeeName = trans.payee;
         newTrans.remittanceInformationUnstructured = trans.description;
         newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
         newTrans.transactionId = trans.id;

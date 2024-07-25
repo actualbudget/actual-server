@@ -4,6 +4,9 @@ import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
+import EasybankBawaatww from './banks/easybank-bawaatww.js';
+import Fortuneo from './banks/FORTUNEO_FTNOFRP1XXX.js';
+import IngIngbrobu from './banks/ing-ingbrobu.js';
 import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
@@ -25,8 +28,11 @@ export const banks = [
   Belfius,
   BnpBeGebabebb,
   DanskeBankDabNO22,
+  EasybankBawaatww,
+  Fortuneo,
   IngIngddeff,
   IngPlIngbplpw,
+  IngIngbrobu,
   MbankRetailBrexplpw,
   NationwideNaiaGB21,
   NorwegianXxNorwnok1,

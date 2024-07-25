@@ -1,12 +1,17 @@
 import Fallback from './integration-bank.js';
 
 import { printIban, amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   ...Fallback,
 
-  institutionIds: ['SEB_KORT_AB_NO_SKHSFI21', 'SEB_KORT_AB_SE_SKHSFI21'],
+  institutionIds: [
+    'SEB_KORT_AB_NO_SKHSFI21',
+    'SEB_KORT_AB_SE_SKHSFI21',
+    'SEB_CARD_ESSESESS',
+  ],
 
   accessValidForDays: 180,
 
@@ -26,16 +31,18 @@ export default {
    * Sign of transaction amount needs to be flipped for SEB credit cards
    */
   normalizeTransaction(transaction, _booked) {
+    // Creditor name is stored in additionInformation for SEB
+    transaction.creditorName = transaction.additionalInformation;
+    transaction.transactionAmount = {
+      // Flip transaction amount sign
+      amount: (-parseFloat(transaction.transactionAmount.amount)).toString(),
+      currency: transaction.transactionAmount.currency,
+    };
+
     return {
       ...transaction,
-      // Creditor name is stored in additionInformation for SEB
-      creditorName: transaction.additionalInformation,
+      payeeName: formatPayeeName(transaction),
       date: transaction.valueDate,
-      transactionAmount: {
-        // Flip transaction amount sign
-        amount: (-parseFloat(transaction.transactionAmount.amount)).toString(),
-        currency: transaction.transactionAmount.currency,
-      },
     };
   },
 
