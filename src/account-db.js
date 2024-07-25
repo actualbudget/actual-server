@@ -29,25 +29,21 @@ export function needsBootstrap() {
 
 export function listLoginMethods() {
   let accountDb = getAccountDb();
-  let rows = accountDb.all('SELECT method FROM auth');
-  return rows.map((r) => r['method']);
+  let rows = accountDb.all('SELECT method, display_name, active FROM auth');
+  return rows.map((r) => ({
+    method: r.method,
+    active: r.active,
+    displayName: r.display_name,
+  }));
 }
 
 /*
  * Get the Login Method in the following order
- * Try to search for active method = openid, if enabled, skip the rest of the checks. Otherwise, follow checks bellow.
  * req (the frontend can say which method in the case it wants to resort to forcing password auth)
  * config options
  * fall back to using password
  */
 export function getLoginMethod(req) {
-  let accountDb = getAccountDb();
-  let row = accountDb.first('SELECT method FROM auth where active = 1');
-
-  if (row !== null && row['method'] === 'openid') {
-    return row['method'];
-  }
-
   if (
     typeof req !== 'undefined' &&
     (req.body || { loginMethod: null }).loginMethod
@@ -106,7 +102,7 @@ export async function bootstrap(loginSettings) {
 }
 
 export async function enableOpenID(loginSettings, checkFileConfig = true) {
-  if (checkFileConfig && config.openId) {
+  if (checkFileConfig && config.loginMethod) {
     return { error: 'unable-to-change-file-config-enabled' };
   }
 
@@ -120,9 +116,28 @@ export async function enableOpenID(loginSettings, checkFileConfig = true) {
   getAccountDb().mutate('DELETE FROM user_roles');
 }
 
-export async function disableOpenID(loginSettings, checkFileConfig = true) {
-  if (checkFileConfig && config.password) {
+export async function disableOpenID(
+  loginSettings,
+  checkFileConfig = true,
+  checkForOldPassword = false,
+) {
+  if (checkFileConfig && config.loginMethod) {
     return { error: 'unable-to-change-file-config-enabled' };
+  }
+
+  if (checkForOldPassword) {
+    let accountDb = getAccountDb();
+    const { extra_data: passwordHash } =
+      accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
+        'password',
+      ]) || {};
+
+    let confirmed =
+      passwordHash && bcrypt.compareSync(loginSettings.password, passwordHash);
+
+    if (!confirmed) {
+      return { error: 'invalid-password' };
+    }
   }
 
   let { error } = (await bootstrapPassword(loginSettings.password)) || {};
@@ -133,6 +148,7 @@ export async function disableOpenID(loginSettings, checkFileConfig = true) {
   getAccountDb().mutate('DELETE FROM sessions');
   getAccountDb().mutate('DELETE FROM users');
   getAccountDb().mutate('DELETE FROM user_roles');
+  getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
 }
 
 export function login(password) {
@@ -142,10 +158,9 @@ export function login(password) {
 
   let accountDb = getAccountDb();
   const { extra_data: passwordHash } =
-    accountDb.first(
-      'SELECT extra_data FROM auth WHERE method = ? AND active = 1',
-      ['password'],
-    ) || {};
+    accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
+      'password',
+    ]) || {};
 
   let confirmed = passwordHash && bcrypt.compareSync(password, passwordHash);
 
@@ -156,12 +171,6 @@ export function login(password) {
   let sessionRow = accountDb.first('SELECT * FROM sessions');
 
   let token = sessionRow ? sessionRow.token : uuid.v4();
-  if (!sessionRow) {
-    accountDb.mutate(
-      'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
-      [token, -1, ''],
-    );
-  }
 
   let { c } = accountDb.first('SELECT count(*) as c FROM users');
   let userId = null;
@@ -185,10 +194,17 @@ export function login(password) {
     userId = userIdFromDb;
   }
 
-  accountDb.mutate(
-    'UPDATE sessions SET expires_at = ?, user_id = ? WHERE expires_at = -1',
-    [2147483647, userId],
-  );
+  if (!sessionRow) {
+    accountDb.mutate(
+      'INSERT INTO sessions (token, expires_at, user_id, auth_method) VALUES (?, ?, ?, ?)',
+      [token, -1, userId, 'password'],
+    );
+  } else {
+    accountDb.mutate('UPDATE sessions SET user_id = ? WHERE token = ?', [
+      userId,
+      token,
+    ]);
+  }
 
   return { token };
 }
@@ -223,11 +239,21 @@ export function getUserInfo(userId) {
 
 export function getUserPermissions(userId) {
   let accountDb = getAccountDb();
-  return accountDb.all(
-    `SELECT roles.permissions FROM users
+  const permissions =
+    accountDb.all(
+      `SELECT roles.permissions FROM users
                               JOIN user_roles ON user_roles.user_id = users.id
                               JOIN roles ON roles.id = user_roles.role_id
                               WHERE users.id = ?`,
-    [userId],
+      [userId],
+    ) || [];
+
+  const uniquePermissions = Array.from(
+    new Set(
+      permissions.flatMap((rolePermission) =>
+        rolePermission.permissions.split(',').map((perm) => perm.trim()),
+      ),
+    ),
   );
+  return uniquePermissions;
 }

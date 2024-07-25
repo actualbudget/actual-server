@@ -9,6 +9,8 @@ import {
   login,
   enableOpenID,
   disableOpenID,
+  getUserInfo,
+  getUserPermissions,
 } from './account-db.js';
 import { changePassword } from './accounts/password.js';
 import {
@@ -108,7 +110,7 @@ app.post('/enable-openid', async (req, res) => {
 });
 
 app.post('/enable-password', async (req, res) => {
-  let { error } = (await disableOpenID(req.body)) || {};
+  let { error } = (await disableOpenID(req.body, true, true)) || {};
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
@@ -144,16 +146,20 @@ app.post('/change-password', (req, res) => {
 });
 
 app.get('/validate', (req, res) => {
-  let data = validateUser(req, res);
-  if (data) {
+  let session = validateUser(req, res);
+  if (session) {
+    const user = getUserInfo(session.user_id);
+    let permissions = getUserPermissions(session.user_id);
+
     res.send({
       status: 'ok',
       data: {
         validated: true,
-        userName: data?.user?.user_name,
-        permissions: data?.permissions,
-        userId: data?.user_id,
-        displayName: data?.user?.display_name,
+        userName: user?.user_name,
+        permissions: permissions,
+        userId: session?.user_id,
+        displayName: user?.display_name,
+        loginMethod: session?.auth_method,
       },
     });
   }

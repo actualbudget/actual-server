@@ -102,7 +102,7 @@ export default async function run() {
         exit(-1);
       }
     }
-  } else if (config.loginMethod !== 'openid') {
+  } else if (config.loginMethod) {
     const { cnt } = getAccountDb().first(
       'SELECT count(*) as cnt FROM auth WHERE method <> ? and active = 1',
       ['openid'],

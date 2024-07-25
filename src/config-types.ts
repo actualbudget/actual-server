@@ -2,7 +2,7 @@ import { ServerOptions } from 'https';
 
 export interface Config {
   mode: 'test' | 'development';
-  loginMethod: 'password' | 'header' | 'openid';
+  loginMethod?: 'password' | 'header' | 'openid' | null;
   trustedProxies: string[];
   dataDir: string;
   projectRoot: string;

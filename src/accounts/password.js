@@ -20,7 +20,7 @@ export function bootstrapPassword(password) {
   let accountDb = getAccountDb();
   accountDb.mutate('UPDATE auth SET active = 0');
   accountDb.mutate(
-    "INSERT INTO auth (method, extra_data, active) VALUES ('password', ?, 1)",
+    "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('password', 'Password', ?, 1)",
     [hashed],
   );
 

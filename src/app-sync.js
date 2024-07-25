@@ -9,7 +9,7 @@ import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 import * as simpleSync from './sync-simple.js';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
-import getAccountDb from './account-db.js';
+import getAccountDb, { getUserPermissions } from './account-db.js';
 
 const app = express();
 app.use(errorMiddleware);
@@ -264,7 +264,7 @@ app.post('/upload-user-file', async (req, res) => {
     groupId = uuid.v4();
     accountDb.mutate(
       'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, owner) VALUES (?, ?, ?, ?, ?, ?)',
-      [fileId, groupId, syncFormatVersion, name, encryptMeta, user.user.id],
+      [fileId, groupId, syncFormatVersion, name, encryptMeta, user.user_id],
     );
     res.send(JSON.stringify({ status: 'ok', groupId }));
   } else {
@@ -337,15 +337,15 @@ app.post('/update-user-filename', (req, res) => {
 });
 
 app.get('/list-user-files', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
+  let session = validateUser(req, res);
+  if (!session) {
     return;
   }
 
   const canSeeAll =
-    user.master ||
-    user.permissions.findIndex((permission) => permission === 'ADMINISTRATOR') >
-      -1;
+    getUserPermissions(session.user_id).findIndex(
+      (permission) => permission === 'ADMINISTRATOR',
+    ) > -1;
 
   let accountDb = getAccountDb();
   let rows = canSeeAll
@@ -360,7 +360,7 @@ app.get('/list-user-files', (req, res) => {
           JOIN user_access
             ON user_access.file_id = files.id
             AND user_access.user_id = ?`,
-        [user.user_id, user.user_id],
+        [session.user_id, session.user_id],
       );
 
   res.send(

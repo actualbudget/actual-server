@@ -48,7 +48,6 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
-  loginMethod: 'password',
   // assume local networks are trusted for header authentication
   trustedProxies: [
     '10.0.0.0/8',
@@ -144,7 +143,7 @@ debug(`using data directory ${finalConfig.dataDir}`);
 debug(`using server files directory ${finalConfig.serverFiles}`);
 debug(`using user files directory ${finalConfig.userFiles}`);
 debug(`using web root directory ${finalConfig.webRoot}`);
-debug(`using login method ${finalConfig.loginMethod}`);
+debug(`using login method ${finalConfig.loginMethod ?? 'password'}`);
 debug(`using trusted proxies ${finalConfig.trustedProxies.join(', ')}`);
 
 if (finalConfig.https) {

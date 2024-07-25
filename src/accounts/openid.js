@@ -33,7 +33,7 @@ export async function bootstrapOpenId(config) {
   let accountDb = getAccountDb();
   accountDb.mutate('UPDATE auth SET active = 0');
   accountDb.mutate(
-    "INSERT INTO auth (method, extra_data, active) VALUES ('openid', ?, 1)",
+    "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
     [JSON.stringify(config)],
   );
 
@@ -183,8 +183,8 @@ export async function loginWithOpenIdFinalize(body) {
 
     const token = uuid.v4();
     accountDb.mutate(
-      'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
-      [token, grant.expires_at, userId],
+      'INSERT INTO sessions (token, expires_at, user_id, auth_method) VALUES (?, ?, ?, ?)',
+      [token, grant.expires_at, userId, 'openid'],
     );
 
     return { url: `${return_url}/openid-cb?token=${token}` };

@@ -2,7 +2,7 @@ import express from 'express';
 import * as uuid from 'uuid';
 import errorMiddleware from './util/error-middleware.js';
 import validateUser from './util/validate-user.js';
-import getAccountDb from './account-db.js';
+import getAccountDb, { getUserPermissions } from './account-db.js';
 import config from './load-config.js';
 
 let app = express();
@@ -33,18 +33,18 @@ const getFileById = (fileId) => {
   );
 };
 
-const getUserFromRequest = (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
+const getSessionFromRequest = (req, res) => {
+  let session = validateUser(req, res);
+  if (!session) {
     return null;
   }
 
-  if (user.permissions.indexOf('ADMINISTRATOR') === -1) {
+  if (getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') === -1) {
     sendErrorResponse(res, 401, 'unauthorized', 'permission-not-found');
     return null;
   }
 
-  return user;
+  return session;
 };
 
 const validateUserInput = (res, user) => {
@@ -63,22 +63,44 @@ const validateUserInput = (res, user) => {
     return false;
   }
 
+  const { id: roleId } =
+    getAccountDb().first('SELECT id FROM roles WHERE roles.id = ?', [
+      user.role,
+    ]) || {};
+
+  if (!roleId) {
+    sendErrorResponse(
+      res,
+      400,
+      'role-does-not-exists',
+      'Selected role does not exists',
+    );
+    return false;
+  }
+
   return true;
 };
 
 app.get('/users/', (req, res) => {
   const users = getAccountDb().all(
-    `SELECT users.id, user_name as userName, display_name as displayName, enabled, master, roles.name as role 
+    `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(master,0) as master, roles.id as role 
      FROM users
      JOIN user_roles ON user_roles.user_id = users.id
-     JOIN roles ON roles.id = user_roles.role_id`,
+     JOIN roles ON roles.id = user_roles.role_id
+     WHERE users.user_name <> ''`,
   );
 
-  res.json(users);
+  res.json(
+    users.map((u) => ({
+      ...u,
+      master: u.master === 1,
+      enabled: u.enabled === 1,
+    })),
+  );
 });
 
 app.post('/users', (req, res) => {
-  const user = getUserFromRequest(req, res);
+  const user = getSessionFromRequest(req, res);
   if (!user) return;
 
   const newUser = req.body;
@@ -113,7 +135,7 @@ app.post('/users', (req, res) => {
 });
 
 app.patch('/users', (req, res) => {
-  const user = getUserFromRequest(req, res);
+  const user = getSessionFromRequest(req, res);
   if (!user) return;
 
   const userToUpdate = req.body;
@@ -150,7 +172,7 @@ app.patch('/users', (req, res) => {
 });
 
 app.post('/users/delete-all', (req, res) => {
-  const user = getUserFromRequest(req, res);
+  const user = getSessionFromRequest(req, res);
   if (!user) return;
 
   const ids = req.body.ids;
@@ -185,10 +207,10 @@ app.post('/users/delete-all', (req, res) => {
 
 app.get('/access', (req, res) => {
   const fileId = req.query.fileId;
-  const user = validateUser(req, res);
-  if (!user || !fileId) return;
+  const session = validateUser(req, res);
+  if (!session || !fileId) return;
 
-  const users = getAccountDb().all(
+  const accesses = getAccountDb().all(
     `SELECT users.id as userId, user_name as userName, files.owner, display_name as displayName
      FROM users
      JOIN user_access ON user_access.user_id = users.id
@@ -196,18 +218,20 @@ app.get('/access', (req, res) => {
      WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
     [
       fileId,
-      user.user_id,
-      user.permissions.indexOf('ADMINISTRATOR') === -1 ? 0 : 1,
+      session.user_id,
+      getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') === -1
+        ? 0
+        : 1,
     ],
   );
 
-  res.json(users);
+  res.json(accesses);
 });
 
 app.post('/access', (req, res) => {
   const userAccess = req.body || {};
-  const user = validateUser(req, res);
-  if (!user || !userAccess.fileId) return;
+  const session = validateUser(req, res);
+  if (!session || !userAccess.fileId) return;
 
   const { id: fileIdInDb } = getFileById(userAccess.fileId);
   if (!fileIdInDb) {
@@ -222,8 +246,10 @@ app.post('/access', (req, res) => {
      WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
       [
         userAccess.fileId,
-        user.user_id,
-        user.permissions.indexOf('ADMINISTRATOR') === -1 ? 0 : 1,
+        session.user_id,
+        getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') === -1
+          ? 0
+          : 1,
       ],
     ) || {};
 
@@ -268,17 +294,18 @@ app.post('/access', (req, res) => {
 
 app.get('/access/available-users', (req, res) => {
   const fileId = req.query.fileId;
-  const user = validateUser(req, res);
-  if (!user || !fileId) return;
+  const session = validateUser(req, res);
+  if (!session || !fileId) return;
 
-  let canListAvailableUser = user.permissions.indexOf('ADMINISTRATOR') > -1;
+  let canListAvailableUser =
+    getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') > -1;
   if (!canListAvailableUser) {
     const { canListAvaiableUserFromDB } =
       getAccountDb().first(
         `SELECT count(*) as canListAvaiableUserFromDB
        FROM files
        WHERE files.id = ? and files.owner = ?`,
-        [fileId, user.user_id],
+        [fileId, session.user_id],
       ) || {};
     canListAvailableUser = canListAvaiableUserFromDB === 1;
   }
@@ -293,7 +320,7 @@ app.get('/access/available-users', (req, res) => {
        AND NOT EXISTS (SELECT 1
                        FROM files
                        WHERE files.id = ? AND files.owner = users.id)
-       AND users.enabled = 1`,
+       AND users.enabled = 1 AND users.user_name <> ''`,
       [fileId, fileId],
     );
     res.json(users);
@@ -326,10 +353,10 @@ app.post('/access/get-bulk', (req, res) => {
 
 app.get('/access/check-access', (req, res) => {
   const fileId = req.query.fileId;
-  const user = validateUser(req, res);
-  if (!user || !fileId) return;
+  const session = validateUser(req, res);
+  if (!session || !fileId) return;
 
-  if (user.permissions.indexOf('ADMINISTRATOR') > -1) {
+  if (getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') > -1) {
     res.json({ granted: true });
     return;
   }
@@ -342,13 +369,13 @@ app.get('/access/check-access', (req, res) => {
       [fileId],
     ) || {};
 
-  res.json({ granted: owner === user.user_id });
+  res.json({ granted: owner === session.user_id });
 });
 
 app.post('/access/transfer-ownership/', (req, res) => {
   const newUserOwner = req.body || {};
-  const user = validateUser(req, res);
-  if (!user || !newUserOwner.fileId) return;
+  const session = validateUser(req, res);
+  if (!session || !newUserOwner.fileId) return;
 
   const { id: fileIdInDb } = getFileById(newUserOwner.fileId);
   if (!fileIdInDb) {
@@ -363,8 +390,10 @@ app.post('/access/transfer-ownership/', (req, res) => {
      WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
       [
         newUserOwner.fileId,
-        user.user_id,
-        user.permissions.indexOf('ADMINISTRATOR') === -1 ? 0 : 1,
+        session.user_id,
+        getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') === -1
+          ? 0
+          : 1,
       ],
     ) || {};
 
@@ -404,17 +433,18 @@ app.post('/access/transfer-ownership/', (req, res) => {
 
 app.get('/file/owner', (req, res) => {
   const fileId = req.query.fileId;
-  const user = validateUser(req, res);
-  if (!user || !fileId) return;
+  const session = validateUser(req, res);
+  if (!session || !fileId) return;
 
-  let canGetOwner = user.permissions.indexOf('ADMINISTRATOR') > -1;
+  let canGetOwner =
+    getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') > -1;
   if (!canGetOwner) {
     const { canListAvaiableUserFromDB } =
       getAccountDb().first(
         `SELECT count(*) as canListAvaiableUserFromDB
        FROM files
        WHERE files.id = ? and files.owner = ?`,
-        [fileId, user.user_id],
+        [fileId, session.user_id],
       ) || {};
     canGetOwner = canListAvaiableUserFromDB === 1;
   }

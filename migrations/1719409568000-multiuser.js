@@ -35,6 +35,9 @@ export const up = async function () {
 
     ALTER TABLE sessions
         ADD user_id TEXT;
+
+    ALTER TABLE sessions
+        ADD auth_method TEXT;
         `,
   );
 };

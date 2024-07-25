@@ -4,10 +4,11 @@ export const up = async function () {
   await getAccountDb().exec(
     `CREATE TABLE auth_new
         (method TEXT PRIMARY KEY,
+        display_name TEXT,
         extra_data TEXT, active INTEGER);
 
-        INSERT INTO auth_new (method, extra_data, active)
-        SELECT 'password', password, 1 FROM auth;
+        INSERT INTO auth_new (method, display_name, extra_data, active)
+        SELECT 'password', 'Password', password, 1 FROM auth;
         DROP TABLE auth;
         ALTER TABLE auth_new RENAME TO auth;
 

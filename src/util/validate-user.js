@@ -1,7 +1,7 @@
 import config from '../load-config.js';
 import proxyaddr from 'proxy-addr';
 import ipaddr from 'ipaddr.js';
-import { getSession, getUserInfo, getUserPermissions } from '../account-db.js';
+import { getSession } from '../account-db.js';
 
 /**
  * @param {import('express').Request} req
@@ -26,7 +26,7 @@ export default function validateUser(req, res) {
     return null;
   }
 
-  if (session.expires_at * 1000 <= Date.now()) {
+  if (session.expires_at !== -1 && session.expires_at * 1000 <= Date.now()) {
     res.status(403);
     res.send({
       status: 'error',
@@ -35,17 +35,6 @@ export default function validateUser(req, res) {
     });
     return null;
   }
-
-  session.user = getUserInfo(session.user_id);
-  let permissions = getUserPermissions(session.user_id);
-  const uniquePermissions = Array.from(
-    new Set(
-      permissions.flatMap((rolePermission) =>
-        rolePermission.permissions.split(',').map((perm) => perm.trim()),
-      ),
-    ),
-  );
-  session.permissions = uniquePermissions;
 
   return session;
 }
