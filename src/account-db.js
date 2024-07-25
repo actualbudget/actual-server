@@ -101,6 +101,10 @@ export async function bootstrap(loginSettings) {
   return {};
 }
 
+export async function isAdmin(userId) {
+  return getUserPermissions(userId).some((value) => value === 'ADMINISTRATOR');
+}
+
 export async function enableOpenID(loginSettings, checkFileConfig = true) {
   if (checkFileConfig && config.loginMethod) {
     return { error: 'unable-to-change-file-config-enabled' };

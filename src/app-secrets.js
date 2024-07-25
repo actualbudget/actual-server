@@ -1,7 +1,7 @@
 import express from 'express';
 import validateUser from './util/validate-user.js';
 import { secretsService } from './services/secrets-service.js';
-import getAccountDb, { getUserPermissions } from './account-db.js';
+import getAccountDb, { isAdmin } from './account-db.js';
 
 const app = express();
 
@@ -26,8 +26,7 @@ app.post('/', async (req, res) => {
     const session = validateUser(req, res);
     if (!session) return;
 
-    let canSaveSecrets =
-      getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') > -1;
+    let canSaveSecrets = isAdmin(session.user_id);
 
     if (!canSaveSecrets) {
       res.status(400).send({

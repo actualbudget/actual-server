@@ -2,7 +2,7 @@ import express from 'express';
 import * as uuid from 'uuid';
 import errorMiddleware from './util/error-middleware.js';
 import validateUser from './util/validate-user.js';
-import getAccountDb, { getUserPermissions } from './account-db.js';
+import getAccountDb, { isAdmin } from './account-db.js';
 import config from './load-config.js';
 
 let app = express();
@@ -39,7 +39,7 @@ const getSessionFromRequest = (req, res) => {
     return null;
   }
 
-  if (getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') === -1) {
+  if (!isAdmin(session.user_id)) {
     sendErrorResponse(res, 401, 'unauthorized', 'permission-not-found');
     return null;
   }
@@ -216,13 +216,7 @@ app.get('/access', (req, res) => {
      JOIN user_access ON user_access.user_id = users.id
      JOIN files ON files.id = user_access.file_id
      WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
-    [
-      fileId,
-      session.user_id,
-      getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') === -1
-        ? 0
-        : 1,
-    ],
+    [fileId, session.user_id, !isAdmin(session.user_id) ? 0 : 1],
   );
 
   res.json(accesses);
@@ -244,13 +238,7 @@ app.post('/access', (req, res) => {
       `SELECT 1 as granted
      FROM files
      WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
-      [
-        userAccess.fileId,
-        session.user_id,
-        getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') === -1
-          ? 0
-          : 1,
-      ],
+      [userAccess.fileId, session.user_id, !isAdmin(session.user_id) ? 0 : 1],
     ) || {};
 
   if (granted === 0) {
@@ -297,8 +285,7 @@ app.get('/access/available-users', (req, res) => {
   const session = validateUser(req, res);
   if (!session || !fileId) return;
 
-  let canListAvailableUser =
-    getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') > -1;
+  let canListAvailableUser = isAdmin(session.user_id);
   if (!canListAvailableUser) {
     const { canListAvaiableUserFromDB } =
       getAccountDb().first(
@@ -356,7 +343,7 @@ app.get('/access/check-access', (req, res) => {
   const session = validateUser(req, res);
   if (!session || !fileId) return;
 
-  if (getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') > -1) {
+  if (isAdmin(session.user_id)) {
     res.json({ granted: true });
     return;
   }
@@ -388,13 +375,7 @@ app.post('/access/transfer-ownership/', (req, res) => {
       `SELECT 1 as granted
      FROM files
      WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
-      [
-        newUserOwner.fileId,
-        session.user_id,
-        getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') === -1
-          ? 0
-          : 1,
-      ],
+      [newUserOwner.fileId, session.user_id, !isAdmin(session.user_id) ? 0 : 1],
     ) || {};
 
   if (granted === 0) {
@@ -436,8 +417,7 @@ app.get('/file/owner', (req, res) => {
   const session = validateUser(req, res);
   if (!session || !fileId) return;
 
-  let canGetOwner =
-    getUserPermissions(session.user_id).indexOf('ADMINISTRATOR') > -1;
+  let canGetOwner = isAdmin(session.user_id);
   if (!canGetOwner) {
     const { canListAvaiableUserFromDB } =
       getAccountDb().first(
