@@ -45,18 +45,7 @@ app.post('/login', (req, res) => {
   switch (loginMethod) {
     case 'header': {
       let headerVal = req.get('x-actual-password') || '';
-      let obfuscated = '*';
-      if (headerVal.length > 4) {
-        let regex = new RegExp('^(.{2}).*(.{2})$', 'g');
-        obfuscated = headerVal.replace(
-          regex,
-          '$1' + '*'.repeat(headerVal.length - 1) + '$2',
-        );
-      } else if (headerVal.length > 0) {
-        obfuscated = headerVal[0] + '*'.repeat(headerVal.length - 1);
-      } else {
-        obfuscated = 'No password provided.';
-      }
+      const obfuscated = '*'.repeat(headerVal.length) || 'No password provided.';
       console.debug('HEADER VALUE: ' + obfuscated);
       if (headerVal == '') {
         res.send({ status: 'error', reason: 'invalid-header' });
