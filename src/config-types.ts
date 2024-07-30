@@ -28,4 +28,5 @@ export interface Config {
   };
   password?: string;
   multiuser: boolean;
+  token_expiration?: 'never' | 'openid-provider' | number;
 }

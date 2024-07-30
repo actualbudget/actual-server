@@ -5,6 +5,7 @@ import * as uuid from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { bootstrapPassword } from './accounts/password.js';
 import { bootstrapOpenId } from './accounts/openid.js';
+import { TOKEN_EXPIRATION_NEVER } from './app-admin.js';
 
 let _accountDb;
 
@@ -201,7 +202,15 @@ export function login(password) {
   if (!sessionRow) {
     accountDb.mutate(
       'INSERT INTO sessions (token, expires_at, user_id, auth_method) VALUES (?, ?, ?, ?)',
-      [token, -1, userId, 'password'],
+      [
+        token,
+        config.token_expiration == 'never' ||
+        config.token_expiration == 'openid-provider'
+          ? TOKEN_EXPIRATION_NEVER
+          : config.token_expiration,
+        userId,
+        'password',
+      ],
     );
   } else {
     accountDb.mutate('UPDATE sessions SET user_id = ? WHERE token = ?', [

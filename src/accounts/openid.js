@@ -1,6 +1,8 @@
 import getAccountDb from '../account-db.js';
 import * as uuid from 'uuid';
 import { generators, Issuer } from 'openid-client';
+import { TOKEN_EXPIRATION_NEVER } from '../app-admin.js';
+import finalConfig from '../load-config.js'
 
 export async function bootstrapOpenId(config) {
   if (!Object.prototype.hasOwnProperty.call(config, 'issuer')) {
@@ -182,9 +184,17 @@ export async function loginWithOpenIdFinalize(body) {
     }
 
     const token = uuid.v4();
+
+    let expiration = TOKEN_EXPIRATION_NEVER;
+    if(finalConfig.token_expiration == 'openid-provider') {
+      expiration = grant.expires_at ?? TOKEN_EXPIRATION_NEVER;
+    } else if(finalConfig.token_expiration != 'never') {
+      expiration = finalConfig.token_expiration;
+    }
+
     accountDb.mutate(
       'INSERT INTO sessions (token, expires_at, user_id, auth_method) VALUES (?, ?, ?, ?)',
-      [token, grant.expires_at, userId, 'openid'],
+      [token, expiration, userId, 'openid'],
     );
 
     return { url: `${return_url}/openid-cb?token=${token}` };

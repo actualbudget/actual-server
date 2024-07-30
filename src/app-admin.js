@@ -10,6 +10,8 @@ app.use(errorMiddleware);
 
 export { app as handlers };
 
+export const TOKEN_EXPIRATION_NEVER = -1;
+
 const sendErrorResponse = (res, status, reason, details) => {
   res.status(status).send({
     status: 'error',
@@ -80,6 +82,16 @@ const validateUserInput = (res, user) => {
 
   return true;
 };
+
+app.get('/masterCreated/', (req, res) => {
+  const { cnt } = getAccountDb().first(
+    `SELECT count(*) as cnt
+     FROM users
+     WHERE users.user_name <> ''`,
+  ) || {};
+
+  res.json(cnt > 0);
+});
 
 app.get('/users/', (req, res) => {
   const users = getAccountDb().all(
@@ -280,6 +292,51 @@ app.post('/access', (req, res) => {
   res.status(200).send({ status: 'ok', data: {} });
 });
 
+app.post('/access/delete-all', (req, res) => {
+  const fileId = req.query.fileId;
+  const session = validateUser(req, res);
+  if (!session) return;
+
+  const { id: fileIdInDb } = getFileById(fileId);
+  if (!fileIdInDb) {
+    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
+    return;
+  }
+
+  const { granted } =
+    getAccountDb().first(
+      `SELECT 1 as granted
+     FROM files
+     WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
+      [fileId, session.user_id, !isAdmin(session.user_id) ? 0 : 1],
+    ) || {};
+
+  if (granted === 0) {
+    sendErrorResponse(
+      res,
+      400,
+      'file-denied',
+      "You don't have permissions over this file",
+    );
+    return;
+  }
+
+  const ids = req.body.ids;
+  let totalDeleted = 0;
+  ids.forEach((item) => {
+    const accessDeleted = getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [item]).changes;
+    totalDeleted += accessDeleted;
+  });
+
+  if (ids.length === totalDeleted) {
+    res
+      .status(200)
+      .send({ status: 'ok', data: { someDeletionsFailed: false } });
+  } else {
+    sendErrorResponse(res, 400, 'not-all-deleted', '');
+  }
+});
+
 app.get('/access/available-users', (req, res) => {
   const fileId = req.query.fileId;
   const session = validateUser(req, res);
@@ -307,8 +364,8 @@ app.get('/access/available-users', (req, res) => {
        AND NOT EXISTS (SELECT 1
                        FROM files
                        WHERE files.id = ? AND files.owner = users.id)
-       AND users.enabled = 1 AND users.user_name <> ''`,
-      [fileId, fileId],
+       AND users.enabled = 1 AND users.user_name <> '' AND users.id <> ?`,
+      [fileId, fileId, session.user_id],
     );
     res.json(users);
   }
