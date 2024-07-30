@@ -59,7 +59,9 @@ app.post('/login', async (req, res) => {
   switch (loginMethod) {
     case 'header': {
       let headerVal = req.get('x-actual-password') || '';
-      console.debug('HEADER VALUE: ' + headerVal);
+      const obfuscated =
+        '*'.repeat(headerVal.length) || 'No password provided.';
+      console.debug('HEADER VALUE: ' + obfuscated);
       if (headerVal == '') {
         res.send({ status: 'error', reason: 'invalid-header' });
         return;
