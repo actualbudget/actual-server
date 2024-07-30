@@ -84,11 +84,12 @@ const validateUserInput = (res, user) => {
 };
 
 app.get('/masterCreated/', (req, res) => {
-  const { cnt } = getAccountDb().first(
-    `SELECT count(*) as cnt
+  const { cnt } =
+    getAccountDb().first(
+      `SELECT count(*) as cnt
      FROM users
      WHERE users.user_name <> ''`,
-  ) || {};
+    ) || {};
 
   res.json(cnt > 0);
 });
@@ -324,7 +325,10 @@ app.post('/access/delete-all', (req, res) => {
   const ids = req.body.ids;
   let totalDeleted = 0;
   ids.forEach((item) => {
-    const accessDeleted = getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [item]).changes;
+    const accessDeleted = getAccountDb().mutate(
+      'DELETE FROM user_access WHERE user_id = ?',
+      [item],
+    ).changes;
     totalDeleted += accessDeleted;
   });
 

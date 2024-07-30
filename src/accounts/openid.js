@@ -2,7 +2,7 @@ import getAccountDb from '../account-db.js';
 import * as uuid from 'uuid';
 import { generators, Issuer } from 'openid-client';
 import { TOKEN_EXPIRATION_NEVER } from '../app-admin.js';
-import finalConfig from '../load-config.js'
+import finalConfig from '../load-config.js';
 
 export async function bootstrapOpenId(config) {
   if (!Object.prototype.hasOwnProperty.call(config, 'issuer')) {
@@ -186,10 +186,11 @@ export async function loginWithOpenIdFinalize(body) {
     const token = uuid.v4();
 
     let expiration = TOKEN_EXPIRATION_NEVER;
-    if(finalConfig.token_expiration == 'openid-provider') {
+    if (finalConfig.token_expiration == 'openid-provider') {
       expiration = grant.expires_at ?? TOKEN_EXPIRATION_NEVER;
-    } else if(finalConfig.token_expiration != 'never') {
-      expiration = Math.floor(Date.now() / 1000) + (finalConfig.token_expiration * 60);
+    } else if (finalConfig.token_expiration != 'never') {
+      expiration =
+        Math.floor(Date.now() / 1000) + finalConfig.token_expiration * 60;
     }
 
     accountDb.mutate(

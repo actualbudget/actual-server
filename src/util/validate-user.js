@@ -27,7 +27,10 @@ export default function validateUser(req, res) {
     return null;
   }
 
-  if (session.expires_at !== TOKEN_EXPIRATION_NEVER && session.expires_at * 1000 <= Date.now()) {
+  if (
+    session.expires_at !== TOKEN_EXPIRATION_NEVER &&
+    session.expires_at * 1000 <= Date.now()
+  ) {
     res.status(403);
     res.send({
       status: 'error',
