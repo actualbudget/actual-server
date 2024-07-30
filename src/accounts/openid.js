@@ -189,7 +189,7 @@ export async function loginWithOpenIdFinalize(body) {
     if(finalConfig.token_expiration == 'openid-provider') {
       expiration = grant.expires_at ?? TOKEN_EXPIRATION_NEVER;
     } else if(finalConfig.token_expiration != 'never') {
-      expiration = finalConfig.token_expiration;
+      expiration = Math.floor(Date.now() / 1000) + (finalConfig.token_expiration * 60);
     }
 
     accountDb.mutate(
