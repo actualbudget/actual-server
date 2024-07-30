@@ -341,12 +341,12 @@ app.post('/access/delete-all', (req, res) => {
   }
 });
 
-app.get('/access/available-users', (req, res) => {
+app.get('/access/available-users', async (req, res) => {
   const fileId = req.query.fileId;
   const session = validateUser(req, res);
   if (!session || !fileId) return;
 
-  let canListAvailableUser = isAdmin(session.user_id);
+  let canListAvailableUser = await isAdmin(session.user_id);
   if (!canListAvailableUser) {
     const { canListAvaiableUserFromDB } =
       getAccountDb().first(
@@ -473,12 +473,12 @@ app.post('/access/transfer-ownership/', (req, res) => {
   res.status(200).send({ status: 'ok', data: {} });
 });
 
-app.get('/file/owner', (req, res) => {
+app.get('/file/owner', async (req, res) => {
   const fileId = req.query.fileId;
   const session = validateUser(req, res);
   if (!session || !fileId) return;
 
-  let canGetOwner = isAdmin(session.user_id);
+  let canGetOwner = await isAdmin(session.user_id);
   if (!canGetOwner) {
     const { canListAvaiableUserFromDB } =
       getAccountDb().first(
