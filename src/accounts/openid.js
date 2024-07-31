@@ -1,4 +1,4 @@
-import getAccountDb from '../account-db.js';
+import getAccountDb, { clearExpiredSessions } from '../account-db.js';
 import * as uuid from 'uuid';
 import { generators, Issuer } from 'openid-client';
 import { TOKEN_EXPIRATION_NEVER } from '../app-admin.js';
@@ -204,15 +204,4 @@ export async function loginWithOpenIdFinalize(body) {
   } catch (err) {
     return { error: 'openid-grant-failed: ' + err };
   }
-}
-
-function clearExpiredSessions() {
-  const clearThreshold = Math.floor(Date.now() / 1000) - 3600;
-
-  const deletedSessions = getAccountDb().mutate(
-    'DELETE FROM sessions WHERE expires_at <> -1 and expires < ?',
-    [clearThreshold],
-  ).changes;
-
-  console.log(`Deleted ${deletedSessions} old sessions`);
 }
