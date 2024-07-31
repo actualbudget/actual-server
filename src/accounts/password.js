@@ -1,5 +1,4 @@
 import * as bcrypt from 'bcrypt';
-import * as uuid from 'uuid';
 import getAccountDb, { clearExpiredSessions } from '../account-db.js';
 
 function hashPassword(password) {
