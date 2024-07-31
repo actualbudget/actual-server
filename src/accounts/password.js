@@ -35,7 +35,10 @@ export function loginWithPassword(password) {
   let confirmed = row && bcrypt.compareSync(password, row.extra_data);
 
   if (confirmed) {
-    let row = accountDb.first('SELECT token FROM sessions WHERE user_name = ?',['']);
+    let row = accountDb.first(
+      'SELECT token FROM sessions WHERE user_name = ?',
+      [''],
+    );
 
     clearExpiredSessions();
 
