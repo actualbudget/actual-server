@@ -198,8 +198,21 @@ export async function loginWithOpenIdFinalize(body) {
       [token, expiration, userId, 'openid'],
     );
 
+    clearExpiredSessions();
+
     return { url: `${return_url}/openid-cb?token=${token}` };
   } catch (err) {
     return { error: 'openid-grant-failed: ' + err };
   }
+}
+
+function clearExpiredSessions() {
+  const clearThreshold = Math.floor(Date.now() / 1000) - 3600;
+
+  const deletedSessions = getAccountDb().mutate(
+    'DELETE FROM sessions WHERE expires_at <> -1 and expires < ?',
+    [clearThreshold],
+  ).changes;
+
+  console.log(`Deleted ${deletedSessions} old sessions`);
 }

@@ -199,24 +199,24 @@ export function login(password) {
     userId = userIdFromDb;
   }
 
+  let expiration = TOKEN_EXPIRATION_NEVER;
+  if (
+    config.token_expiration != 'never' &&
+    config.token_expiration != 'openid-provider'
+  ) {
+    expiration = Math.floor(Date.now() / 1000) + config.token_expiration * 60;
+  }
+
   if (!sessionRow) {
     accountDb.mutate(
       'INSERT INTO sessions (token, expires_at, user_id, auth_method) VALUES (?, ?, ?, ?)',
-      [
-        token,
-        config.token_expiration == 'never' ||
-        config.token_expiration == 'openid-provider'
-          ? TOKEN_EXPIRATION_NEVER
-          : config.token_expiration,
-        userId,
-        'password',
-      ],
+      [token, expiration, userId, 'password'],
     );
   } else {
-    accountDb.mutate('UPDATE sessions SET user_id = ? WHERE token = ?', [
-      userId,
-      token,
-    ]);
+    accountDb.mutate(
+      'UPDATE sessions SET user_id = ?, expires_at = ? WHERE token = ?',
+      [userId, expiration, token],
+    );
   }
 
   return { token };
@@ -269,4 +269,15 @@ export function getUserPermissions(userId) {
     ),
   );
   return uniquePermissions;
+}
+
+export function clearExpiredSessions() {
+  const clearThreshold = Math.floor(Date.now() / 1000) - 3600;
+
+  const deletedSessions = getAccountDb().mutate(
+    'DELETE FROM sessions WHERE expires_at <> -1 and expires < ?',
+    [clearThreshold],
+  ).changes;
+
+  console.log(`Deleted ${deletedSessions} old sessions`);
 }
