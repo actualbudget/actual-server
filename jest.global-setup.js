@@ -6,6 +6,7 @@ export default async function setup() {
 
   // Insert a fake "valid-token" fixture that can be reused
   const db = getAccountDb();
+  await db.mutate('DELETE FROM sessions');
   await db.mutate('INSERT INTO sessions (token, expires_at) VALUES (?, ?)', [
     'valid-token',
     -1,
