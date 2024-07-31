@@ -23,7 +23,12 @@ export const up = async function () {
 export const down = async function () {
   await getAccountDb().exec(
     `
+      CREATE TABLE auth_new
+        (password TEXT);
+      INSERT INTO auth_new (password)
+        SELECT extra_data FROM auth;        
       DROP TABLE auth;
+      ALTER TABLE auth_new RENAME TO auth;
       DROP TABLE pending_openid_requests;
       `,
   );

@@ -45,7 +45,7 @@ export const up = async function () {
 export const down = async function () {
   await getAccountDb().exec(
     `
-      DROP TABLE user;
+      DROP TABLE users;
       DROP TABLE roles;
       DROP TABLE user_roles;
       `,
