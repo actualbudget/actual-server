@@ -43,7 +43,15 @@ export async function bootstrapOpenId(config) {
 }
 
 async function setupOpenIdClient(config) {
-  const issuer = await Issuer.discover(config.issuer);
+  let issuer =
+    typeof config.issuer === 'string'
+      ? await Issuer.discover(config.issuer)
+      : new Issuer({
+          issuer: config.issuer.name,
+          authorization_endpoint: config.issuer.authorization_endpoint,
+          token_endpoint: config.issuer.token_endpoint,
+          userinfo_endpoint: config.issuer.userinfo_endpoint,
+        });
 
   const client = new issuer.Client({
     client_id: config.client_id,
@@ -139,8 +147,10 @@ export async function loginWithOpenIdFinalize(body) {
       redirect_uri: client.redirect_uris[0],
     });
     const userInfo = await client.userinfo(grant);
-    if (userInfo.email == null) {
-      return { error: 'openid-grant-failed: no email found for the user' };
+    const identity =
+      userInfo.login ?? userInfo.email ?? userInfo.id ?? userInfo.name;
+    if (identity == null) {
+      return { error: 'openid-grant-failed: no identification was found' };
     }
 
     let { c } = accountDb.first(
@@ -152,7 +162,7 @@ export async function loginWithOpenIdFinalize(body) {
       userId = uuid.v4();
       accountDb.mutate(
         'INSERT INTO users (id, user_name, display_name, enabled, master) VALUES (?, ?, ?, 1, 1)',
-        [userId, userInfo.email, userInfo.name ?? userInfo.email],
+        [userId, identity, userInfo.name ?? userInfo.email ?? identity],
       );
 
       accountDb.mutate(
@@ -163,7 +173,7 @@ export async function loginWithOpenIdFinalize(body) {
       let { id: userIdFromDb, display_name: displayName } =
         accountDb.first(
           'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
-          [userInfo.email],
+          [identity],
         ) || {};
 
       if (userIdFromDb == null) {

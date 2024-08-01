@@ -21,7 +21,14 @@ export interface Config {
     fileSizeLimitMB: number;
   };
   openId?: {
-    issuer: string;
+    issuer:
+      | string
+      | {
+          name: string;
+          authorization_endpoint: string;
+          token_endpoint: string;
+          userinfo_endpoint: string;
+        };
     client_id: string;
     client_secret: string;
     server_hostname: string;

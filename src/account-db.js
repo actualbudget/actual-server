@@ -135,10 +135,11 @@ export async function disableOpenID(
         'password',
       ]) || {};
 
-    if(passwordHash) {
+    if (passwordHash) {
       let confirmed =
-        passwordHash && bcrypt.compareSync(loginSettings.password, passwordHash);
-  
+        passwordHash &&
+        bcrypt.compareSync(loginSettings.password, passwordHash);
+
       if (!confirmed) {
         return { error: 'invalid-password' };
       }
@@ -151,7 +152,7 @@ export async function disableOpenID(
   }
 
   getAccountDb().mutate('DELETE FROM sessions');
-  getAccountDb().mutate('DELETE FROM users WHERE user_name <> ?',['']);
+  getAccountDb().mutate('DELETE FROM users WHERE user_name <> ?', ['']);
   getAccountDb().mutate('DELETE FROM user_roles');
   getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
 }
@@ -280,4 +281,36 @@ export function clearExpiredSessions() {
   ).changes;
 
   console.log(`Deleted ${deletedSessions} old sessions`);
+}
+
+export async function toogleAuthentication() {
+  if (config.loginMethod === 'openid') {
+    const { cnt } = getAccountDb().first(
+      'SELECT count(*) as cnt FROM auth WHERE method = ? and active = 1',
+      ['openid'],
+    );
+    if (cnt == 0) {
+      const { error } = (await enableOpenID(config, false)) || {};
+
+      if (error) {
+        console.error(error);
+        return false;
+      }
+    }
+  } else if (config.loginMethod) {
+    const { cnt } = getAccountDb().first(
+      'SELECT count(*) as cnt FROM auth WHERE method <> ? and active = 1',
+      ['openid'],
+    );
+    if (cnt == 0) {
+      const { error } = (await disableOpenID(config, false)) || {};
+
+      if (error) {
+        console.error(error);
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
