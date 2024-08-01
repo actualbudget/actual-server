@@ -148,7 +148,7 @@ export async function loginWithOpenIdFinalize(body) {
     });
     const userInfo = await client.userinfo(grant);
     const identity =
-      userInfo.login ?? userInfo.email ?? userInfo.id ?? userInfo.name;
+      userInfo.login ?? userInfo.email ?? userInfo.preferred_username ?? userInfo.id ?? userInfo.name;
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
     }
