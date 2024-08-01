@@ -135,11 +135,13 @@ export async function disableOpenID(
         'password',
       ]) || {};
 
-    let confirmed =
-      passwordHash && bcrypt.compareSync(loginSettings.password, passwordHash);
-
-    if (!confirmed) {
-      return { error: 'invalid-password' };
+    if(passwordHash) {
+      let confirmed =
+        passwordHash && bcrypt.compareSync(loginSettings.password, passwordHash);
+  
+      if (!confirmed) {
+        return { error: 'invalid-password' };
+      }
     }
   }
 
