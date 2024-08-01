@@ -117,8 +117,6 @@ export async function enableOpenID(loginSettings, checkFileConfig = true) {
   }
 
   getAccountDb().mutate('DELETE FROM sessions');
-  getAccountDb().mutate('DELETE FROM users');
-  getAccountDb().mutate('DELETE FROM user_roles');
 }
 
 export async function disableOpenID(
