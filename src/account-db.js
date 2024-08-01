@@ -275,7 +275,7 @@ export function clearExpiredSessions() {
   const clearThreshold = Math.floor(Date.now() / 1000) - 3600;
 
   const deletedSessions = getAccountDb().mutate(
-    'DELETE FROM sessions WHERE expires_at <> -1 and expires < ?',
+    'DELETE FROM sessions WHERE expires_at <> -1 and expires_at < ?',
     [clearThreshold],
   ).changes;
 
