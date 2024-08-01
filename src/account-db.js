@@ -149,7 +149,7 @@ export async function disableOpenID(
   }
 
   getAccountDb().mutate('DELETE FROM sessions');
-  getAccountDb().mutate('DELETE FROM users');
+  getAccountDb().mutate('DELETE FROM users WHERE user_name <> ?',['']);
   getAccountDb().mutate('DELETE FROM user_roles');
   getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
 }
