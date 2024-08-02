@@ -1,5 +1,7 @@
 import Fallback from './integration-bank.js';
 
+import { formatPayeeName } from '../../util/payee-name.js';
+
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   ...Fallback,
@@ -39,10 +41,10 @@ export default {
           let value = (match[4] || match[5]).trim();
           if (key === 'narrative') {
             // Set narrativeName to the first element in the "narrative" array.
-            creditorNameFromNarrative = value
-              .matchAll(/'([a-zA-Z0-9\s]*)'/g)
-              ?.next()
-              .value[1].trim();
+            let first_value = value.matchAll(/'(.+?)'/g)?.next().value;
+            creditorNameFromNarrative = first_value
+              ? first_value[1].trim()
+              : undefined;
           }
           // Remove square brackets and single quotes and commas
           value = value.replace(/[[\]',]/g, '');
@@ -66,9 +68,11 @@ export default {
       }
     }
 
+    transaction.creditorName = creditorName;
+
     return {
       ...transaction,
-      creditorName: creditorName,
+      payeeName: formatPayeeName(transaction),
       date: transaction.valueDate || transaction.bookingDate,
     };
   },

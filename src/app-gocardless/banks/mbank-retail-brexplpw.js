@@ -1,6 +1,7 @@
 import Fallback from './integration-bank.js';
 
 import { printIban, amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -8,7 +9,7 @@ export default {
 
   institutionIds: ['MBANK_RETAIL_BREXPLPW'],
 
-  accessValidForDays: 180,
+  accessValidForDays: 179,
 
   normalizeAccount(account) {
     return {
@@ -25,6 +26,7 @@ export default {
   normalizeTransaction(transaction, _booked) {
     return {
       ...transaction,
+      payeeName: formatPayeeName(transaction),
       date: transaction.bookingDate || transaction.valueDate,
     };
   },
