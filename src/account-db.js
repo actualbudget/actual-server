@@ -102,7 +102,7 @@ export async function bootstrap(loginSettings) {
   return {};
 }
 
-export async function isAdmin(userId) {
+export function isAdmin(userId) {
   return getUserPermissions(userId).some((value) => value === 'ADMINISTRATOR');
 }
 

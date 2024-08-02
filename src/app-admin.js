@@ -4,9 +4,12 @@ import errorMiddleware from './util/error-middleware.js';
 import validateUser from './util/validate-user.js';
 import getAccountDb, { isAdmin } from './account-db.js';
 import config from './load-config.js';
+import bodyParser from 'body-parser';
 
 let app = express();
 app.use(errorMiddleware);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 export { app as handlers };
 
@@ -35,13 +38,13 @@ const getFileById = (fileId) => {
   );
 };
 
-const getSessionFromRequest = (req, res) => {
+export const getAdminSessionFromRequest = async (req, res) => {
   let session = validateUser(req, res);
   if (!session) {
     return null;
   }
 
-  if (!isAdmin(session.user_id)) {
+  if (!(await isAdmin(session.user_id))) {
     sendErrorResponse(res, 401, 'unauthorized', 'permission-not-found');
     return null;
   }
@@ -95,6 +98,9 @@ app.get('/masterCreated/', (req, res) => {
 });
 
 app.get('/users/', (req, res) => {
+  const session = validateUser(req, res);
+  if (!session) return;
+
   const users = getAccountDb().all(
     `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(master,0) as master, roles.id as role 
      FROM users
@@ -112,8 +118,8 @@ app.get('/users/', (req, res) => {
   );
 });
 
-app.post('/users', (req, res) => {
-  const user = getSessionFromRequest(req, res);
+app.post('/users', async (req, res) => {
+  const user = await getAdminSessionFromRequest(req, res);
   if (!user) return;
 
   const newUser = req.body;
@@ -147,8 +153,8 @@ app.post('/users', (req, res) => {
   res.status(200).send({ status: 'ok', data: { id: userId } });
 });
 
-app.patch('/users', (req, res) => {
-  const user = getSessionFromRequest(req, res);
+app.patch('/users', async (req, res) => {
+  const user = await getAdminSessionFromRequest(req, res);
   if (!user) return;
 
   const userToUpdate = req.body;
@@ -184,8 +190,8 @@ app.patch('/users', (req, res) => {
   res.status(200).send({ status: 'ok', data: { id: userIdInDb } });
 });
 
-app.post('/users/delete-all', (req, res) => {
-  const user = getSessionFromRequest(req, res);
+app.post('/users/delete-all', async (req, res) => {
+  const user = await getAdminSessionFromRequest(req, res);
   if (!user) return;
 
   const ids = req.body.ids;
@@ -221,7 +227,13 @@ app.post('/users/delete-all', (req, res) => {
 app.get('/access', (req, res) => {
   const fileId = req.query.fileId;
   const session = validateUser(req, res);
-  if (!session || !fileId) return;
+  if (!session) return;
+
+  const { id: fileIdInDb } = getFileById(fileId);
+  if (!fileIdInDb) {
+    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
+    return false;
+  }
 
   const accesses = getAccountDb().all(
     `SELECT users.id as userId, user_name as userName, files.owner, display_name as displayName
@@ -235,34 +247,40 @@ app.get('/access', (req, res) => {
   res.json(accesses);
 });
 
-app.post('/access', (req, res) => {
-  const userAccess = req.body || {};
-  const session = validateUser(req, res);
-  if (!session || !userAccess.fileId) return;
+function checkFilePermission(fileId, userId, res) {
+  const { granted } = getAccountDb().first(
+    `SELECT 1 as granted
+      FROM files
+      WHERE files.id = ? and (files.owner = ?)`,
+    [fileId, userId],
+  ) || { granted: 0 };
 
-  const { id: fileIdInDb } = getFileById(userAccess.fileId);
-  if (!fileIdInDb) {
-    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
-    return;
-  }
-
-  const { granted } =
-    getAccountDb().first(
-      `SELECT 1 as granted
-     FROM files
-     WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
-      [userAccess.fileId, session.user_id, !isAdmin(session.user_id) ? 0 : 1],
-    ) || {};
-
-  if (granted === 0) {
+  if (granted === 0 && !isAdmin(userId)) {
     sendErrorResponse(
       res,
       400,
       'file-denied',
       "You don't have permissions over this file",
     );
-    return;
+    return false;
   }
+
+  const { id: fileIdInDb } = getFileById(fileId);
+  if (!fileIdInDb) {
+    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
+    return false;
+  }
+
+  return true;
+}
+
+app.post('/access', (req, res) => {
+  const userAccess = req.body || {};
+  const session = validateUser(req, res);
+
+  if (!session) return;
+
+  if (!checkFilePermission(userAccess.fileId, session.user_id, res)) return;
 
   if (!userAccess.userId) {
     sendErrorResponse(res, 400, 'user-cant-be-empty', 'User cannot be empty');
@@ -298,29 +316,7 @@ app.post('/access/delete-all', (req, res) => {
   const session = validateUser(req, res);
   if (!session) return;
 
-  const { id: fileIdInDb } = getFileById(fileId);
-  if (!fileIdInDb) {
-    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
-    return;
-  }
-
-  const { granted } =
-    getAccountDb().first(
-      `SELECT 1 as granted
-     FROM files
-     WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
-      [fileId, session.user_id, !isAdmin(session.user_id) ? 0 : 1],
-    ) || {};
-
-  if (granted === 0) {
-    sendErrorResponse(
-      res,
-      400,
-      'file-denied',
-      "You don't have permissions over this file",
-    );
-    return;
-  }
+  if (!checkFilePermission(fileId, session.user_id, res)) return;
 
   const ids = req.body.ids;
   let totalDeleted = 0;
@@ -344,36 +340,23 @@ app.post('/access/delete-all', (req, res) => {
 app.get('/access/available-users', async (req, res) => {
   const fileId = req.query.fileId;
   const session = validateUser(req, res);
-  if (!session || !fileId) return;
+  if (!session) return;
 
-  let canListAvailableUser = await isAdmin(session.user_id);
-  if (!canListAvailableUser) {
-    const { canListAvaiableUserFromDB } =
-      getAccountDb().first(
-        `SELECT count(*) as canListAvaiableUserFromDB
-       FROM files
-       WHERE files.id = ? and files.owner = ?`,
-        [fileId, session.user_id],
-      ) || {};
-    canListAvailableUser = canListAvaiableUserFromDB === 1;
-  }
+  if (!checkFilePermission(fileId, session.user_id, res)) return;
 
-  if (canListAvailableUser) {
-    const users = getAccountDb().all(
-      `SELECT users.id as userId, user_name as userName, display_name as displayName
-       FROM users
-       WHERE NOT EXISTS (SELECT 1 
-                         FROM user_access 
-                         WHERE user_access.file_id = ? and user_access.user_id = users.id)
-       AND NOT EXISTS (SELECT 1
-                       FROM files
-                       WHERE files.id = ? AND files.owner = users.id)
-       AND users.enabled = 1 AND users.user_name <> '' AND users.id <> ?`,
-      [fileId, fileId, session.user_id],
-    );
-    res.json(users);
-  }
-  return null;
+  const users = getAccountDb().all(
+    `SELECT users.id as userId, user_name as userName, display_name as displayName
+      FROM users
+      WHERE NOT EXISTS (SELECT 1 
+                        FROM user_access 
+                        WHERE user_access.file_id = ? and user_access.user_id = users.id)
+      AND NOT EXISTS (SELECT 1
+                      FROM files
+                      WHERE files.id = ? AND files.owner = users.id)
+      AND users.enabled = 1 AND users.user_name <> '' AND users.id <> ?`,
+    [fileId, fileId, session.user_id],
+  );
+  res.json(users);
 });
 
 app.post('/access/get-bulk', (req, res) => {
@@ -402,7 +385,13 @@ app.post('/access/get-bulk', (req, res) => {
 app.get('/access/check-access', (req, res) => {
   const fileId = req.query.fileId;
   const session = validateUser(req, res);
-  if (!session || !fileId) return;
+  if (!session) return;
+
+  const { id: fileIdInDb } = getFileById(fileId);
+  if (!fileIdInDb) {
+    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
+    return false;
+  }
 
   if (isAdmin(session.user_id)) {
     res.json({ granted: true });
@@ -423,31 +412,9 @@ app.get('/access/check-access', (req, res) => {
 app.post('/access/transfer-ownership/', (req, res) => {
   const newUserOwner = req.body || {};
   const session = validateUser(req, res);
-  if (!session || !newUserOwner.fileId) return;
+  if (!session) return;
 
-  const { id: fileIdInDb } = getFileById(newUserOwner.fileId);
-  if (!fileIdInDb) {
-    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
-    return;
-  }
-
-  const { granted } =
-    getAccountDb().first(
-      `SELECT 1 as granted
-     FROM files
-     WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
-      [newUserOwner.fileId, session.user_id, !isAdmin(session.user_id) ? 0 : 1],
-    ) || {};
-
-  if (granted === 0) {
-    sendErrorResponse(
-      res,
-      400,
-      'file-denied',
-      "You don't have permissions over this file",
-    );
-    return;
-  }
+  if (!checkFilePermission(newUserOwner.fileId, session.user_id, res)) return;
 
   if (!newUserOwner.newUserId) {
     sendErrorResponse(res, 400, 'user-cant-be-empty', 'User cannot be empty');
@@ -476,7 +443,9 @@ app.post('/access/transfer-ownership/', (req, res) => {
 app.get('/file/owner', async (req, res) => {
   const fileId = req.query.fileId;
   const session = validateUser(req, res);
-  if (!session || !fileId) return;
+  if (!session) return;
+
+  if (!checkFilePermission(fileId, session.user_id, res)) return;
 
   let canGetOwner = await isAdmin(session.user_id);
   if (!canGetOwner) {
