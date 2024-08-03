@@ -1,9 +1,11 @@
-import { printIban, amountToInteger } from '../utils.js';
-
 import Fallback from './integration-bank.js';
+
+import { printIban, amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
 
   institutionIds: ['BERLINER_SPARKASSE_BELADEBEXXX'],
 
