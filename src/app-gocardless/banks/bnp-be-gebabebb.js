@@ -1,21 +1,11 @@
-import {
-  sortByBookingDateOrValueDate,
-  amountToInteger,
-  printIban,
-} from '../utils.js';
+import Fallback from './integration-bank.js';
 
-const SORTED_BALANCE_TYPE_LIST = [
-  'closingBooked',
-  'expected',
-  'forwardAvailable',
-  'interimAvailable',
-  'interimBooked',
-  'nonInvoiced',
-  'openingBooked',
-];
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: [
     'FINTRO_BE_GEBABEBB',
     'HELLO_BE_GEBABEBB',
@@ -23,20 +13,6 @@ export default {
   ],
 
   accessValidForDays: 180,
-
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.name, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: `integration-${account.institution_id}`,
-      type: 'checking',
-    };
-  },
 
   /** BNP_BE_GEBABEBB provides a lot of useful information via the 'additionalField'
    *  There does not seem to be a specification of this field, but the following information is contained in its subfields:
@@ -65,10 +41,10 @@ export default {
           let value = (match[4] || match[5]).trim();
           if (key === 'narrative') {
             // Set narrativeName to the first element in the "narrative" array.
-            creditorNameFromNarrative = value
-              .matchAll(/'([a-zA-Z0-9\s]*)'/g)
-              ?.next()
-              .value[1].trim();
+            let first_value = value.matchAll(/'(.+?)'/g)?.next().value;
+            creditorNameFromNarrative = first_value
+              ? first_value[1].trim()
+              : undefined;
           }
           // Remove square brackets and single quotes and commas
           value = value.replace(/[[\]',]/g, '');
@@ -92,27 +68,12 @@ export default {
       }
     }
 
+    transaction.creditorName = creditorName;
+
     return {
       ...transaction,
-      creditorName: creditorName,
+      payeeName: formatPayeeName(transaction),
       date: transaction.valueDate || transaction.bookingDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    const currentBalance = balances
-      .filter((item) => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
-      .sort(
-        (a, b) =>
-          SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
-          SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
-      )[0];
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
   },
 };

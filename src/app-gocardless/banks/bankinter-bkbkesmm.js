@@ -1,21 +1,12 @@
-import {
-  printIban,
-  amountToInteger,
-  sortByBookingDateOrValueDate,
-} from '../utils.js';
+import Fallback from './integration-bank.js';
 
-const SORTED_BALANCE_TYPE_LIST = [
-  'closingBooked',
-  'expected',
-  'forwardAvailable',
-  'interimAvailable',
-  'interimBooked',
-  'nonInvoiced',
-  'openingBooked',
-];
+import { printIban } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['BANKINTER_BKBKESMM'],
 
   accessValidForDays: 90,
@@ -33,32 +24,17 @@ export default {
   },
 
   normalizeTransaction(transaction, _booked) {
+    transaction.debtorName = transaction.debtorName?.replaceAll(';', ' ');
+    transaction.creditorName = transaction.creditorName?.replaceAll(';', ' ');
+    transaction.remittanceInformationUnstructured =
+      transaction.remittanceInformationUnstructured
+        .replaceAll(/\/Txt\/(\w\|)?/gi, '')
+        .replaceAll(';', ' ');
+
     return {
       ...transaction,
-      debtorName: transaction.debtorName?.replaceAll(';', ' '),
-      creditorName: transaction.creditorName?.replaceAll(';', ' '),
-      remittanceInformationUnstructured:
-        transaction.remittanceInformationUnstructured
-          .replaceAll(/\/Txt\/(\w\|)?/gi, '')
-          .replaceAll(';', ' '),
+      payeeName: formatPayeeName(transaction),
       date: transaction.bookingDate || transaction.valueDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    const currentBalance = balances
-      .filter((item) => SORTED_BALANCE_TYPE_LIST.includes(item.balanceType))
-      .sort(
-        (a, b) =>
-          SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
-          SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
-      )[0];
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance?.balanceAmount?.amount || 0));
   },
 };

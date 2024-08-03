@@ -1,6 +1,6 @@
 {
   "name": "actual-sync",
-  "version": "24.5.0",
+  "version": "24.7.0",
   "license": "MIT",
   "description": "actual syncing server",
   "type": "module",
@@ -10,14 +10,14 @@
     "build": "tsc",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest  --coverage",
     "types": "tsc --noEmit --incremental",
-    "verify": "yarn -s lint && yarn types",
+    "verify": "yarn lint && yarn types",
     "reset-password": "node src/scripts/reset-password.js",
     "health-check": "node src/scripts/health-check.js"
   },
   "dependencies": {
     "@actual-app/crdt": "2.1.0",
-    "@actual-app/web": "24.5.0",
-    "bcrypt": "^5.1.0",
+    "@actual-app/web": "24.7.0",
+    "bcrypt": "^5.1.1",
     "better-sqlite3": "^9.6.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.20.2",
-    "@types/bcrypt": "^5.0.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/better-sqlite3": "^7.6.7",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
@@ -55,5 +55,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "yarn@4.0.1"
+  "packageManager": "yarn@4.3.1"
 }

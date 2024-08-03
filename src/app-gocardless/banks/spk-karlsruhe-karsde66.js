@@ -1,11 +1,12 @@
-import {
-  printIban,
-  amountToInteger,
-  sortByBookingDateOrValueDate,
-} from '../utils.js';
+import Fallback from './integration-bank.js';
+
+import { printIban, amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['SPK_KARLSRUHE_KARSDE66XXX'],
 
   accessValidForDays: 90,
@@ -25,7 +26,7 @@ export default {
   /**
    * Following the GoCardless documentation[0] we should prefer `bookingDate`
    * here, though some of their bank integrations uses the date field
-   * differently from what's describen in their documentation and so it's
+   * differently from what's described in their documentation and so it's
    * sometimes necessary to use `valueDate` instead.
    *
    *   [0]: https://nordigen.zendesk.com/hc/en-gb/articles/7899367372829-valueDate-and-bookingDate-for-transactions
@@ -66,16 +67,15 @@ export default {
       transaction.creditorName ||
       transaction.debtorName;
 
+    transaction.creditorName = usefulCreditorName;
+    transaction.remittanceInformationUnstructured =
+      remittanceInformationUnstructured;
+
     return {
       ...transaction,
-      creditorName: usefulCreditorName,
-      remittanceInformationUnstructured: remittanceInformationUnstructured,
+      payeeName: formatPayeeName(transaction),
       date: transaction.bookingDate || transaction.valueDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   /**

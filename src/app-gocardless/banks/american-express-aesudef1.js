@@ -1,7 +1,12 @@
-import { amountToInteger, sortByBookingDateOrValueDate } from '../utils.js';
+import Fallback from './integration-bank.js';
+
+import { amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['AMERICAN_EXPRESS_AESUDEF1'],
 
   accessValidForDays: 180,
@@ -25,12 +30,9 @@ export default {
   normalizeTransaction(transaction, _booked) {
     return {
       ...transaction,
+      payeeName: formatPayeeName(transaction),
       date: transaction.bookingDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   /**

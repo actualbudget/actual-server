@@ -6,17 +6,17 @@ import { formatPayeeName } from '../../util/payee-name.js';
 export default {
   ...Fallback,
 
-  institutionIds: ['BELFIUS_GKCCBEBB'],
+  institutionIds: ['ABANCA_CAGLESMM'],
 
   accessValidForDays: 180,
 
-  // The problem is that we have transaction with duplicated transaction ids.
-  // This is not expected and the nordigen api has a work-around for some backs
-  // They will set an internalTransactionId which is unique
+  // Abanca transactions doesn't get the creditorName/debtorName properly
   normalizeTransaction(transaction, _booked) {
+    transaction.creditorName = transaction.remittanceInformationStructured;
+    transaction.debtorName = transaction.remittanceInformationStructured;
+
     return {
       ...transaction,
-      transactionId: transaction.internalTransactionId,
       payeeName: formatPayeeName(transaction),
       date: transaction.bookingDate || transaction.valueDate,
     };
