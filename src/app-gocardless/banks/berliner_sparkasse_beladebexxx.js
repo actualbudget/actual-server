@@ -4,6 +4,8 @@ import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['BERLINER_SPARKASSE_BELADEBEXXX'],
 
   accessValidForDays: 90,
