@@ -60,7 +60,7 @@ app.post(
         },
       });
     } catch (e) {
-      serverDown(res);
+      serverDown(e, res);
       return;
     }
   }),
@@ -82,7 +82,7 @@ app.post(
     try {
       results = await getTransactions(accessKey, new Date(startDate));
     } catch (e) {
-      serverDown(res);
+      serverDown(e, res);
       return;
     }
 
@@ -205,7 +205,8 @@ function invalidToken(res) {
   });
 }
 
-function serverDown(res) {
+function serverDown(e, res) {
+  console.log(e);
   res.send({
     status: 'ok',
     data: {
