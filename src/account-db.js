@@ -135,7 +135,7 @@ export async function disableOpenID(
         'password',
       ]) || {};
 
-    if(!loginSettings?.password) {
+    if (!loginSettings?.password) {
       return { error: 'invalid-password' };
     }
 
