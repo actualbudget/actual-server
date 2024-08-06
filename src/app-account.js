@@ -18,8 +18,11 @@ import {
   loginWithOpenIdFinalize,
 } from './accounts/openid.js';
 import { getAdminSessionFromRequest } from './app-admin.js';
+import bodyParser from 'body-parser';
 
 let app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(errorMiddleware);
 
 export { app as handlers };
@@ -102,7 +105,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/enable-openid', async (req, res) => {
-  const session = await getAdminSessionFromRequest();
+  const session = await getAdminSessionFromRequest(req, res);
   if (!session) return;
 
   let { error } = (await enableOpenID(req.body)) || {};
@@ -116,7 +119,7 @@ app.post('/enable-openid', async (req, res) => {
 });
 
 app.post('/enable-password', async (req, res) => {
-  const session = await getAdminSessionFromRequest();
+  const session = await getAdminSessionFromRequest(req, res);
   if (!session) return;
 
   let { error } = (await disableOpenID(req.body, true, true)) || {};

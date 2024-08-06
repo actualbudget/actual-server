@@ -6,7 +6,7 @@ function hashPassword(password) {
 }
 
 export function bootstrapPassword(password) {
-  if (password === null || password === '') {
+  if (!password || password === null || password === '') {
     return { error: 'invalid-password' };
   }
 

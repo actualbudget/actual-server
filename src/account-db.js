@@ -135,6 +135,10 @@ export async function disableOpenID(
         'password',
       ]) || {};
 
+    if(!loginSettings?.password) {
+      return { error: 'invalid-password' };
+    }
+
     if (passwordHash) {
       let confirmed =
         passwordHash &&
