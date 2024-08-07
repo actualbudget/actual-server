@@ -87,18 +87,23 @@ app.post(
     }
 
     try {
-      const account = !results?.accounts || results.accounts.find((a) => a.id === accountId);
+      const account =
+        !results?.accounts || results.accounts.find((a) => a.id === accountId);
       if (!account) {
-        console.log(`The account "${accountId}" was not found. Here were the accounts returned:`);
-        if (results?.accounts) results.accounts.forEach((a) => console.log(`${a.id} - ${a.org.name}`));
+        console.log(
+          `The account "${accountId}" was not found. Here were the accounts returned:`,
+        );
+        if (results?.accounts)
+          results.accounts.forEach((a) =>
+            console.log(`${a.id} - ${a.org.name}`),
+          );
         res.send({
           status: 'ok',
           data: {
             error_type: 'ACCOUNT_MISSING',
             error_code: 'ACCOUNT_MISSING',
             status: 'rejected',
-            reason:
-              `The account "${accountId}" was not found. Try unlinking and relinking the account.`,
+            reason: `The account "${accountId}" was not found. Try unlinking and relinking the account.`,
           },
         });
         return;
