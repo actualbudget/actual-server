@@ -87,7 +87,7 @@ app.post(
     }
 
     try {
-      const account = !results?.accounts || results.accounts.find((a) => a.id === 'f' + accountId);
+      const account = !results?.accounts || results.accounts.find((a) => a.id === accountId);
       if (!account) {
         console.log(`The account "${accountId}" was not found. Here were the accounts returned:`);
         if (results?.accounts) results.accounts.forEach((a) => console.log(`${a.id} - ${a.org.name}`));
