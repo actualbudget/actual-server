@@ -4,7 +4,9 @@ import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
+import EasybankBawaatww from './banks/easybank-bawaatww.js';
 import Fortuneo from './banks/FORTUNEO_FTNOFRP1XXX.js';
+import IngIngbrobu from './banks/ing-ingbrobu.js';
 import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
@@ -18,6 +20,7 @@ import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
+import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 
 export const banks = [
   AbancaCaglesmm,
@@ -26,7 +29,9 @@ export const banks = [
   Belfius,
   BnpBeGebabebb,
   DanskeBankDabNO22,
+  EasybankBawaatww,
   Fortuneo,
+  IngIngbrobu,
   IngIngddeff,
   IngPlIngbplpw,
   MbankRetailBrexplpw,
@@ -39,6 +44,7 @@ export const banks = [
   SpkMarburgBiedenkopfHeladef1mar,
   SpkKarlsruhekarsde66,
   VirginNrnbgb22,
+  Berliner_Sparkasse_beladebexxx,
 ];
 
 export default (institutionId) =>

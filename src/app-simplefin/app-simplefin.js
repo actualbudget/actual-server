@@ -2,7 +2,6 @@ import express from 'express';
 import { inspect } from 'util';
 import https from 'https';
 import { SecretName, secretsService } from '../services/secrets-service.js';
-import { formatPayeeName } from '../util/payee-name.js';
 import { handleError } from '../app-gocardless/util/handle-error.js';
 
 const app = express();
@@ -51,14 +50,19 @@ app.post(
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    const accounts = await getAccounts(accessKey, startDate, endDate);
+    try {
+      const accounts = await getAccounts(accessKey, startDate, endDate);
 
-    res.send({
-      status: 'ok',
-      data: {
-        accounts: accounts.accounts,
-      },
-    });
+      res.send({
+        status: 'ok',
+        data: {
+          accounts: accounts.accounts,
+        },
+      });
+    } catch (e) {
+      serverDown(e, res);
+      return;
+    }
   }),
 );
 
@@ -83,15 +87,21 @@ app.post(
       throw new Error('accountId and startDate must be the same length');
     }
 
+    const earliestStartDate = Array.isArray(startDate)
+      ? startDate.reduce((a, b) => (a < b ? a : b))
+      : startDate;
+    let results;
     try {
-      const earliestStartDate = Array.isArray(startDate)
-        ? startDate.reduce((a, b) => (a < b ? a : b))
-        : startDate;
-      const results = await getTransactions(
+      results = await getTransactions(
         accessKey,
         new Date(earliestStartDate),
       );
+    } catch (e) {
+      serverDown(e, res);
+      return;
+    }
 
+    try {
       let response = {};
       if (Array.isArray(accountId)) {
         for (let i = 0; i < accountId.length; i++) {
@@ -188,8 +198,7 @@ function getAccountResponse(results, accountId, startDate) {
     }
 
     newTrans.date = newTrans.bookingDate;
-    newTrans.debtorName = trans.payee;
-    newTrans.payeeName = formatPayeeName(trans);
+    newTrans.payeeName = trans.payee;
     newTrans.remittanceInformationUnstructured = trans.description;
     newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
     newTrans.transactionId = trans.id;
@@ -215,6 +224,19 @@ function invalidToken(res) {
       status: 'rejected',
       reason:
         'Invalid SimpleFIN access token.  Reset the token and re-link any broken accounts.',
+    },
+  });
+}
+
+function serverDown(e, res) {
+  console.log(e);
+  res.send({
+    status: 'ok',
+    data: {
+      error_type: 'SERVER_DOWN',
+      error_code: 'SERVER_DOWN',
+      status: 'rejected',
+      reason: 'There was an error communciating with SimpleFIN.',
     },
   });
 }
@@ -306,7 +328,12 @@ async function getAccounts(accessKey, startDate, endDate) {
           data += d;
         });
         res.on('end', () => {
-          resolve(JSON.parse(data));
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            console.log(`Error parsing JSON response: ${data}`);
+            reject(e);
+          }
         });
       },
     );
