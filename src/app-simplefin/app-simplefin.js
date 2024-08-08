@@ -103,6 +103,7 @@ app.post(
               'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
           },
         });
+        return;
       }
 
       const response = {};
