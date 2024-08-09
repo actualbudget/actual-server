@@ -27,6 +27,32 @@ function parseJSON(path, allowMissing = false) {
   return JSON.parse(text);
 }
 
+/**
+ * @param {string | undefined} envVar
+ * @param {string[] | number | boolean} defaultValue
+ * @returns {string[] | number | boolean}
+ */
+function parseTrustedProxiesEnvVar(envVar, defaultValue) {
+  if (!envVar) {
+    return defaultValue;
+  }
+
+  if (envVar.toLowerCase() === 'true' || envVar.toLowerCase() === 'false') {
+    return envVar.toLowerCase() === 'true';
+  }
+
+  if (typeof envVar === 'string' && !Number.isNaN(Number(envVar))) {
+    return Number(envVar);
+  }
+
+  if (envVar.includes(',')) {
+    return envVar.split(',').map((item) => item.trim());
+  }
+
+  console.warn(`Failed to parse Trusted Proxies value: ${envVar}`);
+  return defaultValue;
+}
+
 let userConfig;
 if (process.env.ACTUAL_CONFIG_PATH) {
   debug(
@@ -50,13 +76,7 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 let defaultConfig = {
   loginMethod: 'password',
   // assume local networks are trusted for header authentication
-  trustedProxies: [
-    '10.0.0.0/8',
-    '172.16.0.0/12',
-    '192.168.0.0/16',
-    'fc00::/7',
-    '::1/128',
-  ],
+  trustedProxies: ['uniquelocal', 'loopback'],
   port: 5006,
   hostname: '::',
   webRoot: path.join(
@@ -100,9 +120,10 @@ const finalConfig = {
   loginMethod: process.env.ACTUAL_LOGIN_METHOD
     ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
     : config.loginMethod,
-  trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
-    ? process.env.ACTUAL_TRUSTED_PROXIES.split(',').map((q) => q.trim())
-    : config.trustedProxies,
+  trustedProxies: parseTrustedProxiesEnvVar(
+    process.env.ACTUAL_TRUSTED_PROXIES,
+    config.trustedProxies,
+  ),
   port: +process.env.ACTUAL_PORT || +process.env.PORT || config.port,
   hostname: process.env.ACTUAL_HOSTNAME || config.hostname,
   serverFiles: process.env.ACTUAL_SERVER_FILES || config.serverFiles,
@@ -143,7 +164,13 @@ debug(`using server files directory ${finalConfig.serverFiles}`);
 debug(`using user files directory ${finalConfig.userFiles}`);
 debug(`using web root directory ${finalConfig.webRoot}`);
 debug(`using login method ${finalConfig.loginMethod}`);
-debug(`using trusted proxies ${finalConfig.trustedProxies.join(', ')}`);
+debug(
+  `using trusted proxies ${
+    Array.isArray(finalConfig.trustedProxies)
+      ? finalConfig.trustedProxies.join(', ')
+      : finalConfig.trustedProxies
+  }`,
+);
 
 if (finalConfig.https) {
   debug(`using https key: ${'*'.repeat(finalConfig.https.key.length)}`);
