@@ -11,6 +11,9 @@ import * as syncApp from './app-sync.js';
 import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as secretApp from './app-secrets.js';
+import * as adminApp from './app-admin.js';
+import { toogleAuthentication } from './account-db.js';
+import { exit } from 'node:process';
 
 const app = express();
 
@@ -48,6 +51,8 @@ app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/secret', secretApp.handlers);
 
+app.use('/admin', adminApp.handlers);
+
 app.get('/mode', (req, res) => {
   res.send(config.mode);
 });
@@ -83,5 +88,8 @@ export default async function run() {
   } else {
     app.listen(config.port, config.hostname);
   }
+
+  if (!(await toogleAuthentication())) exit(-1);
+
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
 }

@@ -4,12 +4,12 @@ import express from 'express';
 import * as uuid from 'uuid';
 import validateUser from './util/validate-user.js';
 import errorMiddleware from './util/error-middleware.js';
-import getAccountDb from './account-db.js';
 import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
 import * as simpleSync from './sync-simple.js';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
+import getAccountDb, { getUserPermissions } from './account-db.js';
 
 const app = express();
 app.use(errorMiddleware);
@@ -263,8 +263,8 @@ app.post('/upload-user-file', async (req, res) => {
     // it's new
     groupId = uuid.v4();
     accountDb.mutate(
-      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta) VALUES (?, ?, ?, ?, ?)',
-      [fileId, groupId, syncFormatVersion, name, encryptMeta],
+      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, owner) VALUES (?, ?, ?, ?, ?, ?)',
+      [fileId, groupId, syncFormatVersion, name, encryptMeta, user.user_id],
     );
     res.send(JSON.stringify({ status: 'ok', groupId }));
   } else {
@@ -337,13 +337,31 @@ app.post('/update-user-filename', (req, res) => {
 });
 
 app.get('/list-user-files', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
+  let session = validateUser(req, res);
+  if (!session) {
     return;
   }
 
+  const canSeeAll =
+    getUserPermissions(session.user_id).findIndex(
+      (permission) => permission === 'ADMINISTRATOR',
+    ) > -1;
+
   let accountDb = getAccountDb();
-  let rows = accountDb.all('SELECT * FROM files');
+  let rows = canSeeAll
+    ? accountDb.all('SELECT * FROM files')
+    : accountDb.all(
+        `SELECT files.* 
+          FROM files
+          WHERE files.owner = ?
+        UNION
+         SELECT files.*
+          FROM files
+          JOIN user_access
+            ON user_access.file_id = files.id
+            AND user_access.user_id = ?`,
+        [session.user_id, session.user_id],
+      );
 
   res.send(
     JSON.stringify({
@@ -354,6 +372,7 @@ app.get('/list-user-files', (req, res) => {
         groupId: row.group_id,
         name: row.name,
         encryptKeyId: row.encrypt_keyid,
+        owner: row.owner,
       })),
     }),
   );

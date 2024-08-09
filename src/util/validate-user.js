@@ -1,7 +1,8 @@
-import { getSession } from '../account-db.js';
 import config from '../load-config.js';
 import proxyaddr from 'proxy-addr';
 import ipaddr from 'ipaddr.js';
+import { getSession } from '../account-db.js';
+import { TOKEN_EXPIRATION_NEVER } from '../app-admin.js';
 
 /**
  * @param {import('express').Request} req
@@ -22,6 +23,19 @@ export default function validateUser(req, res) {
       status: 'error',
       reason: 'unauthorized',
       details: 'token-not-found',
+    });
+    return null;
+  }
+
+  if (
+    session.expires_at !== TOKEN_EXPIRATION_NEVER &&
+    session.expires_at * 1000 <= Date.now()
+  ) {
+    res.status(403);
+    res.send({
+      status: 'error',
+      reason: 'token-expired',
+      details: 'Token Expired. Login again',
     });
     return null;
   }
