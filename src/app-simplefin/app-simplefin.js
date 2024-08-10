@@ -50,14 +50,19 @@ app.post(
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    const accounts = await getAccounts(accessKey, startDate, endDate);
+    try {
+      const accounts = await getAccounts(accessKey, startDate, endDate);
 
-    res.send({
-      status: 'ok',
-      data: {
-        accounts: accounts.accounts,
-      },
-    });
+      res.send({
+        status: 'ok',
+        data: {
+          accounts: accounts.accounts,
+        },
+      });
+    } catch (e) {
+      serverDown(e, res);
+      return;
+    }
   }),
 );
 
@@ -73,10 +78,36 @@ app.post(
       return;
     }
 
+    let results;
     try {
-      const results = await getTransactions(accessKey, new Date(startDate));
+      results = await getTransactions(accessKey, new Date(startDate));
+    } catch (e) {
+      serverDown(e, res);
+      return;
+    }
 
-      const account = results.accounts.find((a) => a.id === accountId);
+    try {
+      const account =
+        !results?.accounts || results.accounts.find((a) => a.id === accountId);
+      if (!account) {
+        console.log(
+          `The account "${accountId}" was not found. Here were the accounts returned:`,
+        );
+        if (results?.accounts)
+          results.accounts.forEach((a) =>
+            console.log(`${a.id} - ${a.org.name}`),
+          );
+        res.send({
+          status: 'ok',
+          data: {
+            error_type: 'ACCOUNT_MISSING',
+            error_code: 'ACCOUNT_MISSING',
+            status: 'rejected',
+            reason: `The account "${accountId}" was not found. Try unlinking and relinking the account.`,
+          },
+        });
+        return;
+      }
 
       const needsAttention = results.errors.find(
         (e) => e === `Connection to ${account.org.name} may need attention`,
@@ -194,6 +225,19 @@ function invalidToken(res) {
   });
 }
 
+function serverDown(e, res) {
+  console.log(e);
+  res.send({
+    status: 'ok',
+    data: {
+      error_type: 'SERVER_DOWN',
+      error_code: 'SERVER_DOWN',
+      status: 'rejected',
+      reason: 'There was an error communciating with SimpleFIN.',
+    },
+  });
+}
+
 function parseAccessKey(accessKey) {
   let scheme = null;
   let rest = null;
@@ -281,7 +325,12 @@ async function getAccounts(accessKey, startDate, endDate) {
           data += d;
         });
         res.on('end', () => {
-          resolve(JSON.parse(data));
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            console.log(`Error parsing JSON response: ${data}`);
+            reject(e);
+          }
         });
       },
     );
