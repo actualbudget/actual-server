@@ -92,10 +92,7 @@ app.post(
       : startDate;
     let results;
     try {
-      results = await getTransactions(
-        accessKey,
-        new Date(earliestStartDate),
-      );
+      results = await getTransactions(accessKey, new Date(earliestStartDate));
     } catch (e) {
       serverDown(e, res);
       return;
@@ -121,10 +118,11 @@ app.post(
           (e) => e === `Connection to ${account.org.name} may need attention`,
         );
         if (needsAttention) {
-          logAccountError(results, account.id,{
+          logAccountError(results, account.id, {
             error_type: 'ACCOUNT_NEEDS_ATTENTION',
             error_code: 'ACCOUNT_NEEDS_ATTENTION',
-            reason: 'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
+            reason:
+              'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
           });
         }
       });
@@ -141,7 +139,7 @@ app.post(
             data: {
               ...response,
               errors: results.errors,
-            }
+            },
           });
         }
         return;
@@ -171,15 +169,14 @@ function logAccountError(results, accountId, data) {
 }
 
 function getAccountResponse(results, accountId, startDate) {
-  const account = !results?.accounts || results.accounts.find((a) => a.id === accountId);
+  const account =
+    !results?.accounts || results.accounts.find((a) => a.id === accountId);
   if (!account) {
     console.log(
       `The account "${accountId}" was not found. Here were the accounts returned:`,
     );
     if (results?.accounts)
-      results.accounts.forEach((a) =>
-        console.log(`${a.id} - ${a.org.name}`),
-      );
+      results.accounts.forEach((a) => console.log(`${a.id} - ${a.org.name}`));
     logAccountError(results, accountId, {
       error_type: 'ACCOUNT_MISSING',
       error_code: 'ACCOUNT_MISSING',
