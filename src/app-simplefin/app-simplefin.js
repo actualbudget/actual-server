@@ -121,18 +121,31 @@ app.post(
           (e) => e === `Connection to ${account.org.name} may need attention`,
         );
         if (needsAttention) {
-          res.send({
-            status: 'ok',
-            data: {
-              error_type: 'ACCOUNT_NEEDS_ATTENTION',
-              error_code: 'ACCOUNT_NEEDS_ATTENTION',
-              status: 'rejected',
-              reason:
-                'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
-            },
+          logAccountError(results, account.id,{
+            error_type: 'ACCOUNT_NEEDS_ATTENTION',
+            error_code: 'ACCOUNT_NEEDS_ATTENTION',
+            reason: 'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
           });
         }
       });
+
+      if (results.hasError) {
+        if (!Array.isArray(accountId)) {
+          res.send({
+            status: 'ok',
+            data: results.errors[accountId][0],
+          });
+        } else {
+          res.send({
+            status: 'ok',
+            data: {
+              ...response,
+              errors: results.errors,
+            }
+          });
+        }
+        return;
+      }
 
       res.send({
         status: 'ok',
@@ -150,8 +163,30 @@ app.post(
   }),
 );
 
+function logAccountError(results, accountId, data) {
+  const errors = results.errors[accountId] || [];
+  errors.push(data);
+  results.errors[accountId] = errors;
+  results.hasError = true;
+}
+
 function getAccountResponse(results, accountId, startDate) {
-  const account = results.accounts.find((a) => a.id === accountId);
+  const account = !results?.accounts || results.accounts.find((a) => a.id === accountId);
+  if (!account) {
+    console.log(
+      `The account "${accountId}" was not found. Here were the accounts returned:`,
+    );
+    if (results?.accounts)
+      results.accounts.forEach((a) =>
+        console.log(`${a.id} - ${a.org.name}`),
+      );
+    logAccountError(results, accountId, {
+      error_type: 'ACCOUNT_MISSING',
+      error_code: 'ACCOUNT_MISSING',
+      reason: `The account "${accountId}" was not found. Try unlinking and relinking the account.`,
+    });
+    return;
+  }
 
   const startingBalance = parseInt(account.balance.replace('.', ''));
   const date = getDate(new Date(account['balance-date'] * 1000));
@@ -329,7 +364,10 @@ async function getAccounts(accessKey, startDate, endDate) {
         });
         res.on('end', () => {
           try {
-            resolve(JSON.parse(data));
+            const results = JSON.parse(data);
+            results.hasError = false;
+            results.errors = {};
+            resolve(results);
           } catch (e) {
             console.log(`Error parsing JSON response: ${data}`);
             reject(e);
