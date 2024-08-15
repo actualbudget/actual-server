@@ -19,7 +19,6 @@ export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
 
-
 // This is a version representing the internal format of sync
 // messages. When this changes, all sync files need to be reset. We
 // will check this version when syncing and notify the user if they
@@ -397,6 +396,10 @@ app.get('/get-user-file-info', (req, res) => {
 });
 
 app.post('/delete-user-file', (req, res) => {
+  let user = validateUser(req, res);
+  if (!user) {
+    return;
+  }
   let accountDb = getAccountDb();
   let { fileId } = req.body;
 
@@ -413,7 +416,6 @@ app.post('/delete-user-file', (req, res) => {
   if (rows.length === 0) {
     return res.status(400).send('file-not-found');
   }
-
 
   accountDb.mutate('UPDATE files SET deleted = TRUE WHERE id = ?', [fileId]);
   res.send(OK_RESPONSE);
