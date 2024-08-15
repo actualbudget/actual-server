@@ -14,6 +14,7 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 const app = express();
 app.use(errorMiddleware);
 app.use(express.json());
+app.use(express.raw({ type: 'application/actual-sync' }));
 
 export { app as handlers };
 
