@@ -206,33 +206,22 @@ export const goCardlessService = {
       throw new AccountNotLinedToRequisition(accountId, requisitionId);
     }
 
-    const [transactions, accountBalance] = await Promise.all([
-      goCardlessService.getTransactions({
-        institutionId: institution_id,
+    const [normalizedTransactions, accountBalance] = await Promise.all([
+      goCardlessService.getNormalizedTransactions(
+        requisitionId,
         accountId,
         startDate,
         endDate,
-      }),
+      ),
       goCardlessService.getBalances(accountId),
     ]);
 
+    const transactions = normalizedTransactions.transactions;
+
     const bank = BankFactory(institution_id);
-    const sortedBookedTransactions = bank.sortTransactions(
-      transactions.transactions?.booked,
-    );
-    const sortedPendingTransactions = bank.sortTransactions(
-      transactions.transactions?.pending,
-    );
-    const allTransactions = sortedBookedTransactions.map((t) => {
-      return { ...t, booked: true };
-    });
-    sortedPendingTransactions.forEach((t) =>
-      allTransactions.push({ ...t, booked: false }),
-    );
-    const sortedAllTransactions = bank.sortTransactions(allTransactions);
 
     const startingBalance = bank.calculateStartingBalance(
-      sortedBookedTransactions,
+      transactions.booked,
       accountBalance.balances,
     );
 
@@ -240,11 +229,7 @@ export const goCardlessService = {
       balances: accountBalance.balances,
       institutionId: institution_id,
       startingBalance,
-      transactions: {
-        booked: sortedBookedTransactions,
-        pending: sortedPendingTransactions,
-        all: sortedAllTransactions,
-      },
+      transactions,
     };
   },
 
