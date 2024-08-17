@@ -250,6 +250,69 @@ export const goCardlessService = {
 
   /**
    *
+   * @param requisitionId
+   * @param accountId
+   * @param startDate
+   * @param endDate
+   * @throws {AccountNotLinedToRequisition} Will throw an error if requisition not includes provided account id
+   * @throws {RequisitionNotLinked} Will throw an error if requisition is not in Linked
+   * @throws {InvalidInputDataError}
+   * @throws {InvalidGoCardlessTokenError}
+   * @throws {AccessDeniedError}
+   * @throws {NotFoundError}
+   * @throws {ResourceSuspended}
+   * @throws {RateLimitError}
+   * @throws {UnknownError}
+   * @throws {ServiceError}
+   * @returns {Promise<{institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}}>}
+   */
+  getNormalizedTransactions: async (
+    requisitionId,
+    accountId,
+    startDate,
+    endDate,
+  ) => {
+    const { institution_id, accounts: accountIds } =
+      await goCardlessService.getLinkedRequisition(requisitionId);
+
+    if (!accountIds.includes(accountId)) {
+      throw new AccountNotLinedToRequisition(accountId, requisitionId);
+    }
+
+    const transactions = await goCardlessService.getTransactions({
+      institutionId: institution_id,
+      accountId,
+      startDate,
+      endDate,
+    });
+
+    const bank = BankFactory(institution_id);
+    const sortedBookedTransactions = bank.sortTransactions(
+      transactions.transactions?.booked,
+    );
+    const sortedPendingTransactions = bank.sortTransactions(
+      transactions.transactions?.pending,
+    );
+    const allTransactions = sortedBookedTransactions.map((t) => {
+      return { ...t, booked: true };
+    });
+    sortedPendingTransactions.forEach((t) =>
+      allTransactions.push({ ...t, booked: false }),
+    );
+    const sortedAllTransactions = bank.sortTransactions(allTransactions);
+
+    return {
+      institutionId: institution_id,
+      transactions: {
+        booked: sortedBookedTransactions,
+        pending: sortedPendingTransactions,
+        all: sortedAllTransactions,
+      },
+    };
+  },
+
+  /**
+   *
    * @param {import('../gocardless.types.js').CreateRequisitionParams} params
    * @throws {InvalidInputDataError}
    * @throws {InvalidGoCardlessTokenError}
