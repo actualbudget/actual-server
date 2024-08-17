@@ -5,7 +5,7 @@ function formatPayeeIban(iban) {
 }
 
 export const formatPayeeName = (trans) => {
-  const amount = trans.amount || trans.transactionAmount.amount;
+  const amount = trans.transactionAmount.amount;
   const nameParts = [];
 
   // get the correct name and account fields for the transaction amount
