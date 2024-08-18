@@ -21,6 +21,7 @@ export const formatPayeeName = (trans) => {
   // use the correct name field if it was found
   // if not, use whatever we can find
 
+  // if the primary name option is set, prevent the account from falling back
   account = name ? account : trans.debtorAccount || trans.creditorAccount;
 
   name =
