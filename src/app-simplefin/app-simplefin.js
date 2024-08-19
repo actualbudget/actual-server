@@ -1,14 +1,16 @@
 import express from 'express';
 import { inspect } from 'util';
-import https from 'https';
 import { SecretName, secretsService } from '../services/secrets-service.js';
 import { handleError } from '../app-gocardless/util/handle-error.js';
 import { requestLoggerMiddleware } from '../util/middlewares.js';
+import SimplefinAPIHandler from './services/simplefin-api-handler.js';
 
 const app = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
+
+const simplefinAPI = new SimplefinAPIHandler(secretsService);
 
 app.post(
   '/status',
@@ -36,7 +38,7 @@ app.post(
         if (token == null || token === 'Forbidden') {
           throw new Error('No token');
         } else {
-          accessKey = await getAccessKey(token);
+          accessKey = await simplefinAPI.getAccessKey(token);
           secretsService.set(SecretName.simplefin_accessKey, accessKey);
           if (accessKey == null || accessKey === 'Forbidden') {
             throw new Error('No access key');
@@ -53,7 +55,7 @@ app.post(
     const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     try {
-      const accounts = await getAccounts(accessKey, startDate, endDate);
+      const accounts = await simplefinAPI.getAccounts(accessKey, startDate, endDate);
 
       res.send({
         status: 'ok',
@@ -82,7 +84,7 @@ app.post(
 
     let results;
     try {
-      results = await getTransactions(accessKey, new Date(startDate));
+      results = await simplefinAPI.getTransactions(accessKey, new Date(startDate));
     } catch (e) {
       serverDown(e, res);
       return;
@@ -238,108 +240,5 @@ function serverDown(e, res) {
       status: 'rejected',
       reason: 'There was an error communciating with SimpleFIN.',
     },
-  });
-}
-
-function parseAccessKey(accessKey) {
-  let scheme = null;
-  let rest = null;
-  let auth = null;
-  let username = null;
-  let password = null;
-  let baseUrl = null;
-  [scheme, rest] = accessKey.split('//');
-  [auth, rest] = rest.split('@');
-  [username, password] = auth.split(':');
-  baseUrl = `${scheme}//${rest}`;
-  return {
-    baseUrl: baseUrl,
-    username: username,
-    password: password,
-  };
-}
-
-async function getAccessKey(base64Token) {
-  const token = Buffer.from(base64Token, 'base64').toString();
-  const options = {
-    method: 'POST',
-    port: 443,
-    headers: { 'Content-Length': 0 },
-  };
-  return new Promise((resolve, reject) => {
-    const req = https.request(new URL(token), options, (res) => {
-      res.on('data', (d) => {
-        resolve(d.toString());
-      });
-    });
-    req.on('error', (e) => {
-      reject(e);
-    });
-    req.end();
-  });
-}
-
-async function getTransactions(accessKey, startDate, endDate) {
-  const now = new Date();
-  startDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
-  endDate = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  console.log(
-    `${startDate.toISOString().split('T')[0]} - ${
-      endDate.toISOString().split('T')[0]
-    }`,
-  );
-  return await getAccounts(accessKey, startDate, endDate);
-}
-
-function normalizeDate(date) {
-  return (date.valueOf() - date.getTimezoneOffset() * 60 * 1000) / 1000;
-}
-
-async function getAccounts(accessKey, startDate, endDate) {
-  const sfin = parseAccessKey(accessKey);
-  const options = {
-    headers: {
-      Authorization: `Basic ${Buffer.from(
-        `${sfin.username}:${sfin.password}`,
-      ).toString('base64')}`,
-    },
-  };
-  const params = [];
-  let queryString = '';
-  if (startDate) {
-    params.push(`start-date=${normalizeDate(startDate)}`);
-  }
-  if (endDate) {
-    params.push(`end-date=${normalizeDate(endDate)}`);
-  }
-
-  params.push(`pending=1`);
-
-  if (params.length > 0) {
-    queryString += '?' + params.join('&');
-  }
-  return new Promise((resolve, reject) => {
-    const req = https.request(
-      new URL(`${sfin.baseUrl}/accounts${queryString}`),
-      options,
-      (res) => {
-        let data = '';
-        res.on('data', (d) => {
-          data += d;
-        });
-        res.on('end', () => {
-          try {
-            resolve(JSON.parse(data));
-          } catch (e) {
-            console.log(`Error parsing JSON response: ${data}`);
-            reject(e);
-          }
-        });
-      },
-    );
-    req.on('error', (e) => {
-      reject(e);
-    });
-    req.end();
   });
 }

@@ -9,7 +9,8 @@
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "build": "tsc",
-    "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest  --coverage",
+    "test": "NODE_ENV=test NODE_NO_WARNINGS=1 NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest",
+    "test:coverage": "NODE_ENV=test NODE_NO_WARNINGS=1 NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest  --coverage",
     "db:migrate": "NODE_ENV=development node src/run-migrations.js up",
     "db:downgrade": "NODE_ENV=development node src/run-migrations.js down",
     "db:test-migrate": "NODE_ENV=test node src/run-migrations.js up",
@@ -40,6 +41,7 @@
     "winston": "^3.14.2"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.25.3",
     "@babel/preset-typescript": "^7.20.2",
     "@types/bcrypt": "^5.0.2",
     "@types/better-sqlite3": "^7.6.7",
