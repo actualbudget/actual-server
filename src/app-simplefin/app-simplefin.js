@@ -103,58 +103,48 @@ app.post(
     }
     console.log('results:', results);
 
-    try {
-      let response = {};
-      if (Array.isArray(accountId)) {
-        for (let i = 0; i < accountId.length; i++) {
-          const id = accountId[i];
-          response[id] = getAccountResponse(
-            results,
-            id,
-            new Date(startDate[i]),
-          );
-        }
-      } else {
-        response = getAccountResponse(results, accountId, new Date(startDate));
+    let response = {};
+    if (Array.isArray(accountId)) {
+      for (let i = 0; i < accountId.length; i++) {
+        const id = accountId[i];
+        response[id] = getAccountResponse(
+          results,
+          id,
+          new Date(startDate[i]),
+        );
       }
+    } else {
+      response = getAccountResponse(results, accountId, new Date(startDate));
+    }
 
-      results.accounts.forEach((account) => {
-        if (account.id in results.errors) {
-          logAccountError(results, account.id, {
-            error_type: 'ACCOUNT_NEEDS_ATTENTION',
-            error_code: 'ACCOUNT_NEEDS_ATTENTION',
-            reason:
-              'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
-          });
-        }
-      });
-
-      if (results.hasError) {
-        res.send({
-          status: 'ok',
-          data: !Array.isArray(accountId)
-            ? results.errors[accountId][0]
-            : {
-                ...response,
-                errors: results.errors,
-              },
+    results.accounts.forEach((account) => {
+      if (account.id in results.errors) {
+        logAccountError(results, account.id, {
+          error_type: 'ACCOUNT_NEEDS_ATTENTION',
+          error_code: 'ACCOUNT_NEEDS_ATTENTION',
+          reason:
+            'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
         });
-        return;
       }
+    });
 
+    if (results.hasError) {
       res.send({
         status: 'ok',
-        data: response,
+        data: !Array.isArray(accountId)
+          ? results.errors[accountId][0]
+          : {
+              ...response,
+              errors: results.errors,
+            },
       });
-    } catch (error) {
-      const sendErrorResponse = (data) =>
-        res.send({ status: 'ok', data: { ...data, details: error.details } });
-      console.log(
-        'Something went wrong',
-        inspect(error, { depth: null }),
-        sendErrorResponse,
-      );
+      return;
     }
+
+    res.send({
+      status: 'ok',
+      data: response,
+    });
   }),
 );
 
