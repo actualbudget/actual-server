@@ -11,7 +11,7 @@ import {
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import { sha256String } from '../util/hash.js';
-import validateUser from '../util/validate-user.js';
+import { validateUserMiddleware } from '../util/middlewares.js';
 
 const app = express();
 app.get('/link', function (req, res) {
@@ -20,13 +20,7 @@ app.get('/link', function (req, res) {
 
 export { app as handlers };
 app.use(express.json());
-app.use(async (req, res, next) => {
-  let user = await validateUser(req, res);
-  if (!user) {
-    return;
-  }
-  next();
-});
+app.use(validateUserMiddleware);
 
 app.post('/status', async (req, res) => {
   res.send({
@@ -146,7 +140,6 @@ app.post(
 
     try {
       const {
-        iban,
         balances,
         institutionId,
         startingBalance,
@@ -161,7 +154,6 @@ app.post(
       res.send({
         status: 'ok',
         data: {
-          iban: iban ? await sha256String(iban) : null,
           balances,
           institutionId,
           startingBalance,
