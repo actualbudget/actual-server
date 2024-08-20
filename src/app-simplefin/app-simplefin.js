@@ -129,10 +129,12 @@ app.post(
 
         res.send({
           status: 'ok',
-          data: !Array.isArray(accountId) ? results.errors[accountId][0] : {
-            ...response,
-            errors: results.errors,
-          },
+          data: !Array.isArray(accountId)
+            ? results.errors[accountId][0]
+            : {
+                ...response,
+                errors: results.errors,
+              },
         });
         return;
       }
@@ -236,7 +238,7 @@ function getAccountResponse(results, accountId, startDate) {
     all.push(newTrans);
   }
 
-  return { balances, startingBalance, transactions: { all, booked, pending }};
+  return { balances, startingBalance, transactions: { all, booked, pending } };
 }
 
 function invalidToken(res) {
