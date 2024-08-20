@@ -111,17 +111,6 @@ app.post(
       response = getAccountResponse(results, accountId, new Date(startDate));
     }
 
-    results.accounts.forEach((account) => {
-      if (account.id in results.errors) {
-        logAccountError(results, account.id, {
-          error_type: 'ACCOUNT_NEEDS_ATTENTION',
-          error_code: 'ACCOUNT_NEEDS_ATTENTION',
-          reason:
-            'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
-        });
-      }
-    });
-
     if (results.hasError) {
       res.send({
         status: 'ok',
@@ -164,6 +153,18 @@ function getAccountResponse(results, accountId, startDate) {
       reason: `The account "${accountId}" was not found. Try unlinking and relinking the account.`,
     });
     return;
+  }
+
+  const needsAttention = results.errors.find(
+    (e) => e === `Connection to ${account.org.name} may need attention`,
+  );
+  if (needsAttention) {
+    logAccountError(results, accountId, {
+      error_type: 'ACCOUNT_NEEDS_ATTENTION',
+      error_code: 'ACCOUNT_NEEDS_ATTENTION',
+      reason:
+        'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
+    });
   }
 
   const startingBalance = parseInt(account.balance.replace('.', ''));
