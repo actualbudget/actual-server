@@ -157,7 +157,7 @@ function getAccountResponse(results, accountId, startDate) {
     return;
   }
 
-  const needsAttention = results.errors.find(
+  const needsAttention = results.sferrors.find(
     (e) => e === `Connection to ${account.org.name} may need attention`,
   );
   if (needsAttention) {
@@ -349,6 +349,7 @@ async function getAccounts(accessKey, startDate, endDate) {
           } else {
             try {
               const results = JSON.parse(data);
+              results.sferrors = results.errors;
               results.hasError = false;
               results.errors = {};
               resolve(results);
