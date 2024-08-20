@@ -94,7 +94,11 @@ app.post(
     try {
       results = await getTransactions(accessKey, new Date(earliestStartDate));
     } catch (e) {
-      serverDown(e, res);
+      if (e.message === 'Forbidden') {
+        invalidToken(res);
+      } else {
+        serverDown(e, res);
+      }
       return;
     }
     console.log('results:', results);
@@ -354,14 +358,19 @@ async function getAccounts(accessKey, startDate, endDate) {
           data += d;
         });
         res.on('end', () => {
-          try {
-            const results = JSON.parse(data);
-            results.hasError = false;
-            results.errors = {};
-            resolve(results);
-          } catch (e) {
-            console.log(`Error parsing JSON response: ${data}`);
-            reject(e);
+          if (res.statusCode === 403) {
+            reject(new Error('Forbidden'));
+          } else {
+            try {
+              const results = JSON.parse(data);
+              results.hasError = false;
+              results.errors = {};
+              resolve(results);
+            } catch (e) {
+              console.log(res);
+              console.log(`Error parsing JSON response: ${data}`);
+              reject(e);
+            }
           }
         });
       },
