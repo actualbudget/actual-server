@@ -113,35 +113,25 @@ app.post(
         response = getAccountResponse(results, accountId, new Date(startDate));
       }
 
-      results.accounts.forEach((account) => {
-        const needsAttention = results.errors.find(
-          (e) => e === `Connection to ${account.org.name} may need attention`,
-        );
-        if (needsAttention) {
-          logAccountError(results, account.id, {
-            error_type: 'ACCOUNT_NEEDS_ATTENTION',
-            error_code: 'ACCOUNT_NEEDS_ATTENTION',
-            reason:
-              'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
-          });
-        }
-      });
-
       if (results.hasError) {
-        if (!Array.isArray(accountId)) {
-          res.send({
-            status: 'ok',
-            data: results.errors[accountId][0],
-          });
-        } else {
-          res.send({
-            status: 'ok',
-            data: {
-              ...response,
-              errors: results.errors,
-            },
-          });
-        }
+        results.accounts.forEach((account) => {
+          if (account.id in results.errors) {
+            logAccountError(results, account.id, {
+              error_type: 'ACCOUNT_NEEDS_ATTENTION',
+              error_code: 'ACCOUNT_NEEDS_ATTENTION',
+              reason:
+                'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
+            });
+          }
+        });
+
+        res.send({
+          status: 'ok',
+          data: !Array.isArray(accountId) ? results.errors[accountId][0] : {
+            ...response,
+            errors: results.errors,
+          },
+        });
         return;
       }
 
