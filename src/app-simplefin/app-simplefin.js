@@ -249,7 +249,7 @@ function serverDown(e, res) {
       error_type: 'SERVER_DOWN',
       error_code: 'SERVER_DOWN',
       status: 'rejected',
-      reason: 'There was an error communciating with SimpleFIN.',
+      reason: 'There was an error communicating with SimpleFIN.',
     },
   });
 }
