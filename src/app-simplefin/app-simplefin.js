@@ -117,20 +117,19 @@ app.post(
       } else {
         response = getAccountResponse(results, accountId, new Date(startDate));
       }
-      console.log('response:', response);
+
+      results.accounts.forEach((account) => {
+        if (account.id in results.errors) {
+          logAccountError(results, account.id, {
+            error_type: 'ACCOUNT_NEEDS_ATTENTION',
+            error_code: 'ACCOUNT_NEEDS_ATTENTION',
+            reason:
+              'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
+          });
+        }
+      });
 
       if (results.hasError) {
-        results.accounts.forEach((account) => {
-          if (account.id in results.errors) {
-            logAccountError(results, account.id, {
-              error_type: 'ACCOUNT_NEEDS_ATTENTION',
-              error_code: 'ACCOUNT_NEEDS_ATTENTION',
-              reason:
-                'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
-            });
-          }
-        });
-
         res.send({
           status: 'ok',
           data: !Array.isArray(accountId)
@@ -367,7 +366,6 @@ async function getAccounts(accessKey, startDate, endDate) {
               results.errors = {};
               resolve(results);
             } catch (e) {
-              console.log(res);
               console.log(`Error parsing JSON response: ${data}`);
               reject(e);
             }
