@@ -97,6 +97,7 @@ app.post(
       serverDown(e, res);
       return;
     }
+    console.log('results:', results);
 
     try {
       let response = {};
@@ -112,6 +113,7 @@ app.post(
       } else {
         response = getAccountResponse(results, accountId, new Date(startDate));
       }
+      console.log('response:', response);
 
       if (results.hasError) {
         results.accounts.forEach((account) => {
@@ -234,7 +236,7 @@ function getAccountResponse(results, accountId, startDate) {
     all.push(newTrans);
   }
 
-  return { balances, startingBalance, all, booked, pending };
+  return { balances, startingBalance, transactions: { all, booked, pending }};
 }
 
 function invalidToken(res) {
