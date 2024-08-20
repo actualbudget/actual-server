@@ -101,7 +101,6 @@ app.post(
       }
       return;
     }
-    console.log('results:', results);
 
     let response = {};
     if (Array.isArray(accountId)) {
