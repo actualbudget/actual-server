@@ -8,7 +8,7 @@ export function handleError(func) {
         status: 'ok',
         data: {
           error_code: 'INTERNAL_ERROR',
-          error_type: err.message ? err.message :  'internal-error',
+          error_type: err.message ? err.message : 'internal-error',
         },
       });
     });
