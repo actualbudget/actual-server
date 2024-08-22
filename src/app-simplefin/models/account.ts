@@ -2,6 +2,7 @@ import Organization from './organization.ts';
 import Transaction from './transaction.ts';
 
 class Account {
+  // https://www.simplefin.org/protocol.html#account
   org: Organization;
   id: string;
   name: string;
@@ -37,9 +38,12 @@ class Account {
   static fromJson(json: string): Account {
     const data = JSON.parse(json);
     data.org = Organization.fromJson(JSON.stringify(data.org));
-    data.transactions = data.transactions.map((transaction: any) => 
-      Transaction.fromJson(JSON.stringify(transaction))
-    );
+
+    if (data.transactions) {
+      data.transactions = data.transactions.map((transaction: object) =>
+        Transaction.fromJson(JSON.stringify(transaction)),
+      );
+    }
     return new Account(data);
   }
 }

@@ -1,5 +1,6 @@
 import AccountSet from './account-set.ts';
 import Account from './account.ts';
+import Transaction from './transaction.ts';
 
 describe('AccountResponse', () => {
   it('should create an AccountResponse instance from JSON with all fields', () => {
@@ -33,6 +34,14 @@ describe('AccountResponse', () => {
     }`;
 
     const accountResponse = AccountSet.fromJson(json);
+
+    const expectedTransaction = new Transaction({
+      id: '12394832938403',
+      posted: 793090572,
+      amount: '-33293.43',
+      description: "Uncle Frank's Bait Shop",
+    });
+
     expect(accountResponse).toBeInstanceOf(AccountSet);
     expect(accountResponse.errors).toEqual([]);
     expect(accountResponse.accounts.length).toBe(1);
@@ -44,12 +53,7 @@ describe('AccountResponse', () => {
     expect(accountResponse.accounts[0].availableBalance).toBe('75.23');
     expect(accountResponse.accounts[0].balanceDate).toBe(978366153);
     expect(accountResponse.accounts[0].transactions).toEqual([
-      {
-        id: '12394832938403',
-        posted: 793090572,
-        amount: '-33293.43',
-        description: "Uncle Frank's Bait Shop",
-      },
+      expectedTransaction,
     ]);
     expect(accountResponse.accounts[0].extra).toEqual({
       accountOpenDate: 978360153,

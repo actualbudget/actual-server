@@ -1,5 +1,6 @@
 import Account from './account.ts';
 import Organization from './organization.ts';
+import Transaction from './transaction.ts';
 
 describe('Account', () => {
   it('should create an Account instance from JSON with all fields', () => {
@@ -28,6 +29,14 @@ describe('Account', () => {
     }`;
 
     const account = Account.fromJson(json);
+
+    const expectedTransaction = new Transaction({
+      id: '12394832938403',
+      posted: 793090572,
+      amount: '-33293.43',
+      description: "Uncle Frank's Bait Shop",
+    });
+
     expect(account).toBeInstanceOf(Account);
     expect(account.org).toBeInstanceOf(Organization);
     expect(account.id).toBe('2930002');
@@ -36,17 +45,10 @@ describe('Account', () => {
     expect(account.balance).toBe('100.23');
     expect(account.availableBalance).toBe('75.23');
     expect(account.balanceDate).toBe(978366153);
-    expect(account.transactions).toEqual([
-      {
-        id: '12394832938403',
-        posted: 793090572,
-        amount: '-33293.43',
-        description: "Uncle Frank's Bait Shop",
-      },
-    ]);
-    expect(account.extra).toEqual({
-      accountOpenDate: 978360153,
-    });
+    expect(account.transactions).toHaveLength(1);
+    expect(account.transactions[0]).toBeInstanceOf(Transaction);
+    expect(account.transactions[0]).toEqual(expectedTransaction);
+    expect(account.extra).toEqual({ accountOpenDate: 978360153 });
   });
 
   it('should create an Account instance from JSON with only required fields', () => {
@@ -81,6 +83,13 @@ describe('Account', () => {
       sfinUrl: 'https://sfin.mybank.com',
     });
 
+    const transaction = new Transaction({
+      id: '12394832938403',
+      posted: 793090572,
+      amount: '-33293.43',
+      description: "Uncle Frank's Bait Shop",
+    });
+
     const data = {
       org: org,
       id: '2930002',
@@ -89,14 +98,7 @@ describe('Account', () => {
       balance: '100.23',
       availableBalance: '75.23',
       balanceDate: 978366153,
-      transactions: [
-        {
-          id: '12394832938403',
-          posted: 793090572,
-          amount: '-33293.43',
-          description: "Uncle Frank's Bait Shop",
-        },
-      ],
+      transactions: [transaction],
       extra: {
         accountOpenDate: 978360153,
       },
@@ -111,14 +113,9 @@ describe('Account', () => {
     expect(account.balance).toBe('100.23');
     expect(account.availableBalance).toBe('75.23');
     expect(account.balanceDate).toBe(978366153);
-    expect(account.transactions).toEqual([
-      {
-        id: '12394832938403',
-        posted: 793090572,
-        amount: '-33293.43',
-        description: "Uncle Frank's Bait Shop",
-      },
-    ]);
+    expect(account.transactions).toHaveLength(1);
+    expect(account.transactions[0]).toBeInstanceOf(Transaction);
+    expect(account.transactions[0]).toEqual(transaction);
     expect(account.extra).toEqual({
       accountOpenDate: 978360153,
     });

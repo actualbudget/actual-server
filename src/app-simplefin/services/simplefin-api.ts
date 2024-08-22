@@ -127,16 +127,12 @@ class SimplefinApi implements SimpleFinApiInterface {
 
   async fetchAccessKey() {
     const url = this.context.accessKeyUrl();
-    try {
-      const response = await this.http_client.request(url, {
-        method: this.context.method,
-        port: this.context.port,
-        headers: this.context.headers,
-      });
-      this.context.accessKey = response;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.http_client.request(url, {
+      method: this.context.method,
+      port: this.context.port,
+      headers: this.context.headers,
+    });
+    this.context.accessKey = response;
   }
 }
 
