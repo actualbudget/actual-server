@@ -9,8 +9,8 @@
   "collectCoverageFrom": ["**/*.{js,ts,tsx}"],
   "coveragePathIgnorePatterns": ["dist", "/node_modules/", "/build/", "/coverage/"],
   "coverageReporters": ["html", "lcov", "text", "text-summary"],
+  "extensionsToTreatAsEsm": [".ts"],
   "resetMocks": true,
   "restoreMocks": true,
-  "silent": true,
-  "transform": {"\\.[jt]sx?$": "babel-jest"}
+  "silent": true
 }

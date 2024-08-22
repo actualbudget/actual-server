@@ -1,4 +1,4 @@
-import { GenericSimplefinError } from '../errors.js';
+import { GenericSimplefinError } from '../errors.ts';
 import { HttpClient } from '../httpClient.ts';
 import AccountSet from '../models/account-set.ts';
 
