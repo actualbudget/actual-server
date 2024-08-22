@@ -181,6 +181,7 @@ app.post('/reset-user-file', async (req, res) => {
   if (group_id) {
     try {
       await fs.unlink(getPathForGroupFile(group_id));
+      //eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       console.log(`Unable to delete sync data for group "${group_id}"`);
     }

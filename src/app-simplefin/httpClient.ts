@@ -1,5 +1,5 @@
 export interface CustomRequestOptions {
-  headers?: { [key: string]: string };
+  headers?: { [key: string]: string | number };
   port: number;
   method: string;
 }

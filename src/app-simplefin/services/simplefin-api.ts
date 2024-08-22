@@ -5,7 +5,7 @@ import AccountSet from '../models/account-set.ts';
 class SimplefinContextData {
   method: 'POST' | 'GET';
   port: number;
-  headers: { [key: string]: string };
+  headers: { [key: string]: string | number };
   base64Token: string | undefined;
   accessKey: string | undefined;
   baseUrl: string | undefined;
@@ -16,7 +16,7 @@ class SimplefinContextData {
   constructor(
     method: 'POST' | 'GET',
     port: number,
-    headers: { [key: string]: string } = {},
+    headers: { [key: string]: string | number } = {},
     base64Token: string | undefined = undefined,
   ) {
     this.method = method;

@@ -104,7 +104,7 @@ describe('/reset-user-file', () => {
       fileId,
     ]);
 
-    expect(rows[0].group_id).toBeNull;
+    expect(rows[0].group_id).toBeNull();
   });
 
   it('returns 400 if the file is not found', async () => {

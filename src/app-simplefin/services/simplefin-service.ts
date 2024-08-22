@@ -1,4 +1,3 @@
-// simplefin-service.ts
 import AccountSet from '../models/account-set.ts';
 import {
   SimplefinContextData,

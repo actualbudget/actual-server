@@ -37,6 +37,14 @@ class Transaction {
     const data = JSON.parse(json);
     return new Transaction(data);
   }
+
+
+  isPending(): boolean {
+    if (this.pending === undefined) {
+      return this.posted.getTime() === 0;
+    }
+    return this.pending;
+  }
 }
 
 export default Transaction;

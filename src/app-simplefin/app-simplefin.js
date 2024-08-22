@@ -3,7 +3,7 @@ import { inspect } from 'util';
 import { SecretName, secretsService } from '../services/secrets-service.js';
 import { handleError } from '../app-gocardless/util/handle-error.js';
 import { requestLoggerMiddleware } from '../util/middlewares.js';
-import { SimpleFinService } from './services/simplefin-service.js';
+import { SimpleFinService } from './services/simplefin-service.ts';
 import { SimplefinApi } from './services/simplefin-api.ts';
 import { HttpsClient } from './httpClient.ts';
 
@@ -49,6 +49,7 @@ app.post(
           }
         }
       }
+      //eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       invalidToken(res);
       return;
@@ -176,12 +177,12 @@ app.post(
 
         let dateToUse = 0;
 
-        if (trans.posted == 0) {
+        if (trans.isPending()) {
           newTrans.booked = false;
-          dateToUse = trans.transacted_at;
+          dateToUse = trans.transacted_at.getTime() / 1000;
         } else {
           newTrans.booked = true;
-          dateToUse = trans.posted;
+          dateToUse = trans.posted.getTime() / 1000;
         }
 
         newTrans.bookingDate = new Date(dateToUse * 1000)
@@ -189,7 +190,7 @@ app.post(
           .split('T')[0];
 
         newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
-        newTrans.payeeName = trans.payee;
+        // newTrans.payeeName = trans.payee; TODO: Is this used?
         newTrans.remittanceInformationUnstructured = trans.description;
         newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
         newTrans.transactionId = trans.id;

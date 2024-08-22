@@ -20,5 +20,10 @@
     "module": "node16",
     "outDir": "build"
   },
+  "include": ["**/*.ts"],
   "exclude": ["node_modules", "build", "coverage"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
 }
