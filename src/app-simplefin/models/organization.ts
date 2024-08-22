@@ -1,8 +1,7 @@
 class Organization {
   // https://www.simplefin.org/protocol.html#organization
 
-
-  //  Either domain or name is required. Both may be specified. 
+  //  Either domain or name is required. Both may be specified.
   name?: string;
   domain?: string;
   sfinUrl: string;
@@ -10,11 +9,11 @@ class Organization {
   id?: string;
 
   constructor(data: {
-    domain?: string,
-    sfinUrl: string,
-    name?: string,
-    url?: string,
-    id?: string
+    domain?: string;
+    sfinUrl: string;
+    name?: string;
+    url?: string;
+    id?: string;
   }) {
     this.domain = data.domain;
     this.sfinUrl = data.sfinUrl;

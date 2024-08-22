@@ -9,13 +9,13 @@ class Transaction {
   extra?: object;
 
   constructor(data: {
-    id: string,
-    posted: number,
-    amount: string,
-    description: string,
-    transacted_at?: number,
-    pending?: boolean,
-    extra?: object
+    id: string;
+    posted: number;
+    amount: string;
+    description: string;
+    transacted_at?: number;
+    pending?: boolean;
+    extra?: object;
   }) {
     this.id = data.id;
 
@@ -26,7 +26,9 @@ class Transaction {
     this.amount = data.amount;
     this.description = data.description;
 
-    this.transacted_at = data.transacted_at ? new Date(data.transacted_at * 1000) : undefined;
+    this.transacted_at = data.transacted_at
+      ? new Date(data.transacted_at * 1000)
+      : undefined;
     this.pending = data.pending ?? false;
     this.extra = data.extra;
   }

@@ -12,7 +12,9 @@ export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
 
-const simplefinService = new SimpleFinService(new SimplefinApi(new HttpsClient()));
+const simplefinService = new SimpleFinService(
+  new SimplefinApi(new HttpsClient()),
+);
 
 app.post(
   '/status',
@@ -57,7 +59,11 @@ app.post(
     const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     try {
-      const accounts = await simplefinService.getAccounts(accessKey, startDate, endDate);
+      const accounts = await simplefinService.getAccounts(
+        accessKey,
+        startDate,
+        endDate,
+      );
 
       res.send({
         status: 'ok',
@@ -86,7 +92,10 @@ app.post(
 
     let results;
     try {
-      results = await simplefinService.getTransactions(accessKey, new Date(startDate));
+      results = await simplefinService.getTransactions(
+        accessKey,
+        new Date(startDate),
+      );
     } catch (e) {
       serverDown(e, res);
       return;

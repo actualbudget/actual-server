@@ -37,22 +37,22 @@ describe('AccountResponse', () => {
     expect(accountResponse.errors).toEqual([]);
     expect(accountResponse.accounts.length).toBe(1);
     expect(accountResponse.accounts[0]).toBeInstanceOf(Account);
-    expect(accountResponse.accounts[0].id).toBe("2930002");
-    expect(accountResponse.accounts[0].name).toBe("Savings");
-    expect(accountResponse.accounts[0].currency).toBe("USD");
-    expect(accountResponse.accounts[0].balance).toBe("100.23");
-    expect(accountResponse.accounts[0].availableBalance).toBe("75.23");
+    expect(accountResponse.accounts[0].id).toBe('2930002');
+    expect(accountResponse.accounts[0].name).toBe('Savings');
+    expect(accountResponse.accounts[0].currency).toBe('USD');
+    expect(accountResponse.accounts[0].balance).toBe('100.23');
+    expect(accountResponse.accounts[0].availableBalance).toBe('75.23');
     expect(accountResponse.accounts[0].balanceDate).toBe(978366153);
     expect(accountResponse.accounts[0].transactions).toEqual([
       {
-        id: "12394832938403",
+        id: '12394832938403',
         posted: 793090572,
-        amount: "-33293.43",
-        description: "Uncle Frank's Bait Shop"
-      }
+        amount: '-33293.43',
+        description: "Uncle Frank's Bait Shop",
+      },
     ]);
     expect(accountResponse.accounts[0].extra).toEqual({
-      accountOpenDate: 978360153
+      accountOpenDate: 978360153,
     });
   });
 
@@ -79,10 +79,10 @@ describe('AccountResponse', () => {
     expect(accountResponse.errors).toEqual([]);
     expect(accountResponse.accounts.length).toBe(1);
     expect(accountResponse.accounts[0]).toBeInstanceOf(Account);
-    expect(accountResponse.accounts[0].id).toBe("2930002");
-    expect(accountResponse.accounts[0].name).toBe("Savings");
-    expect(accountResponse.accounts[0].currency).toBe("USD");
-    expect(accountResponse.accounts[0].balance).toBe("100.23");
+    expect(accountResponse.accounts[0].id).toBe('2930002');
+    expect(accountResponse.accounts[0].name).toBe('Savings');
+    expect(accountResponse.accounts[0].currency).toBe('USD');
+    expect(accountResponse.accounts[0].balance).toBe('100.23');
     expect(accountResponse.accounts[0].availableBalance).toBeUndefined();
     expect(accountResponse.accounts[0].balanceDate).toBe(978366153);
     expect(accountResponse.accounts[0].transactions).toBeUndefined();
