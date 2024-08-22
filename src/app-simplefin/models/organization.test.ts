@@ -1,4 +1,4 @@
-import Organization from './organization';
+import Organization from './organization.ts';
 
 describe('Organization', () => {
   it('should create an Organization instance from JSON with all fields', () => {

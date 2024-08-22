@@ -1,114 +1,70 @@
 // simplefin-api.js
 import https from 'https';
 import { Buffer } from 'buffer';
-
+import { SimplefinApi, SimplefinContextData } from './simplefin-api.ts'
+import AccountSet from '../models/account-set.ts';
 class SimplefinAPIHandler {
-  constructor(secretsService) {
+
+  /**
+ * @param {import('../../services/secrets-service.js').SecretsService} secretsService - The secrets service dependency.
+ * @param {import('./simplefin-api.ts').SimpleFinApiInterface} simplefinApi - The secrets service dependency.
+ */
+  constructor(secretsService, simplefinApi) {
     this.secretsService = secretsService;
+    this.simplefinApi = simplefinApi
   }
 
+
+  /**
+   * Retrieves the access key using the provided base64 token.
+   * 
+   * @param {string} base64Token - The base64 encoded token used for authentication.
+   * @returns {Promise<string>} - A promise that resolves to the access key.
+   */
   async getAccessKey(base64Token) {
-    const token = Buffer.from(base64Token, 'base64').toString();
-    const options = {
-      method: 'POST',
-      port: 443,
-      headers: { 'Content-Length': 0 },
-    };
-    return new Promise((resolve, reject) => {
-      const req = https.request(new URL(token), options, (res) => {
-        res.on('data', (d) => {
-          resolve(d.toString());
-        });
-      });
-      req.on('error', (e) => {
-        reject(e);
-      });
-      req.end();
-    });
+    let context = new SimplefinContextData('GET', 443, { 'Content-Length': 0 }, base64Token)
+
+    this.simplefinApi.setContext(context)
+    return this.simplefinApi.fetchAccessKey().then(() => context.accessKey)
   }
 
+  /**
+   * Retrieves accounts using the Simplefin API.
+   *
+   * @param {string} accessKey - The access key for authentication.
+   * @param {Date} startDate - The start date for filtering accounts.
+   * @param {Date} endDate - The end date for filtering accounts.
+   * @returns {Promise<AccountSet>} - A promise that resolves to an AccountSet.
+   */
   async getAccounts(accessKey, startDate, endDate) {
-    const sfin = this.parseAccessKey(accessKey);
-    const options = {
-      headers: {
-        Authorization: `Basic ${Buffer.from(
-          `${sfin.username}:${sfin.password}`,
-        ).toString('base64')}`,
-      },
-    };
-    const params = [];
-    let queryString = '';
-    if (startDate) {
-      params.push(`start-date=${this.normalizeDate(startDate)}`);
-    }
-    if (endDate) {
-      params.push(`end-date=${this.normalizeDate(endDate)}`);
-    }
+    let context = new SimplefinContextData('GET', 443);
+    context.parseAccessKey(accessKey);
+    this.simplefinApi.setContext(context);
+    return await this.simplefinApi.fetchAccounts(startDate, endDate).then((accounts) => accounts);
 
-    params.push(`pending=1`);
-
-    if (params.length > 0) {
-      queryString += '?' + params.join('&');
-    }
-    return new Promise((resolve, reject) => {
-      const req = https.request(
-        new URL(`${sfin.baseUrl}/accounts${queryString}`),
-        options,
-        (res) => {
-          let data = '';
-          res.on('data', (d) => {
-            data += d;
-          });
-          res.on('end', () => {
-            try {
-              resolve(JSON.parse(data));
-            } catch (e) {
-              console.log(`Error parsing JSON response: ${data}`);
-              reject(e);
-            }
-          });
-        },
-      );
-      req.on('error', (e) => {
-        reject(e);
-      });
-      req.end();
-    });
   }
 
+  /**
+   * Retrieves transactions within a specified date range.
+   *
+   * @param {string} accessKey - The access key for authentication.
+   * @param {Date} startDate - The start date of the date range. If not provided, defaults to the first day of the current month.
+   * @param {Date} endDate - The end date of the date range. If not provided, defaults to the first day of the next month.
+   * @returns {Promise<Array>} - A promise that resolves to an array of transactions.
+   */
   async getTransactions(accessKey, startDate, endDate) {
     const now = new Date();
     startDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
     endDate = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 1);
     console.log(
-      `${startDate.toISOString().split('T')[0]} - ${
-        endDate.toISOString().split('T')[0]
+      `${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]
       }`,
     );
-    return await this.getAccounts(accessKey, startDate, endDate);
+    let accounts = await this.getAccounts(accessKey, startDate, endDate);
+
+    return 
   }
 
-  parseAccessKey(accessKey) {
-    let scheme = null;
-    let rest = null;
-    let auth = null;
-    let username = null;
-    let password = null;
-    let baseUrl = null;
-    [scheme, rest] = accessKey.split('//');
-    [auth, rest] = rest.split('@');
-    [username, password] = auth.split(':');
-    baseUrl = `${scheme}//${rest}`;
-    return {
-      baseUrl: baseUrl,
-      username: username,
-      password: password,
-    };
-  }
-
-  normalizeDate(date) {
-    return (date.valueOf() - date.getTimezoneOffset() * 60 * 1000) / 1000;
-  }
 }
 
 export default SimplefinAPIHandler;

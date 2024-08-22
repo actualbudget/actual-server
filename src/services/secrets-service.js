@@ -52,6 +52,7 @@ class SecretsDb {
 const secretsDb = new SecretsDb();
 const _cachedSecrets = new Map();
 /**
+ * @typedef {Object} SecretsService
  * A service for managing secrets stored in `secretsDb`.
  */
 export const secretsService = {

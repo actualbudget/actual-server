@@ -1,4 +1,6 @@
 class Organization {
+  // https://www.simplefin.org/protocol.html#organization
+
 
   //  Either domain or name is required. Both may be specified. 
   name?: string;
