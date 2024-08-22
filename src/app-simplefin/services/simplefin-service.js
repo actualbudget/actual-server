@@ -3,14 +3,12 @@ import https from 'https';
 import { Buffer } from 'buffer';
 import { SimplefinApi, SimplefinContextData } from './simplefin-api.ts'
 import AccountSet from '../models/account-set.ts';
-class SimplefinAPIHandler {
+class SimpleFinService {
 
   /**
- * @param {import('../../services/secrets-service.js').SecretsService} secretsService - The secrets service dependency.
  * @param {import('./simplefin-api.ts').SimpleFinApiInterface} simplefinApi - The secrets service dependency.
  */
-  constructor(secretsService, simplefinApi) {
-    this.secretsService = secretsService;
+  constructor(simplefinApi) {
     this.simplefinApi = simplefinApi
   }
 
@@ -46,11 +44,10 @@ class SimplefinAPIHandler {
 
   /**
    * Retrieves transactions within a specified date range.
-   *
    * @param {string} accessKey - The access key for authentication.
    * @param {Date} startDate - The start date of the date range. If not provided, defaults to the first day of the current month.
    * @param {Date} endDate - The end date of the date range. If not provided, defaults to the first day of the next month.
-   * @returns {Promise<Array>} - A promise that resolves to an array of transactions.
+   * @returns {Promise<AccountSet>} - A promise that resolves to an array of transactions.
    */
   async getTransactions(accessKey, startDate, endDate) {
     const now = new Date();
@@ -60,11 +57,10 @@ class SimplefinAPIHandler {
       `${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]
       }`,
     );
-    let accounts = await this.getAccounts(accessKey, startDate, endDate);
-
-    return 
+    let accountSet = await this.getAccounts(accessKey, startDate, endDate);
+    return accountSet
   }
 
 }
 
-export default SimplefinAPIHandler;
+export { SimpleFinService };

@@ -3,14 +3,16 @@ import { inspect } from 'util';
 import { SecretName, secretsService } from '../services/secrets-service.js';
 import { handleError } from '../app-gocardless/util/handle-error.js';
 import { requestLoggerMiddleware } from '../util/middlewares.js';
-import SimplefinAPIHandler from './services/simplefin-api-handler.js';
+import { SimpleFinService } from './services/simplefin-service.js';
+import { SimplefinApi } from './services/simplefin-api.ts';
+import { HttpsClient } from './httpClient.ts';
 
 const app = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
 
-const simplefinAPI = new SimplefinAPIHandler(secretsService);
+const simplefinService = new SimpleFinService(new SimplefinApi(new HttpsClient()));
 
 app.post(
   '/status',
@@ -38,7 +40,7 @@ app.post(
         if (token == null || token === 'Forbidden') {
           throw new Error('No token');
         } else {
-          accessKey = await simplefinAPI.getAccessKey(token);
+          accessKey = await simplefinService.getAccessKey(token);
           secretsService.set(SecretName.simplefin_accessKey, accessKey);
           if (accessKey == null || accessKey === 'Forbidden') {
             throw new Error('No access key');
@@ -55,7 +57,7 @@ app.post(
     const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     try {
-      const accounts = await simplefinAPI.getAccounts(accessKey, startDate, endDate);
+      const accounts = await simplefinService.getAccounts(accessKey, startDate, endDate);
 
       res.send({
         status: 'ok',
@@ -84,15 +86,14 @@ app.post(
 
     let results;
     try {
-      results = await simplefinAPI.getTransactions(accessKey, new Date(startDate));
+      results = await simplefinService.getTransactions(accessKey, new Date(startDate));
     } catch (e) {
       serverDown(e, res);
       return;
     }
 
     try {
-      const account =
-        !results?.accounts || results.accounts.find((a) => a.id === accountId);
+      const account = results.accounts.find((a) => a.id === accountId);
       if (!account) {
         console.log(
           `The account "${accountId}" was not found. Here were the accounts returned:`,
