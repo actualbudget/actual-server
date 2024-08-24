@@ -22,7 +22,7 @@ class SimpleFinService {
    */
   async getAccessKey(base64Token: string): Promise<string> {
     const context = new SimplefinContextData(
-      'GET',
+      'POST',
       443,
       { 'Content-Length': 0 },
       base64Token,
