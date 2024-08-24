@@ -47,7 +47,7 @@ describe('SimplefinContextData', () => {
     const endDate = new Date('2023-01-31');
     context.buildAccountQueryString(startDate, endDate);
     expect(context.queryString).toBe(
-      '?start-date=1672534800&end-date=1675126800&pending=1',
+      '?start-date=1672531200&end-date=1675123200&pending=1',
     );
   });
 
@@ -93,7 +93,7 @@ describe('SimplefinContextData', () => {
   it('should normalize date correctly', () => {
     const context = new SimplefinContextData('GET', 8080);
     const date = new Date('2023-01-01T00:00:00Z');
-    expect(context.normalizeDate(date)).toBe(1672534800);
+    expect(context.normalizeDate(date)).toBe(1672531200);
   });
 });
 
