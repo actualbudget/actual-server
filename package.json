@@ -5,7 +5,9 @@
   "description": "actual syncing server",
   "type": "module",
   "scripts": {
-    "start": "node app",
+    "start": "tsx app",
+    "docker:build": "chmod +x docker/download-artifacts.sh && ./docker/download-artifacts.sh && docker build --build-arg GITHUB_TOKEN=$(gh auth token) -t actual-server-dev -f docker/edge-ubuntu.Dockerfile .",
+    "docker:run": "docker run --rm -p 5006:5006 actual-server-dev",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "build": "tsc",
@@ -15,7 +17,7 @@
     "db:downgrade": "NODE_ENV=development node src/run-migrations.js down",
     "db:test-migrate": "NODE_ENV=test node src/run-migrations.js up",
     "db:test-downgrade": "NODE_ENV=test node src/run-migrations.js down",
-    "types": "tsc --noEmit --incremental",
+    "types": "tsc --noEmit --incremental --no-emitDeclarationOnly",
     "verify": "yarn lint && yarn types",
     "reset-password": "node src/scripts/reset-password.js",
     "health-check": "node src/scripts/health-check.js"
@@ -58,6 +60,7 @@
     "jest": "^29.3.1",
     "prettier": "^2.8.3",
     "supertest": "^6.3.1",
+    "tsx": "^4.17.0",
     "typescript": "^5.5.4"
   },
   "engines": {
