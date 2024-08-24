@@ -26,7 +26,7 @@ class Organization {
     const data = JSON.parse(json);
     const camelCaseData = {
       ...data,
-      sfinUrl: data['sfin-url']
+      sfinUrl: data['sfin-url'],
     };
 
     return new Organization(camelCaseData);

@@ -38,7 +38,6 @@ class Transaction {
     return new Transaction(data);
   }
 
-
   isPending(): boolean {
     if (this.pending === undefined) {
       return this.posted.getTime() === 0;

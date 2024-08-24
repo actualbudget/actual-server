@@ -11,8 +11,8 @@ class Account {
   availableBalance?: string;
   balanceDate: number;
   // The transactions are ordered by posted
-  transactions?: Array<Transaction>;
-  extra?: object;
+  transactions: Array<Transaction>;
+  extra: object;
 
   constructor(data: {
     org: Organization;
@@ -44,7 +44,7 @@ class Account {
       data.transactions = data.transactions.map((transaction: object) =>
         Transaction.fromJson(JSON.stringify(transaction)),
       );
-    }else {
+    } else {
       // Make sure that the transactions property is always defined
       data.transactions = [];
     }
@@ -55,8 +55,7 @@ class Account {
       balanceDate: data['balance-date'],
       // Make sure that top-level keys are camelCase, not kebab-case
       // and that extra is an object, even if it's not present
-      extra: data.extra ? transformKeys(data.extra) : {}
-
+      extra: data.extra ? transformKeys(data.extra) : {},
     };
 
     return new Account(camelCaseData);

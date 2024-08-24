@@ -9,10 +9,8 @@ function kebabToCamel(str: string): string {
 function transformKeys(obj: object): object {
   const newObj: object = {};
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      const newKey = isKebabCase(key) ? kebabToCamel(key) : key;
-      newObj[newKey] = obj[key];
-    }
+    const newKey = isKebabCase(key) ? kebabToCamel(key) : key;
+    newObj[newKey] = obj[key];
   }
   return newObj;
 }
