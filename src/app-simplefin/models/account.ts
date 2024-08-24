@@ -9,7 +9,7 @@ class Account {
   currency: string;
   balance: string;
   availableBalance?: string;
-  balanceDate: number;
+  balanceDate: Date;
   // The transactions are ordered by posted
   transactions: Array<Transaction>;
   extra: object;
@@ -31,7 +31,7 @@ class Account {
     this.currency = data.currency;
     this.balance = data.balance;
     this.availableBalance = data.availableBalance;
-    this.balanceDate = data.balanceDate;
+    this.balanceDate = new Date(data.balanceDate * 1000);
     this.transactions = data.transactions;
     this.extra = data.extra;
   }
