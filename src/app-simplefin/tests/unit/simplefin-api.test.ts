@@ -191,7 +191,7 @@ describe('SimplefinApi', () => {
 
     // Make sure start/end dates got normalized, and that the URL got correctly built
     fakeHttpClient.setResponse(
-      'https://bridge.simplefin.org/simplefin/accounts/?start-date=1672534800&end-date=1675126800&pending=1',
+      'https://bridge.simplefin.org/simplefin/accounts/?start-date=1672531200&end-date=1675123200&pending=1',
       fakeResponse,
     );
 
@@ -212,7 +212,7 @@ describe('SimplefinApi', () => {
           method: 'GET',
           port: 443,
         },
-        url: 'https://bridge.simplefin.org/simplefin/accounts/?start-date=1672534800&end-date=1675126800&pending=1',
+        url: 'https://bridge.simplefin.org/simplefin/accounts/?start-date=1672531200&end-date=1675123200&pending=1',
       },
     ]);
   });
@@ -236,7 +236,7 @@ describe('SimplefinApi', () => {
     simplefinApi.setContext(accountContext);
 
     fakeHttpClient.setResponse(
-      'https://bridge.simplefin.org/simplefin/accounts/?start-date=1672534800&end-date=1675126800&pending=1',
+      'https://bridge.simplefin.org/simplefin/accounts/?start-date=1672531200&end-date=1675123200&pending=1',
       new Error('Network Error'),
     );
 

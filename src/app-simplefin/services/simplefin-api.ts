@@ -89,7 +89,7 @@ class SimplefinContextData {
   }
 
   normalizeDate(date: Date) {
-    return (date.valueOf() - date.getTimezoneOffset() * 60 * 1000) / 1000;
+    return Date.parse(date.toISOString()) / 1000
   }
 }
 
