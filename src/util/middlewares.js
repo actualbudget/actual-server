@@ -1,4 +1,5 @@
 import validateUser from './validate-user.js';
+import config from '../load-config.js';
 
 import * as winston from 'winston';
 import * as expressWinston from 'express-winston';
@@ -28,7 +29,9 @@ const validateUserMiddleware = async (req, res, next) => {
 };
 
 const requestLoggerMiddleware = expressWinston.logger({
-  transports: [new winston.transports.Console()],
+  transports: [
+    new winston.transports.Console({ silent: !config.useRequestLogger }),
+  ],
   format: winston.format.combine(
     winston.format.colorize(),
     winston.format.timestamp(),

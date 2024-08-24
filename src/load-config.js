@@ -72,6 +72,7 @@ let defaultConfig = {
     fileSizeLimitMB: 20,
   },
   projectRoot,
+  useRequestLogger: true,
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -83,6 +84,7 @@ if (process.env.NODE_ENV === 'test') {
     serverFiles: path.join(projectRoot, 'test-server-files'),
     userFiles: path.join(projectRoot, 'test-user-files'),
     ...defaultConfig,
+    useRequestLogger: false,
   };
 } else {
   config = {

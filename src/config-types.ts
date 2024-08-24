@@ -20,4 +20,5 @@ export interface Config {
     syncEncryptedFileSizeLimitMB: number;
     fileSizeLimitMB: number;
   };
+  useRequestLogger: boolean;
 }
