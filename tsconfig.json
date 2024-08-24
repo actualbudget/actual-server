@@ -6,7 +6,7 @@
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": true,
     "emitDeclarationOnly": true,
-    "declaration": true, // Emit TypeScript declaration files (.d.ts)
+    "declaration": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,

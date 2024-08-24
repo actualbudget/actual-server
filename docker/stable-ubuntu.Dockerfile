@@ -23,4 +23,4 @@ ADD src ./src
 ADD migrations ./migrations
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 EXPOSE 5006
-CMD ["node", "app.js"]
+CMD ["npx", "tsx", "app.js"]

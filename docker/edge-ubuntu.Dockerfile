@@ -33,4 +33,4 @@ ADD migrations ./migrations
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 ENV ACTUAL_WEB_ROOT=/public
 EXPOSE 5006
-CMD ["tsx", "app.js"]
+CMD ["npx", "tsx", "app.js"]

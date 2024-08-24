@@ -16,7 +16,7 @@ RUN curl -L -o /tmp/desktop-client.zip --header "Authorization: Bearer ${GITHUB_
 RUN unzip /tmp/desktop-client.zip -d /public
 
 FROM alpine:3.17 as prod
-RUN apk add --no-cache nodejs tini
+RUN apk add --no-cache nodejs npm tini
 
 ARG USERNAME=actual
 ARG USER_UID=1001
@@ -33,4 +33,4 @@ ADD migrations ./migrations
 ENTRYPOINT ["/sbin/tini","-g",  "--"]
 ENV ACTUAL_WEB_ROOT=/public
 EXPOSE 5006
-CMD ["node", "app.js"]
+CMD ["npx", "tsx", "app.js"]
