@@ -10,14 +10,14 @@ describe('AccountResponse', () => {
         {
           "org": {
             "domain": "mybank.com",
-            "sfinUrl": "https://sfin.mybank.com"
+            "sfin-url": "https://sfin.mybank.com"
           },
           "id": "2930002",
           "name": "Savings",
           "currency": "USD",
           "balance": "100.23",
-          "availableBalance": "75.23",
-          "balanceDate": 978366153,
+          "available-balance": "75.23",
+          "balance-date": 978366153,
           "transactions": [
             {
               "id": "12394832938403",
@@ -27,7 +27,7 @@ describe('AccountResponse', () => {
             }
           ],
           "extra": {
-            "accountOpenDate": 978360153
+            "account-open-date": 978360153
           }
         }
       ]
@@ -67,13 +67,13 @@ describe('AccountResponse', () => {
         {
           "org": {
             "domain": "mybank.com",
-            "sfinUrl": "https://sfin.mybank.com"
+            "sfin-url": "https://sfin.mybank.com"
           },
           "id": "2930002",
           "name": "Savings",
           "currency": "USD",
           "balance": "100.23",
-          "balanceDate": 978366153
+          "balance-date": 978366153
         }
       ]
     }`;
@@ -89,8 +89,8 @@ describe('AccountResponse', () => {
     expect(accountResponse.accounts[0].balance).toBe('100.23');
     expect(accountResponse.accounts[0].availableBalance).toBeUndefined();
     expect(accountResponse.accounts[0].balanceDate).toBe(978366153);
-    expect(accountResponse.accounts[0].transactions).toBeUndefined();
-    expect(accountResponse.accounts[0].extra).toBeUndefined();
+    expect(accountResponse.accounts[0].transactions).toEqual([]);
+    expect(accountResponse.accounts[0].extra).toEqual({});
   });
 
   it('should create an AccountResponse instance from JSON with an empty accounts array', () => {
@@ -112,13 +112,13 @@ describe('AccountResponse', () => {
         {
           "org": {
             "domain": "mybank.com",
-            "sfinUrl": "https://sfin.mybank.com"
+            "sfin-url": "https://sfin.mybank.com"
           },
           "id": "2930002",
           "name": "Savings",
           "currency": "USD",
           "balance": "100.23",
-          "balanceDate": 978366153
+          "balance-date": 978366153
         }
       ]
     }`;

@@ -4,7 +4,7 @@ describe('Organization', () => {
   it('should create an Organization instance from JSON with all fields', () => {
     const json = `{
       "domain": "mybank.com",
-      "sfinUrl": "https://sfin.mybank.com",
+      "sfin-url": "https://sfin.mybank.com",
       "name": "My Bank",
       "url": "https://www.mybank.com",
       "id": "12345"
@@ -21,7 +21,7 @@ describe('Organization', () => {
 
   it('should create an Organization instance from JSON with only required fields', () => {
     const json = `{
-      "sfinUrl": "https://sfin.mybank.com"
+      "sfin-url": "https://sfin.mybank.com"
     }`;
 
     const org = Organization.fromJson(json);

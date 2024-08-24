@@ -7,14 +7,14 @@ describe('Account', () => {
     const json = `{
       "org": {
         "domain": "mybank.com",
-        "sfinUrl": "https://sfin.mybank.com"
+        "sfin-url": "https://sfin.mybank.com"
       },
       "id": "2930002",
       "name": "Savings",
       "currency": "USD",
       "balance": "100.23",
-      "availableBalance": "75.23",
-      "balanceDate": 978366153,
+      "available-balance": "75.23",
+      "balance-date": 978366153,
       "transactions": [
         {
           "id": "12394832938403",
@@ -24,12 +24,11 @@ describe('Account', () => {
         }
       ],
       "extra": {
-        "accountOpenDate": 978360153
+        "account-open-date": 978360153
       }
     }`;
 
     const account = Account.fromJson(json);
-
     const expectedTransaction = new Transaction({
       id: '12394832938403',
       posted: 793090572,
@@ -55,13 +54,13 @@ describe('Account', () => {
     const json = `{
       "org": {
         "domain": "mybank.com",
-        "sfinUrl": "https://sfin.mybank.com"
+        "sfin-url": "https://sfin.mybank.com"
       },
       "id": "2930002",
       "name": "Savings",
       "currency": "USD",
       "balance": "100.23",
-      "balanceDate": 978366153
+      "balance-date": 978366153
     }`;
 
     const account = Account.fromJson(json);
@@ -73,8 +72,11 @@ describe('Account', () => {
     expect(account.balance).toBe('100.23');
     expect(account.availableBalance).toBeUndefined();
     expect(account.balanceDate).toBe(978366153);
-    expect(account.transactions).toBeUndefined();
-    expect(account.extra).toBeUndefined();
+
+    // Make sure transactions are an empty array
+    // and that extra is an empty object
+    expect(account.transactions).toEqual([]);
+    expect(account.extra).toEqual({});
   });
 
   it('should create an Account instance directly from an object', () => {

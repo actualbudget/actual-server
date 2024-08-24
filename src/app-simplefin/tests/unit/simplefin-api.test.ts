@@ -164,14 +164,14 @@ describe('SimplefinApi', () => {
         {
           "org": {
             "domain": "mybank.com",
-            "sfinUrl": "https://sfin.mybank.com"
+            "sfin-url": "https://sfin.mybank.com"
           },
           "id": "2930002",
           "name": "Savings",
           "currency": "USD",
           "balance": "100.23",
-          "availableBalance": "75.23",
-          "balanceDate": 978366153,
+          "available-balance": "75.23",
+          "balance-date": 978366153,
           "transactions": [
             {
               "id": "12394832938403",
@@ -181,7 +181,7 @@ describe('SimplefinApi', () => {
             }
           ],
           "extra": {
-            "accountOpenDate": 978360153
+            "account-open-date": 978360153
           }
         }
       ]

@@ -24,7 +24,12 @@ class Organization {
 
   static fromJson(json: string): Organization {
     const data = JSON.parse(json);
-    return new Organization(data);
+    const camelCaseData = {
+      ...data,
+      sfinUrl: data['sfin-url']
+    };
+
+    return new Organization(camelCaseData);
   }
 }
 
