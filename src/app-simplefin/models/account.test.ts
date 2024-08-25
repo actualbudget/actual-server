@@ -43,7 +43,7 @@ describe('Account', () => {
     expect(account.currency).toBe('USD');
     expect(account.balance).toBe('100.23');
     expect(account.availableBalance).toBe('75.23');
-    expect(account.balanceDate).toBe(978366153);
+    expect(account.balanceDate).toEqual(new Date(978366153 * 1000));
     expect(account.transactions).toHaveLength(1);
     expect(account.transactions[0]).toBeInstanceOf(Transaction);
     expect(account.transactions[0]).toEqual(expectedTransaction);
@@ -71,7 +71,7 @@ describe('Account', () => {
     expect(account.currency).toBe('USD');
     expect(account.balance).toBe('100.23');
     expect(account.availableBalance).toBeUndefined();
-    expect(account.balanceDate).toBe(978366153);
+    expect(account.balanceDate).toEqual(new Date(978366153 * 1000));
 
     // Make sure transactions are an empty array
     // and that extra is an empty object
@@ -114,7 +114,7 @@ describe('Account', () => {
     expect(account.currency).toBe('USD');
     expect(account.balance).toBe('100.23');
     expect(account.availableBalance).toBe('75.23');
-    expect(account.balanceDate).toBe(978366153);
+    expect(account.balanceDate).toEqual(new Date(978366153 * 1000));
     expect(account.transactions).toHaveLength(1);
     expect(account.transactions[0]).toBeInstanceOf(Transaction);
     expect(account.transactions[0]).toEqual(transaction);

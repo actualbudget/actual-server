@@ -2,8 +2,8 @@ import AccountSet from './account-set.ts';
 import Account from './account.ts';
 import Transaction from './transaction.ts';
 
-describe('AccountResponse', () => {
-  it('should create an AccountResponse instance from JSON with all fields', () => {
+describe('AccountSet', () => {
+  it('should create an AccountSet instance from JSON with all fields', () => {
     const json = `{
       "errors": [],
       "accounts": [
@@ -33,7 +33,7 @@ describe('AccountResponse', () => {
       ]
     }`;
 
-    const accountResponse = AccountSet.fromJson(json);
+    const accountSet = AccountSet.fromJson(json);
 
     const expectedTransaction = new Transaction({
       id: '12394832938403',
@@ -42,25 +42,25 @@ describe('AccountResponse', () => {
       description: "Uncle Frank's Bait Shop",
     });
 
-    expect(accountResponse).toBeInstanceOf(AccountSet);
-    expect(accountResponse.errors).toEqual([]);
-    expect(accountResponse.accounts.length).toBe(1);
-    expect(accountResponse.accounts[0]).toBeInstanceOf(Account);
-    expect(accountResponse.accounts[0].id).toBe('2930002');
-    expect(accountResponse.accounts[0].name).toBe('Savings');
-    expect(accountResponse.accounts[0].currency).toBe('USD');
-    expect(accountResponse.accounts[0].balance).toBe('100.23');
-    expect(accountResponse.accounts[0].availableBalance).toBe('75.23');
-    expect(accountResponse.accounts[0].balanceDate).toBe(978366153);
-    expect(accountResponse.accounts[0].transactions).toEqual([
+    expect(accountSet).toBeInstanceOf(AccountSet);
+    expect(accountSet.errors).toEqual([]);
+    expect(accountSet.accounts.length).toBe(1);
+    expect(accountSet.accounts[0]).toBeInstanceOf(Account);
+    expect(accountSet.accounts[0].id).toBe('2930002');
+    expect(accountSet.accounts[0].name).toBe('Savings');
+    expect(accountSet.accounts[0].currency).toBe('USD');
+    expect(accountSet.accounts[0].balance).toBe('100.23');
+    expect(accountSet.accounts[0].availableBalance).toBe('75.23');
+    expect(accountSet.accounts[0].balanceDate).toEqual(new Date(978366153 * 1000));
+    expect(accountSet.accounts[0].transactions).toEqual([
       expectedTransaction,
     ]);
-    expect(accountResponse.accounts[0].extra).toEqual({
+    expect(accountSet.accounts[0].extra).toEqual({
       accountOpenDate: 978360153,
     });
   });
 
-  it('should create an AccountResponse instance from JSON with only required fields', () => {
+  it('should create an AccountSet instance from JSON with only required fields', () => {
     const json = `{
       "errors": [],
       "accounts": [
@@ -78,22 +78,22 @@ describe('AccountResponse', () => {
       ]
     }`;
 
-    const accountResponse = AccountSet.fromJson(json);
-    expect(accountResponse).toBeInstanceOf(AccountSet);
-    expect(accountResponse.errors).toEqual([]);
-    expect(accountResponse.accounts.length).toBe(1);
-    expect(accountResponse.accounts[0]).toBeInstanceOf(Account);
-    expect(accountResponse.accounts[0].id).toBe('2930002');
-    expect(accountResponse.accounts[0].name).toBe('Savings');
-    expect(accountResponse.accounts[0].currency).toBe('USD');
-    expect(accountResponse.accounts[0].balance).toBe('100.23');
-    expect(accountResponse.accounts[0].availableBalance).toBeUndefined();
-    expect(accountResponse.accounts[0].balanceDate).toBe(978366153);
-    expect(accountResponse.accounts[0].transactions).toEqual([]);
-    expect(accountResponse.accounts[0].extra).toEqual({});
+    const accountSet = AccountSet.fromJson(json);
+    expect(accountSet).toBeInstanceOf(AccountSet);
+    expect(accountSet.errors).toEqual([]);
+    expect(accountSet.accounts.length).toBe(1);
+    expect(accountSet.accounts[0]).toBeInstanceOf(Account);
+    expect(accountSet.accounts[0].id).toBe('2930002');
+    expect(accountSet.accounts[0].name).toBe('Savings');
+    expect(accountSet.accounts[0].currency).toBe('USD');
+    expect(accountSet.accounts[0].balance).toBe('100.23');
+    expect(accountSet.accounts[0].availableBalance).toBeUndefined();
+    expect(accountSet.accounts[0].balanceDate).toEqual(new Date(978366153 * 1000));
+    expect(accountSet.accounts[0].transactions).toEqual([]);
+    expect(accountSet.accounts[0].extra).toEqual({});
   });
 
-  it('should create an AccountResponse instance from JSON with an empty accounts array', () => {
+  it('should create an AccountSet instance from JSON with an empty accounts array', () => {
     const json = `{
       "errors": [],
       "accounts": []
@@ -105,7 +105,7 @@ describe('AccountResponse', () => {
     expect(accountResponse.accounts).toEqual([]);
   });
 
-  it('should create an AccountResponse instance from JSON with an empty errors array', () => {
+  it('should create an AccountSet instance from JSON with an empty errors array', () => {
     const json = `{
       "errors": [],
       "accounts": [
