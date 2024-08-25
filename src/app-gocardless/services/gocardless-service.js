@@ -1,15 +1,16 @@
 import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
 import {
-  RequisitionNotLinked,
+  AccessDeniedError,
   AccountNotLinedToRequisition,
+  GenericGoCardlessError,
   InvalidInputDataError,
   InvalidGoCardlessTokenError,
-  AccessDeniedError,
   NotFoundError,
-  ResourceSuspended,
   RateLimitError,
-  UnknownError,
+  ResourceSuspended,
+  RequisitionNotLinked,
   ServiceError,
+  UnknownError,
 } from '../errors.js';
 import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
@@ -56,7 +57,7 @@ export const handleGoCardlessError = (error) => {
     case 503:
       throw new ServiceError(error);
     default:
-      return;
+      throw new GenericGoCardlessError(error);
   }
 };
 

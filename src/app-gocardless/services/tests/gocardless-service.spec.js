@@ -1,15 +1,16 @@
 import { jest } from '@jest/globals';
 import {
+  AccessDeniedError,
+  AccountNotLinedToRequisition,
+  GenericGoCardlessError,
   InvalidInputDataError,
   InvalidGoCardlessTokenError,
-  AccessDeniedError,
   NotFoundError,
-  ResourceSuspended,
   RateLimitError,
-  UnknownError,
-  ServiceError,
+  ResourceSuspended,
   RequisitionNotLinked,
-  AccountNotLinedToRequisition,
+  ServiceError,
+  UnknownError,
 } from '../../errors.js';
 
 import {
@@ -518,13 +519,10 @@ describe('#handleGoCardlessError', () => {
     expect(() => handleGoCardlessError(response)).toThrow(ServiceError);
   });
 
-  it('does not throw an error for status code 200', () => {
-    const response = { response: { status: 200 } };
-    expect(() => handleGoCardlessError(response)).not.toThrow();
-  });
-
-  it('does not throw an error when status code is not present', () => {
-    const response = { foo: 'bar' };
-    expect(() => handleGoCardlessError(response)).not.toThrow();
+  it('throws a generic error when the status code is not recognised', () => {
+    const response = { response: { status: 0 } };
+    expect(() => handleGoCardlessError(response)).toThrow(
+      GenericGoCardlessError,
+    );
   });
 });
