@@ -144,8 +144,7 @@ app.post(
       const response = {};
 
       const balance = parseInt(account.balance.replace('.', ''));
-      const date = account.balanceDate.toISOString()
-        .split('T')[0];
+      const date = account.balanceDate.toISOString().split('T')[0];
 
       response.balances = [
         {
