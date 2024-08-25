@@ -51,10 +51,10 @@ describe('AccountSet', () => {
     expect(accountSet.accounts[0].currency).toBe('USD');
     expect(accountSet.accounts[0].balance).toBe('100.23');
     expect(accountSet.accounts[0].availableBalance).toBe('75.23');
-    expect(accountSet.accounts[0].balanceDate).toEqual(new Date(978366153 * 1000));
-    expect(accountSet.accounts[0].transactions).toEqual([
-      expectedTransaction,
-    ]);
+    expect(accountSet.accounts[0].balanceDate).toEqual(
+      new Date(978366153 * 1000),
+    );
+    expect(accountSet.accounts[0].transactions).toEqual([expectedTransaction]);
     expect(accountSet.accounts[0].extra).toEqual({
       accountOpenDate: 978360153,
     });
@@ -88,7 +88,9 @@ describe('AccountSet', () => {
     expect(accountSet.accounts[0].currency).toBe('USD');
     expect(accountSet.accounts[0].balance).toBe('100.23');
     expect(accountSet.accounts[0].availableBalance).toBeUndefined();
-    expect(accountSet.accounts[0].balanceDate).toEqual(new Date(978366153 * 1000));
+    expect(accountSet.accounts[0].balanceDate).toEqual(
+      new Date(978366153 * 1000),
+    );
     expect(accountSet.accounts[0].transactions).toEqual([]);
     expect(accountSet.accounts[0].extra).toEqual({});
   });
