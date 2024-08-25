@@ -142,8 +142,13 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
-    const { requisitionId, startDate, endDate, accountId, includeBalance } =
-      req.body;
+    const {
+      requisitionId,
+      startDate,
+      endDate,
+      accountId,
+      includeBalance = true,
+    } = req.body;
 
     try {
       if (includeBalance) {
