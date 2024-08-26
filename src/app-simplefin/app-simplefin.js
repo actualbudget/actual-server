@@ -2,10 +2,12 @@ import express from 'express';
 import https from 'https';
 import { SecretName, secretsService } from '../services/secrets-service.js';
 import { handleError } from '../app-gocardless/util/handle-error.js';
+import { requestLoggerMiddleware } from '../util/middlewares.js';
 
 const app = express();
 export { app as handlers };
 app.use(express.json());
+app.use(requestLoggerMiddleware);
 
 app.post(
   '/status',
