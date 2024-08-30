@@ -30,7 +30,7 @@ export default {
    * remittanceInformationUnstructured.
    */
   normalizeTransaction(transaction, _booked) {
-    if (transaction.transactionAmount.amount > 0) {
+    if (Number(transaction.transactionAmount.amount) > 0) {
       return {
         ...transaction,
         payeeName: transaction.debtorName,
