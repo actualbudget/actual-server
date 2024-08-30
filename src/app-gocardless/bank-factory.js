@@ -21,6 +21,7 @@ import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-hela
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
 import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
+import KBCkredbebb from './banks/kbc_kredbebb.js';
 
 export const banks = [
   AbancaCaglesmm,
@@ -45,6 +46,7 @@ export const banks = [
   SpkKarlsruhekarsde66,
   VirginNrnbgb22,
   Berliner_Sparkasse_beladebexxx,
+  KBCkredbebb,
 ];
 
 export default (institutionId) =>
