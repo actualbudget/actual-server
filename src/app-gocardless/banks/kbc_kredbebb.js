@@ -6,17 +6,17 @@ import Fallback from './integration-bank.js';
  * f.e. Proxy Poel BE Gent Betaling met Apple Pay via Maestro 23-08-2024 om 14.03 uur XXXX XXXX XXXX XXXX -> Proxy Poel BE Gent
  */
 function extractPayeeName(remittanceInformationUnstructured) {
-  const indexForRemoval =
-    remittanceInformationUnstructured.lastIndexOf(' Betaling met') ||
-    remittanceInformationUnstructured.lastIndexOf(' Domiciliëring') ||
-    remittanceInformationUnstructured.lastIndexOf(
-      ' Doorlopende betalingsopdracht',
-    );
+  const indices = [
+    remittanceInformationUnstructured.lastIndexOf(' Betaling met'),
+    remittanceInformationUnstructured.lastIndexOf(' Domiciliëring'),
+    remittanceInformationUnstructured.lastIndexOf(' Overschrijving'),
+  ];
 
-  return (
-    remittanceInformationUnstructured.substring(0, indexForRemoval) ||
-    remittanceInformationUnstructured
-  );
+  const indexForRemoval = Math.max(...indices);
+
+  return indexForRemoval > -1
+    ? remittanceInformationUnstructured.substring(0, indexForRemoval)
+    : remittanceInformationUnstructured;
 }
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -40,9 +40,9 @@ export default {
 
     return {
       ...transaction,
-      payeeName: extractPayeeName(
-        transaction.remittanceInformationUnstructured,
-      ),
+      payeeName:
+        transaction.creditorName ||
+        extractPayeeName(transaction.remittanceInformationUnstructured),
       date: transaction.bookingDate || transaction.valueDate,
     };
   },
