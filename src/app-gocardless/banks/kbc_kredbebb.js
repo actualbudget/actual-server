@@ -33,7 +33,9 @@ export default {
     if (Number(transaction.transactionAmount.amount) > 0) {
       return {
         ...transaction,
-        payeeName: transaction.debtorName,
+        payeeName:
+          transaction.debtorName ||
+          transaction.remittanceInformationUnstructured,
         date: transaction.bookingDate || transaction.valueDate,
       };
     }
