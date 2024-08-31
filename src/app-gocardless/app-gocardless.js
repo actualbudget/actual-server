@@ -5,9 +5,10 @@ import { inspect } from 'util';
 
 import { goCardlessService } from './services/gocardless-service.js';
 import {
-  RequisitionNotLinked,
   AccountNotLinedToRequisition,
   GenericGoCardlessError,
+  RateLimitError,
+  RequisitionNotLinked,
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import { sha256String } from '../util/hash.js';
@@ -141,34 +142,64 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
-    const { requisitionId, startDate, endDate, accountId } = req.body;
+    const {
+      requisitionId,
+      startDate,
+      endDate,
+      accountId,
+      includeBalance = true,
+    } = req.body;
 
     try {
-      const {
-        balances,
-        institutionId,
-        startingBalance,
-        transactions: { booked, pending, all },
-      } = await goCardlessService.getTransactionsWithBalance(
-        requisitionId,
-        accountId,
-        startDate,
-        endDate,
-      );
-
-      res.send({
-        status: 'ok',
-        data: {
+      if (includeBalance) {
+        const {
           balances,
           institutionId,
           startingBalance,
-          transactions: {
-            booked,
-            pending,
-            all,
+          transactions: { booked, pending, all },
+        } = await goCardlessService.getTransactionsWithBalance(
+          requisitionId,
+          accountId,
+          startDate,
+          endDate,
+        );
+
+        res.send({
+          status: 'ok',
+          data: {
+            balances,
+            institutionId,
+            startingBalance,
+            transactions: {
+              booked,
+              pending,
+              all,
+            },
           },
-        },
-      });
+        });
+      } else {
+        const {
+          institutionId,
+          transactions: { booked, pending, all },
+        } = await goCardlessService.getNormalizedTransactions(
+          requisitionId,
+          accountId,
+          startDate,
+          endDate,
+        );
+
+        res.send({
+          status: 'ok',
+          data: {
+            institutionId,
+            transactions: {
+              booked,
+              pending,
+              all,
+            },
+          },
+        });
+      }
     } catch (error) {
       const sendErrorResponse = (data) =>
         res.send({ status: 'ok', data: { ...data, details: error.details } });
@@ -189,6 +220,14 @@ app.post(
             error_code: 'INVALID_ACCESS_TOKEN',
             status: 'rejected',
             reason: 'Account not linked with this requisition',
+          });
+          break;
+        case error instanceof RateLimitError:
+          sendErrorResponse({
+            error_type: 'RATE_LIMIT_EXCEEDED',
+            error_code: 'NORDIGEN_ERROR',
+            status: 'rejected',
+            reason: 'Rate limit exceeded',
           });
           break;
         case error instanceof GenericGoCardlessError:
