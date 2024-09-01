@@ -87,7 +87,7 @@ app.post(
     }
     if (Array.isArray(accountId) && accountId.length !== startDate.length) {
       console.log(accountId, startDate);
-      throw new Error('accountId and startDate must be the same length');
+      throw new Error('accountId and startDate arrays must be the same length');
     }
 
     const earliestStartDate = Array.isArray(startDate)
