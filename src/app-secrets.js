@@ -1,20 +1,18 @@
 import express from 'express';
-import validateUser from './util/validate-user.js';
 import { secretsService } from './services/secrets-service.js';
 import getAccountDb, { isAdmin } from './account-db.js';
+import {
+  requestLoggerMiddleware,
+  validateUserMiddleware,
+} from './util/middlewares.js';
 
 const app = express();
 
 export { app as handlers };
 app.use(express.json());
+app.use(requestLoggerMiddleware);
 
-app.use(async (req, res, next) => {
-  let user = await validateUser(req, res);
-  if (!user) {
-    return;
-  }
-  next();
-});
+app.use(validateUserMiddleware);
 
 app.post('/', async (req, res) => {
   const { method } =

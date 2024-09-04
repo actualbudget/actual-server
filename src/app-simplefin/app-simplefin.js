@@ -3,10 +3,12 @@ import { inspect } from 'util';
 import https from 'https';
 import { SecretName, secretsService } from '../services/secrets-service.js';
 import { handleError } from '../app-gocardless/util/handle-error.js';
+import { requestLoggerMiddleware } from '../util/middlewares.js';
 
 const app = express();
 export { app as handlers };
 app.use(express.json());
+app.use(requestLoggerMiddleware);
 
 app.post(
   '/status',
@@ -87,7 +89,27 @@ app.post(
     }
 
     try {
-      const account = results.accounts.find((a) => a.id === accountId);
+      const account =
+        !results?.accounts || results.accounts.find((a) => a.id === accountId);
+      if (!account) {
+        console.log(
+          `The account "${accountId}" was not found. Here were the accounts returned:`,
+        );
+        if (results?.accounts)
+          results.accounts.forEach((a) =>
+            console.log(`${a.id} - ${a.org.name}`),
+          );
+        res.send({
+          status: 'ok',
+          data: {
+            error_type: 'ACCOUNT_MISSING',
+            error_code: 'ACCOUNT_MISSING',
+            status: 'rejected',
+            reason: `The account "${accountId}" was not found. Try unlinking and relinking the account.`,
+          },
+        });
+        return;
+      }
 
       const needsAttention = results.errors.find(
         (e) => e === `Connection to ${account.org.name} may need attention`,
@@ -103,6 +125,7 @@ app.post(
               'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
           },
         });
+        return;
       }
 
       const response = {};

@@ -5,12 +5,13 @@ function formatPayeeIban(iban) {
 }
 
 export const formatPayeeName = (trans) => {
+  const amount = trans.transactionAmount.amount;
   const nameParts = [];
 
   // get the correct name and account fields for the transaction amount
   let name;
   let account;
-  if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
+  if (amount > 0 || Object.is(Number(amount), 0)) {
     name = trans.debtorName;
     account = trans.debtorAccount;
   } else {
@@ -20,6 +21,10 @@ export const formatPayeeName = (trans) => {
 
   // use the correct name field if it was found
   // if not, use whatever we can find
+
+  // if the primary name option is set, prevent the account from falling back
+  account = name ? account : trans.debtorAccount || trans.creditorAccount;
+
   name =
     name ||
     trans.debtorName ||
@@ -27,8 +32,6 @@ export const formatPayeeName = (trans) => {
     trans.remittanceInformationUnstructured ||
     (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
     trans.additionalInformation;
-
-  account = account || trans.debtorAccount || trans.creditorAccount;
 
   if (name) {
     nameParts.push(title(name));

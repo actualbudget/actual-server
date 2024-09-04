@@ -1,15 +1,16 @@
 import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
 import {
-  RequisitionNotLinked,
+  AccessDeniedError,
   AccountNotLinedToRequisition,
+  GenericGoCardlessError,
   InvalidInputDataError,
   InvalidGoCardlessTokenError,
-  AccessDeniedError,
   NotFoundError,
-  ResourceSuspended,
   RateLimitError,
-  UnknownError,
+  ResourceSuspended,
+  RequisitionNotLinked,
   ServiceError,
+  UnknownError,
 } from '../errors.js';
 import * as nordigenNode from 'nordigen-node';
 import * as uuid from 'uuid';
@@ -35,26 +36,28 @@ const getGocardlessClient = () => {
   return clients.get(hash);
 };
 
-export const handleGoCardlessError = (response) => {
-  switch (response.status_code) {
+export const handleGoCardlessError = (error) => {
+  const status = error?.response?.status;
+
+  switch (status) {
     case 400:
-      throw new InvalidInputDataError(response);
+      throw new InvalidInputDataError(error);
     case 401:
-      throw new InvalidGoCardlessTokenError(response);
+      throw new InvalidGoCardlessTokenError(error);
     case 403:
-      throw new AccessDeniedError(response);
+      throw new AccessDeniedError(error);
     case 404:
-      throw new NotFoundError(response);
+      throw new NotFoundError(error);
     case 409:
-      throw new ResourceSuspended(response);
+      throw new ResourceSuspended(error);
     case 429:
-      throw new RateLimitError(response);
+      throw new RateLimitError(error);
     case 500:
-      throw new UnknownError(response);
+      throw new UnknownError(error);
     case 503:
-      throw new ServiceError(response);
+      throw new ServiceError(error);
     default:
-      return;
+      throw new GenericGoCardlessError(error);
   }
 };
 
@@ -87,8 +90,11 @@ export const goCardlessService = {
     if (isExpiredJwtToken(getGocardlessClient().token)) {
       // Generate new access token. Token is valid for 24 hours
       // Note: access_token is automatically injected to other requests after you successfully obtain it
-      const tokenData = await client.generateToken();
-      handleGoCardlessError(tokenData);
+      try {
+        await client.generateToken();
+      } catch (error) {
+        handleGoCardlessError(error);
+      }
     }
   },
 
@@ -185,7 +191,7 @@ export const goCardlessService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{iban: string, balances: Array<import('../gocardless-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}, startingBalance: number}>}
+   * @returns {Promise<{balances: Array<import('../gocardless-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}, startingBalance: number}>}
    */
   getTransactionsWithBalance: async (
     requisitionId,
@@ -200,16 +206,70 @@ export const goCardlessService = {
       throw new AccountNotLinedToRequisition(accountId, requisitionId);
     }
 
-    const [accountMetadata, transactions, accountBalance] = await Promise.all([
-      goCardlessService.getAccountMetadata(accountId),
-      goCardlessService.getTransactions({
-        institutionId: institution_id,
+    const [normalizedTransactions, accountBalance] = await Promise.all([
+      goCardlessService.getNormalizedTransactions(
+        requisitionId,
         accountId,
         startDate,
         endDate,
-      }),
+      ),
       goCardlessService.getBalances(accountId),
     ]);
+
+    const transactions = normalizedTransactions.transactions;
+
+    const bank = BankFactory(institution_id);
+
+    const startingBalance = bank.calculateStartingBalance(
+      transactions.booked,
+      accountBalance.balances,
+    );
+
+    return {
+      balances: accountBalance.balances,
+      institutionId: institution_id,
+      startingBalance,
+      transactions,
+    };
+  },
+
+  /**
+   *
+   * @param requisitionId
+   * @param accountId
+   * @param startDate
+   * @param endDate
+   * @throws {AccountNotLinedToRequisition} Will throw an error if requisition not includes provided account id
+   * @throws {RequisitionNotLinked} Will throw an error if requisition is not in Linked
+   * @throws {InvalidInputDataError}
+   * @throws {InvalidGoCardlessTokenError}
+   * @throws {AccessDeniedError}
+   * @throws {NotFoundError}
+   * @throws {ResourceSuspended}
+   * @throws {RateLimitError}
+   * @throws {UnknownError}
+   * @throws {ServiceError}
+   * @returns {Promise<{institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}}>}
+   */
+  getNormalizedTransactions: async (
+    requisitionId,
+    accountId,
+    startDate,
+    endDate,
+  ) => {
+    const { institution_id, accounts: accountIds } =
+      await goCardlessService.getLinkedRequisition(requisitionId);
+
+    if (!accountIds.includes(accountId)) {
+      throw new AccountNotLinedToRequisition(accountId, requisitionId);
+    }
+
+    const transactions = await goCardlessService.getTransactions({
+      institutionId: institution_id,
+      accountId,
+      startDate,
+      endDate,
+    });
 
     const bank = BankFactory(institution_id);
     const sortedBookedTransactions = bank.sortTransactions(
@@ -226,16 +286,8 @@ export const goCardlessService = {
     );
     const sortedAllTransactions = bank.sortTransactions(allTransactions);
 
-    const startingBalance = bank.calculateStartingBalance(
-      sortedBookedTransactions,
-      accountBalance.balances,
-    );
-
     return {
-      iban: accountMetadata.iban,
-      balances: accountBalance.balances,
       institutionId: institution_id,
-      startingBalance,
       transactions: {
         booked: sortedBookedTransactions,
         pending: sortedPendingTransactions,
@@ -263,23 +315,26 @@ export const goCardlessService = {
     const institution = await goCardlessService.getInstitution(institutionId);
     const bank = BankFactory(institutionId);
 
-    const response = await client.initSession({
-      redirectUrl: host + '/gocardless/link',
-      institutionId,
-      referenceId: uuid.v4(),
-      accessValidForDays: bank.accessValidForDays,
-      maxHistoricalDays: BANKS_WITH_LIMITED_HISTORY.includes(institutionId)
-        ? Number(institution.transaction_total_days) >= 90
-          ? '89'
-          : institution.transaction_total_days
-        : institution.transaction_total_days,
-      userLanguage: 'en',
-      ssn: null,
-      redirectImmediate: false,
-      accountSelection: false,
-    });
-
-    handleGoCardlessError(response);
+    let response;
+    try {
+      response = await client.initSession({
+        redirectUrl: host + '/gocardless/link',
+        institutionId,
+        referenceId: uuid.v4(),
+        accessValidForDays: bank.accessValidForDays,
+        maxHistoricalDays: BANKS_WITH_LIMITED_HISTORY.includes(institutionId)
+          ? Number(institution.transaction_total_days) >= 90
+            ? '89'
+            : institution.transaction_total_days
+          : institution.transaction_total_days,
+        userLanguage: 'en',
+        ssn: null,
+        redirectImmediate: false,
+        accountSelection: false,
+      });
+    } catch (error) {
+      handleGoCardlessError(error);
+    }
 
     const { link, id: requisitionId } = response;
 
@@ -304,9 +359,14 @@ export const goCardlessService = {
    */
   deleteRequisition: async (requisitionId) => {
     await goCardlessService.getRequisition(requisitionId);
-    const response = client.deleteRequisition(requisitionId);
 
-    handleGoCardlessError(response);
+    let response;
+    try {
+      response = client.deleteRequisition(requisitionId);
+    } catch (error) {
+      handleGoCardlessError(error);
+    }
+
     return response;
   },
 
@@ -327,9 +387,12 @@ export const goCardlessService = {
   getRequisition: async (requisitionId) => {
     await goCardlessService.setToken();
 
-    const response = client.getRequisitionById(requisitionId);
-
-    handleGoCardlessError(response);
+    let response;
+    try {
+      response = client.getRequisitionById(requisitionId);
+    } catch (error) {
+      handleGoCardlessError(error);
+    }
 
     return response;
   },
@@ -340,13 +403,15 @@ export const goCardlessService = {
    * @returns {Promise<import('../gocardless.types.js').DetailedAccount>}
    */
   getDetailedAccount: async (accountId) => {
-    const [detailedAccount, metadataAccount] = await Promise.all([
-      client.getDetails(accountId),
-      client.getMetadata(accountId),
-    ]);
-
-    handleGoCardlessError(detailedAccount);
-    handleGoCardlessError(metadataAccount);
+    let detailedAccount, metadataAccount;
+    try {
+      [detailedAccount, metadataAccount] = await Promise.all([
+        client.getDetails(accountId),
+        client.getMetadata(accountId),
+      ]);
+    } catch (error) {
+      handleGoCardlessError(error);
+    }
 
     return {
       ...detailedAccount.account,
@@ -363,9 +428,12 @@ export const goCardlessService = {
    * @returns {Promise<import('../gocardless-node.types.js').GoCardlessAccountMetadata>}
    */
   getAccountMetadata: async (accountId) => {
-    const response = await client.getMetadata(accountId);
-
-    handleGoCardlessError(response);
+    let response;
+    try {
+      response = await client.getMetadata(accountId);
+    } catch (error) {
+      handleGoCardlessError(error);
+    }
 
     return response;
   },
@@ -384,9 +452,12 @@ export const goCardlessService = {
    * @returns {Promise<Array<import('../gocardless-node.types.js').Institution>>}
    */
   getInstitutions: async (country) => {
-    const response = await client.getInstitutions(country);
-
-    handleGoCardlessError(response);
+    let response;
+    try {
+      response = await client.getInstitutions(country);
+    } catch (error) {
+      handleGoCardlessError(error);
+    }
 
     return response;
   },
@@ -405,9 +476,12 @@ export const goCardlessService = {
    * @returns {Promise<import('../gocardless-node.types.js').Institution>}
    */
   getInstitution: async (institutionId) => {
-    const response = await client.getInstitutionById(institutionId);
-
-    handleGoCardlessError(response);
+    let response;
+    try {
+      response = await client.getInstitutionById(institutionId);
+    } catch (error) {
+      handleGoCardlessError(error);
+    }
 
     return response;
   },
@@ -446,13 +520,16 @@ export const goCardlessService = {
    * @returns {Promise<import('../gocardless.types.js').GetTransactionsResponse>}
    */
   getTransactions: async ({ institutionId, accountId, startDate, endDate }) => {
-    const response = await client.getTransactions({
-      accountId,
-      dateFrom: startDate,
-      dateTo: endDate,
-    });
-
-    handleGoCardlessError(response);
+    let response;
+    try {
+      response = await client.getTransactions({
+        accountId,
+        dateFrom: startDate,
+        dateTo: endDate,
+      });
+    } catch (error) {
+      handleGoCardlessError(error);
+    }
 
     const bank = BankFactory(institutionId);
     response.transactions.booked = response.transactions.booked
@@ -479,9 +556,12 @@ export const goCardlessService = {
    * @returns {Promise<import('../gocardless.types.js').GetBalances>}
    */
   getBalances: async (accountId) => {
-    const response = await client.getBalances(accountId);
-
-    handleGoCardlessError(response);
+    let response;
+    try {
+      response = await client.getBalances(accountId);
+    } catch (error) {
+      handleGoCardlessError(error);
+    }
 
     return response;
   },

@@ -1,5 +1,8 @@
 import express from 'express';
-import errorMiddleware from './util/error-middleware.js';
+import {
+  errorMiddleware,
+  requestLoggerMiddleware,
+} from './util/middlewares.js';
 import validateUser, { validateAuthHeader } from './util/validate-user.js';
 import {
   bootstrap,
@@ -24,7 +27,7 @@ let app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(errorMiddleware);
-
+app.use(requestLoggerMiddleware);
 export { app as handlers };
 
 // Non-authenticated endpoints:
@@ -176,5 +179,3 @@ app.get('/validate', (req, res) => {
     });
   }
 });
-
-app.use(errorMiddleware);
