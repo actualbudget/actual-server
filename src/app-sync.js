@@ -12,7 +12,7 @@ import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 import * as simpleSync from './sync-simple.js';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
-import getAccountDb, { getUserPermissions } from './account-db.js';
+import getAccountDb, { isAdmin } from './account-db.js';
 
 const app = express();
 app.use(errorMiddleware);
@@ -335,10 +335,7 @@ app.post('/update-user-filename', (req, res) => {
 });
 
 app.get('/list-user-files', (req, res) => {
-  const canSeeAll =
-    getUserPermissions(req.userSession.user_id).findIndex(
-      (permission) => permission === 'ADMINISTRATOR',
-    ) > -1;
+  const canSeeAll = isAdmin(req.userSession.user_id);
 
   let accountDb = getAccountDb();
   let rows = canSeeAll

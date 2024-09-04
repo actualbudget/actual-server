@@ -1,19 +1,15 @@
 import express from 'express';
 import * as uuid from 'uuid';
-import {
-  errorMiddleware,
-  requestLoggerMiddleware,
-} from './util/middlewares.js';
+import { errorMiddleware } from './util/middlewares.js';
 import validateUser from './util/validate-user.js';
 import getAccountDb, { isAdmin } from './account-db.js';
 import config from './load-config.js';
 import bodyParser from 'body-parser';
 
 let app = express();
-app.use(errorMiddleware);
-app.use(requestLoggerMiddleware);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(errorMiddleware);
 
 export { app as handlers };
 
