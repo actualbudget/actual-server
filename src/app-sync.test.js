@@ -6,23 +6,6 @@ import getAccountDb from './account-db.js';
 import { SyncProtoBuf } from '@actual-app/crdt';
 import crypto from 'node:crypto';
 
-const ADMIN_ROLE = '213733c1-5645-46ad-8784-a7b20b400f93';
-
-const createUser = (userId, userName, role, master = 0, enabled = 1) => {
-  getAccountDb().mutate(
-    'INSERT INTO users (id, user_name, display_name, enabled, master) VALUES (?, ?, ?, ?, ?)',
-    [userId, userName, `${userName} display`, enabled, master],
-  );
-  getAccountDb().mutate(
-    'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
-    [userId, role],
-  );
-};
-
-const setSessionUser = (userId) => {
-  getAccountDb().mutate('UPDATE sessions SET user_id = ?', [userId]);
-};
-
 describe('/user-get-key', () => {
   it('returns 401 if the user is not authenticated', async () => {
     const res = await request(app).post('/user-get-key');
@@ -36,9 +19,6 @@ describe('/user-get-key', () => {
   });
 
   it('returns encryption key details for a given fileId', async () => {
-    createUser('fileListAdminId', 'admin', ADMIN_ROLE, 1);
-    setSessionUser('fileListAdminId');
-
     const fileId = crypto.randomBytes(16).toString('hex');
     const encrypt_salt = 'test-salt';
     const encrypt_keyid = 'test-key-id';
@@ -46,7 +26,7 @@ describe('/user-get-key', () => {
 
     getAccountDb().mutate(
       'INSERT INTO files (id, encrypt_salt, encrypt_keyid, encrypt_test, owner) VALUES (?, ?, ?, ?, ?)',
-      [fileId, encrypt_salt, encrypt_keyid, encrypt_test, ''],
+      [fileId, encrypt_salt, encrypt_keyid, encrypt_test, 'genericAdmin'],
     );
 
     const res = await request(app)
@@ -108,12 +88,12 @@ describe('/reset-user-file', () => {
     // Use addMockFile to insert a mock file into the database
     getAccountDb().mutate(
       'INSERT INTO files (id, group_id, deleted, owner) VALUES (?, ?, FALSE, ?)',
-      [fileId, groupId, ''],
+      [fileId, groupId, 'genericAdmin'],
     );
 
     getAccountDb().mutate(
       'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
-      [fileId, ''],
+      [fileId, 'genericAdmin'],
     );
 
     const res = await request(app)
@@ -495,8 +475,6 @@ describe('/list-user-files', () => {
   });
 
   it('returns a list of user files for an authenticated user', async () => {
-    createUser('fileListAdminId', 'admin', ADMIN_ROLE, 1);
-    setSessionUser('fileListAdminId');
     const fileId1 = crypto.randomBytes(16).toString('hex');
     const fileId2 = crypto.randomBytes(16).toString('hex');
     const fileName1 = 'file1.txt';
@@ -809,8 +787,8 @@ describe('/sync', () => {
 
 function addMockFile(fileId, groupId, keyId, encryptMeta, syncVersion) {
   getAccountDb().mutate(
-    'INSERT INTO files (id, group_id, encrypt_keyid, encrypt_meta, sync_version) VALUES (?, ?, ?,?, ?)',
-    [fileId, groupId, keyId, encryptMeta, syncVersion],
+    'INSERT INTO files (id, group_id, encrypt_keyid, encrypt_meta, sync_version, owner) VALUES (?, ?, ?,?, ?, ?)',
+    [fileId, groupId, keyId, encryptMeta, syncVersion, 'genericAdmin'],
   );
 }
 
