@@ -139,6 +139,43 @@ const finalConfig = {
             config.upload.fileSizeLimitMB,
         }
       : config.upload,
+  openId:
+    process.env.ACTUAL_OPENID_DISCOVERY_URL ||
+    process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT
+      ? {
+          ...(process.env.ACTUAL_OPENID_DISCOVERY_URL
+            ? {
+                issuer: process.env.ACTUAL_OPENID_DISCOVERY_URL,
+              }
+            : process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT
+            ? {
+                issuer: {
+                  name: process.env.ACTUAL_OPENID_PROVIDER_NAME,
+                  authorization_endpoint:
+                    process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT,
+                  token_endpoint: process.env.ACTUAL_OPENID_TOKEN_ENDPOINT,
+                  userinfo_endpoint:
+                    process.env.ACTUAL_OPENID_USERINFO_ENDPOINT,
+                },
+              }
+            : config.openId),
+          ...{
+            client_id: process.env.ACTUAL_OPENID_CLIENT_ID
+              ? process.env.ACTUAL_OPENID_CLIENT_ID
+              : config.openId?.client_id,
+          },
+          ...{
+            client_secret: process.env.ACTUAL_OPENID_CLIENT_SECRET
+              ? process.env.ACTUAL_OPENID_CLIENT_SECRET
+              : config.openId?.client_secret,
+          },
+          ...{
+            server_hostname: process.env.ACTUAL_OPENID_SERVER_HOSTNAME
+              ? process.env.ACTUAL_OPENID_SERVER_HOSTNAME
+              : config.openId?.server_hostname,
+          },
+        }
+      : config.openId,
 };
 
 debug(`using port ${finalConfig.port}`);
