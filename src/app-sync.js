@@ -261,7 +261,14 @@ app.post('/upload-user-file', async (req, res) => {
     groupId = uuid.v4();
     accountDb.mutate(
       'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, owner) VALUES (?, ?, ?, ?, ?, ?)',
-      [fileId, groupId, syncFormatVersion, name, encryptMeta, req.userSession.user_id],
+      [
+        fileId,
+        groupId,
+        syncFormatVersion,
+        name,
+        encryptMeta,
+        req.userSession.user_id,
+      ],
     );
     res.send({ status: 'ok', groupId });
   } else {
@@ -357,7 +364,7 @@ app.get('/list-user-files', (req, res) => {
       groupId: row.group_id,
       name: row.name,
       encryptKeyId: row.encrypt_keyid,
-        owner: row.owner,
+      owner: row.owner,
     })),
   });
 });
