@@ -261,7 +261,7 @@ app.post('/upload-user-file', async (req, res) => {
     groupId = uuid.v4();
     accountDb.mutate(
       'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, owner) VALUES (?, ?, ?, ?, ?, ?)',
-      [fileId, groupId, syncFormatVersion, name, encryptMeta, user.user_id],
+      [fileId, groupId, syncFormatVersion, name, encryptMeta, req.userSession.user_id],
     );
     res.send({ status: 'ok', groupId });
   } else {
@@ -328,13 +328,8 @@ app.post('/update-user-filename', (req, res) => {
 });
 
 app.get('/list-user-files', (req, res) => {
-  let session = validateUser(req, res);
-  if (!session) {
-    return;
-  }
-
   const canSeeAll =
-    getUserPermissions(session.user_id).findIndex(
+    getUserPermissions(req.userSession.user_id).findIndex(
       (permission) => permission === 'ADMINISTRATOR',
     ) > -1;
 
@@ -351,7 +346,7 @@ app.get('/list-user-files', (req, res) => {
           JOIN user_access
             ON user_access.file_id = files.id
             AND user_access.user_id = ?`,
-        [session.user_id, session.user_id],
+        [req.userSession.user_id, req.userSession.user_id],
       );
 
   res.send({

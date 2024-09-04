@@ -20,10 +20,12 @@ async function errorMiddleware(err, req, res, _next) {
  * @param {import('express').NextFunction} next
  */
 const validateUserMiddleware = async (req, res, next) => {
-  let user = await validateUser(req, res);
-  if (!user) {
+  let session = await validateUser(req, res);
+  if (!session) {
     return;
   }
+
+  req.userSession = session;
   next();
 };
 

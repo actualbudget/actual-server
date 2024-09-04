@@ -11,7 +11,6 @@ const app = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
-
 app.use(validateUserMiddleware);
 
 app.post('/', async (req, res) => {
@@ -21,10 +20,7 @@ app.post('/', async (req, res) => {
   const { name, value } = req.body;
 
   if (method === 'openid') {
-    const session = validateUser(req, res);
-    if (!session) return;
-
-    let canSaveSecrets = isAdmin(session.user_id);
+    let canSaveSecrets = isAdmin(req.userSession);
 
     if (!canSaveSecrets) {
       res.status(400).send({

@@ -148,9 +148,9 @@ export async function loginWithOpenIdFinalize(body) {
     });
     const userInfo = await client.userinfo(grant);
     const identity =
+      userInfo.preferred_username ??
       userInfo.login ??
       userInfo.email ??
-      userInfo.preferred_username ??
       userInfo.id ??
       userInfo.name;
     if (identity == null) {
