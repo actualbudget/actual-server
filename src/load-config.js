@@ -102,6 +102,9 @@ const finalConfig = {
   loginMethod: process.env.ACTUAL_LOGIN_METHOD
     ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
     : config.loginMethod,
+  multiuser: process.env.ACTUAL_MULTIUSER 
+    ? process.env.ACTUAL_MULTIUSER.toLowerCase() === "true" 
+    : config.multiuser,
   trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
     ? process.env.ACTUAL_TRUSTED_PROXIES.split(',').map((q) => q.trim())
     : config.trustedProxies,
@@ -113,28 +116,28 @@ const finalConfig = {
   https:
     process.env.ACTUAL_HTTPS_KEY && process.env.ACTUAL_HTTPS_CERT
       ? {
-          key: process.env.ACTUAL_HTTPS_KEY.replace(/\\n/g, '\n'),
-          cert: process.env.ACTUAL_HTTPS_CERT.replace(/\\n/g, '\n'),
-          ...(config.https || {}),
-        }
+        key: process.env.ACTUAL_HTTPS_KEY.replace(/\\n/g, '\n'),
+        cert: process.env.ACTUAL_HTTPS_CERT.replace(/\\n/g, '\n'),
+        ...(config.https || {}),
+      }
       : config.https,
   upload:
     process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
-    process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
-    process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB
+      process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
+      process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB
       ? {
-          fileSizeSyncLimitMB:
-            +process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
-            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
-            config.upload.fileSizeSyncLimitMB,
-          syncEncryptedFileSizeLimitMB:
-            +process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
-            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
-            config.upload.syncEncryptedFileSizeLimitMB,
-          fileSizeLimitMB:
-            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
-            config.upload.fileSizeLimitMB,
-        }
+        fileSizeSyncLimitMB:
+          +process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
+          +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+          config.upload.fileSizeSyncLimitMB,
+        syncEncryptedFileSizeLimitMB:
+          +process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
+          +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+          config.upload.syncEncryptedFileSizeLimitMB,
+        fileSizeLimitMB:
+          +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+          config.upload.fileSizeLimitMB,
+      }
       : config.upload,
 };
 
