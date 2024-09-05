@@ -202,8 +202,10 @@ export async function loginWithOpenIdFinalize(body) {
     let expiration = TOKEN_EXPIRATION_NEVER;
     if (finalConfig.token_expiration == 'openid-provider') {
       expiration = grant.expires_at ?? TOKEN_EXPIRATION_NEVER;
-    } else if (finalConfig.token_expiration != 'never' &&
-      typeof finalConfig.token_expiration === 'number') {
+    } else if (
+      finalConfig.token_expiration != 'never' &&
+      typeof finalConfig.token_expiration === 'number'
+    ) {
       expiration =
         Math.floor(Date.now() / 1000) + finalConfig.token_expiration * 60;
     }
