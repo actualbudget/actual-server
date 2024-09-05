@@ -337,7 +337,7 @@ app.post('/access/delete-all', (req, res) => {
   }
 });
 
-app.get('/access/available-users', async (req, res) => {
+app.get('/access/users', async (req, res) => {
   const fileId = req.query.fileId;
   const session = validateUser(req, res);
   if (!session) return;
@@ -345,16 +345,14 @@ app.get('/access/available-users', async (req, res) => {
   if (!checkFilePermission(fileId, session.user_id, res)) return;
 
   const users = getAccountDb().all(
-    `SELECT users.id as userId, user_name as userName, display_name as displayName
+    `SELECT users.id as userId, user_name as userName, display_name as displayName, 
+            CASE WHEN user_access.file_id IS NULL THEN 0 ELSE 1 END as haveAccess,
+            CASE WHEN files.id IS NULL THEN 0 ELSE 1 END as owner
       FROM users
-      WHERE NOT EXISTS (SELECT 1 
-                        FROM user_access 
-                        WHERE user_access.file_id = ? and user_access.user_id = users.id)
-      AND NOT EXISTS (SELECT 1
-                      FROM files
-                      WHERE files.id = ? AND files.owner = users.id)
-      AND users.enabled = 1 AND users.user_name <> '' AND users.id <> ?`,
-    [fileId, fileId, session.user_id],
+      LEFT JOIN user_access ON user_access.file_id = ? and user_access.user_id = users.id
+      LEFT JOIN files ON files.id = ? and files.owner = users.id
+      WHERE users.enabled = 1 AND users.user_name <> ''`,
+    [fileId, fileId],
   );
   res.json(users);
 });
