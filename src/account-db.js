@@ -55,19 +55,7 @@ export function getLoginMethod(req) {
   return config.loginMethod || 'password';
 }
 
-// Supported login settings:
-// "password": "secret_password",
-// "openid": {
-//   "issuer": "https://example.org",
-//   "client_id": "your_client_id",
-//   "client_secret": "your_client_secret",
-//   "server_hostname": "https://actual.your_website.com"
-// }
 export async function bootstrap(loginSettings) {
-  if (!needsBootstrap()) {
-    return { error: 'already-bootstrapped' };
-  }
-
   const passEnabled = Object.prototype.hasOwnProperty.call(
     loginSettings,
     'password',
@@ -76,6 +64,19 @@ export async function bootstrap(loginSettings) {
     loginSettings,
     'openid',
   );
+
+  const { cnt } =
+    getAccountDb().first(
+      `SELECT count(*) as cnt
+   FROM users
+   WHERE users.user_name <> '' and users.master = 1`,
+    ) || {};
+
+  if (!openIdEnabled || (openIdEnabled && cnt > 0)) {
+    if (!needsBootstrap()) {
+      return { error: 'already-bootstrapped' };
+    }
+  }
 
   if (!passEnabled && !openIdEnabled) {
     return { error: 'no-auth-method-selected' };

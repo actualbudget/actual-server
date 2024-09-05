@@ -4,7 +4,7 @@ import {
   requestLoggerMiddleware,
 } from './util/middlewares.js';
 import validateUser, { validateAuthHeader } from './util/validate-user.js';
-import {
+import getAccountDb, {
   bootstrap,
   needsBootstrap,
   getLoginMethod,
@@ -135,7 +135,34 @@ app.post('/enable-password', async (req, res) => {
   }
 });
 
-//
+app.get('/openid-config', async (req, res) => {
+  const { cnt } =
+    getAccountDb().first(
+      `SELECT count(*) as cnt
+   FROM users
+   WHERE users.user_name <> '' and users.master = 1`,
+    ) || {};
+
+  if (cnt > 0) {
+    res.send({});
+    return;
+  }
+
+  const auth =
+    getAccountDb().first(
+      `SELECT * FROM auth
+       WHERE method = ?`,
+      ['openid'],
+    ) || {};
+
+  if (!auth) {
+    res.send({});
+    return;
+  }
+
+  res.send({ openId: JSON.parse(auth.extra_data) });
+});
+
 app.get('/login-openid/cb', async (req, res) => {
   let { error, url } = await loginWithOpenIdFinalize(req.query);
   if (error) {

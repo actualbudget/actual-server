@@ -91,7 +91,7 @@ app.get('/masterCreated/', (req, res) => {
     getAccountDb().first(
       `SELECT count(*) as cnt
      FROM users
-     WHERE users.user_name <> ''`,
+     WHERE users.user_name <> '' and users.master = 1`,
     ) || {};
 
   res.json(cnt > 0);
