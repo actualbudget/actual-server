@@ -176,6 +176,9 @@ const finalConfig = {
           },
         }
       : config.openId,
+  token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
+    ? process.env.ACTUAL_TOKEN_EXPIRATION
+    : config.token_expiration,
 };
 
 debug(`using port ${finalConfig.port}`);
