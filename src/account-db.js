@@ -103,6 +103,10 @@ export async function bootstrap(loginSettings) {
 }
 
 export function isAdmin(userId) {
+  const user =
+    getAccountDb().first('SELECT master FROM users WHERE id = ?', [userId]) ||
+    {};
+  if (user?.master === 1) return true;
   return getUserPermissions(userId).some((value) => value === 'ADMINISTRATOR');
 }
 
