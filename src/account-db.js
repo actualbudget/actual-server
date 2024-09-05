@@ -216,7 +216,8 @@ export function login(password) {
   let expiration = TOKEN_EXPIRATION_NEVER;
   if (
     config.token_expiration != 'never' &&
-    config.token_expiration != 'openid-provider'
+    config.token_expiration != 'openid-provider' &&
+    typeof config.token_expiration === 'number'
   ) {
     expiration = Math.floor(Date.now() / 1000) + config.token_expiration * 60;
   }
