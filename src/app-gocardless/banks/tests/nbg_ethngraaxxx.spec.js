@@ -39,7 +39,7 @@ describe('NbgEthngraaxxx', () => {
 
     const normalizedTransaction = NbgEthngraaxxx.normalizeTransaction(
       transaction,
-      false,
+      true,
     );
 
     expect(normalizedTransaction.transactionAmount.amount).toEqual('-100.00');
