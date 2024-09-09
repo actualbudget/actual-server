@@ -1,5 +1,6 @@
 import AbancaCaglesmm from './banks/abanca-caglesmm.js';
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
+import BancsabadellBsabesbb from './banks/bancsabadell-bsabesbbb.js';
 import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
@@ -27,6 +28,7 @@ import NbgEthngraaxxx from './banks/nbg_ethngraaxxx.js';
 export const banks = [
   AbancaCaglesmm,
   AmericanExpressAesudef1,
+  BancsabadellBsabesbb,
   BankinterBkbkesmm,
   Belfius,
   Berliner_Sparkasse_beladebexxx,
