@@ -24,8 +24,7 @@ export default {
   },
 
   normalizeTransaction(transaction, _booked) {
-    const date =
-      transaction.bookingDate ||
+    const date = transaction.bookingDate ||
       transaction.valueDate;
     if (!date) {
       return null;
@@ -52,7 +51,6 @@ export default {
       date: transaction.bookingDate || transaction.valueDate,
     };
   },
-
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
