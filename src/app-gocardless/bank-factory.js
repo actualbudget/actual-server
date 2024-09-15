@@ -1,7 +1,9 @@
 import AbancaCaglesmm from './banks/abanca-caglesmm.js';
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
+import BancsabadellBsabesbb from './banks/bancsabadell-bsabesbbb.js';
 import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
 import Belfius from './banks/belfius_gkccbebb.js';
+import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
 import EasybankBawaatww from './banks/easybank-bawaatww.js';
@@ -10,6 +12,7 @@ import IngIngbrobu from './banks/ing-ingbrobu.js';
 import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
+import KBCkredbebb from './banks/kbc_kredbebb.js';
 import MbankRetailBrexplpw from './banks/mbank-retail-brexplpw.js';
 import NationwideNaiaGB21 from './banks/nationwide-naiagb21.js';
 import NorwegianXxNorwnok1 from './banks/norwegian-xx-norwnok1.js';
@@ -17,16 +20,17 @@ import SEBKortBankAB from './banks/seb-kort-bank-ab.js';
 import SEBPrivat from './banks/seb-privat.js';
 import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
 import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
-import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
+import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
-import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 
 export const banks = [
   AbancaCaglesmm,
   AmericanExpressAesudef1,
+  BancsabadellBsabesbb,
   BankinterBkbkesmm,
   Belfius,
+  Berliner_Sparkasse_beladebexxx,
   BnpBeGebabebb,
   DanskeBankDabNO22,
   EasybankBawaatww,
@@ -34,6 +38,7 @@ export const banks = [
   IngIngbrobu,
   IngIngddeff,
   IngPlIngbplpw,
+  KBCkredbebb,
   MbankRetailBrexplpw,
   NationwideNaiaGB21,
   NorwegianXxNorwnok1,
@@ -41,10 +46,9 @@ export const banks = [
   SEBPrivat,
   SandboxfinanceSfin0000,
   SparNordSpNoDK22,
-  SpkMarburgBiedenkopfHeladef1mar,
   SpkKarlsruhekarsde66,
+  SpkMarburgBiedenkopfHeladef1mar,
   VirginNrnbgb22,
-  Berliner_Sparkasse_beladebexxx,
 ];
 
 export default (institutionId) =>
@@ -91,4 +95,8 @@ export const BANKS_WITH_LIMITED_HISTORY = [
   'OPYN_BITAITRRB2B',
   'PAYTIPPER_PAYTITM1',
   'SELLA_PERSONAL_CREDIT_SELBIT22',
+  'SANTANDER_BSCHESMM',
+  'NORDEA_NDEADKKK',
+  'VUB_BANKA_SUBASKBX',
+  'REVOLUT_REVOLT21',
 ];
