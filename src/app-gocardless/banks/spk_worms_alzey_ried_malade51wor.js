@@ -24,8 +24,7 @@ export default {
   },
 
   normalizeTransaction(transaction, _booked) {
-    const date = transaction.bookingDate ||
-      transaction.valueDate;
+    const date = transaction.bookingDate || transaction.valueDate;
     if (!date) {
       return null;
     }
