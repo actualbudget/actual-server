@@ -5,6 +5,7 @@ import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
+import CBCcregbebb from './banks/cbc_cregbebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
 import EasybankBawaatww from './banks/easybank-bawaatww.js';
 import Fortuneo from './banks/FORTUNEO_FTNOFRP1XXX.js';
@@ -24,6 +25,7 @@ import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import spk_worms_alzey_ried_malade51wor from './banks/spk_worms_alzey_ried_malade51wor.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
+import NbgEthngraaxxx from './banks/nbg_ethngraaxxx.js';
 
 export const banks = [
   AbancaCaglesmm,
@@ -33,6 +35,7 @@ export const banks = [
   Belfius,
   Berliner_Sparkasse_beladebexxx,
   BnpBeGebabebb,
+  CBCcregbebb,
   DanskeBankDabNO22,
   EasybankBawaatww,
   Fortuneo,
@@ -51,6 +54,7 @@ export const banks = [
   SpkMarburgBiedenkopfHeladef1mar,
   spk_worms_alzey_ried_malade51wor,
   VirginNrnbgb22,
+  NbgEthngraaxxx,
 ];
 
 export default (institutionId) =>
