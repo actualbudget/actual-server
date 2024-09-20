@@ -52,7 +52,7 @@ export const banks = [
   SparNordSpNoDK22,
   SpkKarlsruhekarsde66,
   SpkMarburgBiedenkopfHeladef1mar,
-  spk_worms_alzey_ried_malade51wor,
+  SpkWormsAlzeyRiedMalade51wor,
   VirginNrnbgb22,
   NbgEthngraaxxx,
 ];
