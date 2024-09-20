@@ -29,21 +29,10 @@ export default {
       return null;
     }
 
-    let remittanceInformationUnstructured;
-
-    if (transaction.remittanceInformationUnstructured) {
-      remittanceInformationUnstructured =
-        transaction.remittanceInformationUnstructured;
-    } else if (transaction.remittanceInformationStructured) {
-      remittanceInformationUnstructured =
-        transaction.remittanceInformationUnstructured;
-    } else if (transaction.remittanceInformationStructuredArray?.length > 0) {
-      remittanceInformationUnstructured =
-        transaction.remittanceInformationStructuredArray?.join(' ');
-    }
-
     transaction.remittanceInformationUnstructured =
-      remittanceInformationUnstructured;
+      transaction.remittanceInformationUnstructured ??
+      transaction.remittanceInformationStructured ??
+      transaction.remittanceInformationStructuredArray?.join(' ');
     return {
       ...transaction,
       payeeName: formatPayeeName(transaction),
