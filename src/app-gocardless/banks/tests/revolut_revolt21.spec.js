@@ -9,6 +9,7 @@ describe('RevolutRevolt21', () => {
           'Bizum payment to: CREDITOR NAME',
           'Bizum description',
         ],
+        bookingDate: '2024-09-21',
       };
 
       const normalizedTransaction = RevolutRevolt21.normalizeTransaction(
@@ -29,6 +30,7 @@ describe('RevolutRevolt21', () => {
         'Bizum payment from: DEBTOR NAME',
         'Bizum description',
       ],
+      bookingDate: '2024-09-21',
     };
 
     const normalizedTransaction = RevolutRevolt21.normalizeTransaction(
