@@ -17,6 +17,7 @@ import KBCkredbebb from './banks/kbc_kredbebb.js';
 import MbankRetailBrexplpw from './banks/mbank-retail-brexplpw.js';
 import NationwideNaiaGB21 from './banks/nationwide-naiagb21.js';
 import NorwegianXxNorwnok1 from './banks/norwegian-xx-norwnok1.js';
+import RevolutRevolt21 from './banks/revolut_revolt21.js';
 import SEBKortBankAB from './banks/seb-kort-bank-ab.js';
 import SEBPrivat from './banks/seb-privat.js';
 import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
@@ -47,6 +48,7 @@ export const banks = [
   NorwegianXxNorwnok1,
   SEBKortBankAB,
   SEBPrivat,
+  RevolutRevolt21,
   SandboxfinanceSfin0000,
   SparNordSpNoDK22,
   SpkKarlsruhekarsde66,
