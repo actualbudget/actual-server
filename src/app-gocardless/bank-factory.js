@@ -1,10 +1,12 @@
 import AbancaCaglesmm from './banks/abanca-caglesmm.js';
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
+import BancsabadellBsabesbb from './banks/bancsabadell-bsabesbbb.js';
 import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
 import Boursorama from './banks/BOURSORAMA_BOUSFRPP.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
+import CBCcregbebb from './banks/cbc_cregbebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
 import EasybankBawaatww from './banks/easybank-bawaatww.js';
 import Fortuneo from './banks/FORTUNEO_FTNOFRP1XXX.js';
@@ -23,6 +25,7 @@ import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
+import NbgEthngraaxxx from './banks/nbg_ethngraaxxx.js';
 
 export const banks = [
   AbancaCaglesmm,
@@ -32,6 +35,7 @@ export const banks = [
   Berliner_Sparkasse_beladebexxx,
   BnpBeGebabebb,
   Boursorama,
+  CBCcregbebb,
   DanskeBankDabNO22,
   EasybankBawaatww,
   Fortuneo,
@@ -49,6 +53,7 @@ export const banks = [
   SpkKarlsruhekarsde66,
   SpkMarburgBiedenkopfHeladef1mar,
   VirginNrnbgb22,
+  NbgEthngraaxxx,
 ];
 
 export default (institutionId) =>
@@ -97,4 +102,6 @@ export const BANKS_WITH_LIMITED_HISTORY = [
   'SELLA_PERSONAL_CREDIT_SELBIT22',
   'SANTANDER_BSCHESMM',
   'NORDEA_NDEADKKK',
+  'VUB_BANKA_SUBASKBX',
+  'REVOLUT_REVOLT21',
 ];
