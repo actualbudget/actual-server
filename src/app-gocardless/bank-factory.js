@@ -30,6 +30,7 @@ import NbgEthngraaxxx from './banks/nbg_ethngraaxxx.js';
 export const banks = [
   AbancaCaglesmm,
   AmericanExpressAesudef1,
+  BancsabadellBsabesbb,
   BankinterBkbkesmm,
   Belfius,
   Berliner_Sparkasse_beladebexxx,
