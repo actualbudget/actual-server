@@ -11,18 +11,6 @@ export default {
 
   accessValidForDays: 90,
 
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: account.iban.slice(-4),
-      iban: account.iban,
-      name: [account.name, printIban(account)].join(' '),
-      official_name: account.product,
-      type: 'checking',
-    };
-  },
-
   normalizeTransaction(transaction, _booked) {
     const date = transaction.bookingDate || transaction.valueDate;
     if (!date) {
@@ -38,15 +26,5 @@ export default {
       payeeName: formatPayeeName(transaction),
       date: transaction.bookingDate || transaction.valueDate,
     };
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    const currentBalance = balances.find(
-      (balance) => 'interimAvailable' === balance.balanceType,
-    );
-
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance.balanceAmount.amount));
   },
 };
