@@ -65,7 +65,7 @@ describe('utils', () => {
       ]);
     });
 
-    it('should use multiple fields in sort', () => {
+    it('should use bookingDate primarily even if bookingDateTime is on an other date', () => {
       const transactions = [
         {
           bookingDate: '2023-01-01',
