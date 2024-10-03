@@ -71,7 +71,6 @@ let defaultConfig = {
     fileSizeLimitMB: 20,
   },
   projectRoot,
-  password: '',
   multiuser: false,
   token_expiration: 'never',
 };

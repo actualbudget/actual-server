@@ -33,7 +33,6 @@ export interface Config {
     client_secret: string;
     server_hostname: string;
   };
-  password?: string;
   multiuser: boolean;
   token_expiration?: 'never' | 'openid-provider' | number;
 }
