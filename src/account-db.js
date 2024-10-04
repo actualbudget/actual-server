@@ -56,23 +56,17 @@ export function getLoginMethod(req) {
 }
 
 export async function bootstrap(loginSettings) {
-  const passEnabled = Object.prototype.hasOwnProperty.call(
-    loginSettings,
-    'password',
-  );
-  const openIdEnabled = Object.prototype.hasOwnProperty.call(
-    loginSettings,
-    'openid',
-  );
+  const passEnabled = 'password' in loginSettings;
+  const openIdEnabled = 'openid' in loginSettings;
 
-  const { cnt } =
+  const { countOfOwner } =
     getAccountDb().first(
-      `SELECT count(*) as cnt
+      `SELECT count(*) as countOfOwner
    FROM users
    WHERE users.user_name <> '' and users.owner = 1`,
     ) || {};
 
-  if (!openIdEnabled || (openIdEnabled && cnt > 0)) {
+  if (!openIdEnabled || countOfOwner > 0) {
     if (!needsBootstrap()) {
       return { error: 'already-bootstrapped' };
     }
@@ -94,7 +88,7 @@ export async function bootstrap(loginSettings) {
   }
 
   if (openIdEnabled) {
-    let { error } = await bootstrapOpenId(loginSettings.openid);
+    let { error } = await bootstrapOpenId(loginSettings.openId);
     if (error) {
       return { error };
     }
@@ -297,7 +291,7 @@ export function clearExpiredSessions() {
   console.log(`Deleted ${deletedSessions} old sessions`);
 }
 
-export async function toogleAuthentication() {
+export async function toggleAuthentication() {
   if (config.loginMethod === 'openid') {
     const { cnt } = getAccountDb().first(
       'SELECT count(*) as cnt FROM auth WHERE method = ? and active = 1',

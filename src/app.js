@@ -12,7 +12,7 @@ import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as secretApp from './app-secrets.js';
 import * as adminApp from './app-admin.js';
-import { toogleAuthentication } from './account-db.js';
+import { toggleAuthentication } from './account-db.js';
 import { exit } from 'node:process';
 
 const app = express();
@@ -89,7 +89,7 @@ export default async function run() {
     app.listen(config.port, config.hostname);
   }
 
-  if (!(await toogleAuthentication())) exit(-1);
+  if (!(await toggleAuthentication())) exit(-1);
 
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
 }
