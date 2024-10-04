@@ -53,7 +53,6 @@ export const up = async function () {
 };
 
 export const down = async function () {
-  console.log("down multuser");
   await getAccountDb().exec(
     `
       BEGIN TRANSACTION;

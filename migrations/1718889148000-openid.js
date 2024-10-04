@@ -24,7 +24,6 @@ export const up = async function () {
 };
 
 export const down = async function () {
-  console.log("down openid");
   await getAccountDb().exec(
     `
     BEGIN TRANSACTION;
