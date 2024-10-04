@@ -47,7 +47,9 @@ export function loginWithPassword(password) {
 
   let token = sessionRow ? sessionRow.token : uuid.v4();
 
-  let { totalOfUsers } = accountDb.first('SELECT count(*) as totalOfUsers FROM users');
+  let { totalOfUsers } = accountDb.first(
+    'SELECT count(*) as totalOfUsers FROM users',
+  );
   let userId = null;
   if (totalOfUsers === 0) {
     userId = uuid.v4();
@@ -56,7 +58,8 @@ export function loginWithPassword(password) {
       [userId, '', ''],
     );
 
-    const { id: adminRoleId } = accountDb.first('SELECT id FROM roles WHERE name = ?', ['Admin']) || {};
+    const { id: adminRoleId } =
+      accountDb.first('SELECT id FROM roles WHERE name = ?', ['Admin']) || {};
 
     if (!adminRoleId) {
       return { error: 'administrator-role-not-found' };
@@ -81,7 +84,8 @@ export function loginWithPassword(password) {
     finalConfig.token_expiration != 'openid-provider' &&
     typeof finalConfig.token_expiration === 'number'
   ) {
-    expiration = Math.floor(Date.now() / 1000) + finalConfig.token_expiration * 60;
+    expiration =
+      Math.floor(Date.now() / 1000) + finalConfig.token_expiration * 60;
   }
 
   if (!sessionRow) {
