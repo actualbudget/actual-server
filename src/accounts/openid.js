@@ -5,16 +5,16 @@ import { TOKEN_EXPIRATION_NEVER } from '../app-admin.js';
 import finalConfig from '../load-config.js';
 
 export async function bootstrapOpenId(config) {
-  if (!Object.prototype.hasOwnProperty.call(config, 'issuer')) {
+  if (!('issuer' in config)) {
     return { error: 'missing-issuer' };
   }
-  if (!Object.prototype.hasOwnProperty.call(config, 'client_id')) {
+  if (!('client_id' in config)) {
     return { error: 'missing-client-id' };
   }
-  if (!Object.prototype.hasOwnProperty.call(config, 'client_secret')) {
+  if (!('client_secret' in config)) {
     return { error: 'missing-client-secret' };
   }
-  if (!Object.prototype.hasOwnProperty.call(config, 'server_hostname')) {
+  if (!('server_hostname' in config)) {
     return { error: 'missing-server-hostname' };
   }
 
@@ -47,16 +47,17 @@ async function setupOpenIdClient(config) {
     typeof config.issuer === 'string'
       ? await Issuer.discover(config.issuer)
       : new Issuer({
-          issuer: config.issuer.name,
-          authorization_endpoint: config.issuer.authorization_endpoint,
-          token_endpoint: config.issuer.token_endpoint,
-          userinfo_endpoint: config.issuer.userinfo_endpoint,
-        });
+        issuer: config.issuer.name,
+        authorization_endpoint: config.issuer.authorization_endpoint,
+        token_endpoint: config.issuer.token_endpoint,
+        userinfo_endpoint: config.issuer.userinfo_endpoint,
+      });
 
   const client = new issuer.Client({
     client_id: config.client_id,
     client_secret: config.client_secret,
     redirect_uri: config.server_hostname + '/account/login-openid/cb',
+    validate_id_token: true,
   });
 
   return client;
