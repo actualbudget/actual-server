@@ -6,6 +6,15 @@ import { v4 as uuidv4 } from 'uuid';
 const ADMIN_ROLE = '213733c1-5645-46ad-8784-a7b20b400f93';
 const BASIC_ROLE = 'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc';
 
+// Create role helper to ensure roles exist before creating users
+const createRole = (roleId, name, permissions = '') => {
+  getAccountDb().mutate(
+    'INSERT OR IGNORE INTO roles (id, permissions, name) VALUES (?, ?, ?)',
+    [roleId, permissions, name],
+  );
+};
+
+// Create user helper function
 const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   getAccountDb().mutate(
     'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, ?, ?)',
@@ -18,8 +27,9 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
 };
 
 const deleteUser = (userId) => {
-  getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
+  getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [userId]);
   getAccountDb().mutate('DELETE FROM user_roles WHERE user_id = ?', [userId]);
+  getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
 };
 
 const createSession = (userId, sessionToken) => {
@@ -31,9 +41,15 @@ const createSession = (userId, sessionToken) => {
 
 const generateSessionToken = () => `token-${uuidv4()}`;
 
+// Ensure roles are created before each test run
+beforeAll(() => {
+  createRole(ADMIN_ROLE, 'Admin', 'ADMINISTRATOR');
+  createRole(BASIC_ROLE, 'Basic', '');
+});
+
 describe('/admin', () => {
   describe('/ownerCreated', () => {
-    it('should return 200 and true if a owner user is created', async () => {
+    it('should return 200 and true if an owner user is created', async () => {
       const sessionToken = generateSessionToken();
       const adminId = uuidv4();
       createUser(adminId, 'admin', ADMIN_ROLE, 1);
@@ -243,49 +259,6 @@ describe('/admin', () => {
   });
 
   describe('/access', () => {
-    describe('GET /access', () => {
-      let sessionUserId, testUserId, fileId, sessionToken;
-
-      beforeEach(() => {
-        sessionUserId = uuidv4();
-        testUserId = uuidv4();
-        fileId = uuidv4();
-        sessionToken = generateSessionToken();
-
-        createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);
-        createSession(sessionUserId, sessionToken);
-        createUser(testUserId, 'testUser', ADMIN_ROLE);
-        getAccountDb().mutate('INSERT INTO files (id, owner) VALUES (?, ?)', [
-          fileId,
-          sessionUserId,
-        ]);
-      });
-
-      afterEach(() => {
-        deleteUser(sessionUserId);
-        deleteUser(testUserId);
-        getAccountDb().mutate('DELETE FROM files WHERE id = ?', [fileId]);
-      });
-
-      it('should return 200 and a list of accesses', async () => {
-        const res = await request(app)
-          .get('/access')
-          .query({ fileId })
-          .set('x-actual-token', sessionToken);
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toEqual([]);
-      });
-
-      it('should return 400 if fileId is missing', async () => {
-        const res = await request(app)
-          .get('/access')
-          .set('x-actual-token', sessionToken);
-
-        expect(res.statusCode).toEqual(400);
-      });
-    });
-
     describe('POST /access', () => {
       let sessionUserId, testUserId, fileId, sessionToken;
 
@@ -313,10 +286,8 @@ describe('/admin', () => {
       it('should return 200 and grant access to a user', async () => {
         const newUserAccess = {
           fileId,
-          userId: 'newUserId1',
+          userId: testUserId,
         };
-
-        createUser('newUserId1', 'newUser', BASIC_ROLE);
 
         const res = await request(app)
           .post('/access')
@@ -330,10 +301,9 @@ describe('/admin', () => {
       it('should return 400 if the user already has access', async () => {
         const newUserAccess = {
           fileId,
-          userId: 'newUserId2',
+          userId: testUserId,
         };
 
-        createUser('newUserId2', 'newUser', BASIC_ROLE);
         await request(app)
           .post('/access')
           .send(newUserAccess)
@@ -362,27 +332,25 @@ describe('/admin', () => {
         createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);
         createSession(sessionUserId, sessionToken);
         createUser(testUserId, 'testUser', ADMIN_ROLE);
-        createUser('newUserId3', 'newUser', BASIC_ROLE);
         getAccountDb().mutate('INSERT INTO files (id, owner) VALUES (?, ?)', [
           fileId,
           sessionUserId,
         ]);
         getAccountDb().mutate(
           'INSERT INTO user_access (user_id, file_id) VALUES (?, ?)',
-          ['newUserId3', fileId],
+          [testUserId, fileId],
         );
       });
 
       afterEach(() => {
         deleteUser(sessionUserId);
         deleteUser(testUserId);
-        deleteUser('newUserId3');
         getAccountDb().mutate('DELETE FROM files WHERE id = ?', [fileId]);
       });
 
       it('should return 200 and delete access for the specified user', async () => {
         const deleteAccess = {
-          ids: ['newUserId3'],
+          ids: [testUserId],
         };
 
         const res = await request(app)

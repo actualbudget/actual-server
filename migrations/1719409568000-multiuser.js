@@ -23,14 +23,14 @@ export const up = async function () {
     CREATE TABLE user_roles
       (user_id TEXT,
       role_id TEXT,
-      , FOREIGN KEY (user_id) REFERENCES users(id)
+      FOREIGN KEY (user_id) REFERENCES users(id)
       , FOREIGN KEY (role_id) REFERENCES roles(id)
       );
 
     CREATE TABLE user_access
       (user_id TEXT,
       file_id TEXT,
-      , FOREIGN KEY (user_id) REFERENCES users(id)
+      FOREIGN KEY (user_id) REFERENCES users(id)
       , FOREIGN KEY (file_id) REFERENCES files(id)
       );      
 
@@ -53,9 +53,15 @@ export const up = async function () {
 };
 
 export const down = async function () {
+  console.log("down multuser");
   await getAccountDb().exec(
     `
       BEGIN TRANSACTION;
+
+      DROP TABLE IF EXISTS user_access;
+      DROP TABLE IF EXISTS user_roles;
+      DROP TABLE IF EXISTS roles;
+
 
       CREATE TABLE sessions_backup (
           token TEXT PRIMARY KEY
@@ -64,6 +70,8 @@ export const down = async function () {
       INSERT INTO sessions_backup (token)
       SELECT token FROM sessions;
 
+      DROP TABLE sessions;
+      
       ALTER TABLE sessions_backup RENAME TO sessions;
 
       CREATE TABLE files_backup (
@@ -105,9 +113,6 @@ export const down = async function () {
 
       ALTER TABLE files_backup RENAME TO files;
 
-      DROP TABLE IF EXISTS user_access;
-      DROP TABLE IF EXISTS user_roles;
-      DROP TABLE IF EXISTS roles;
       DROP TABLE IF EXISTS users;
 
       COMMIT;

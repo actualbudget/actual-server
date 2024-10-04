@@ -12,12 +12,10 @@ import config from './load-config.js';
 let app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(requestLoggerMiddleware);
 app.use(errorMiddleware);
+app.use(requestLoggerMiddleware);
 
 export { app as handlers };
-
-export const TOKEN_EXPIRATION_NEVER = -1;
 
 const sendErrorResponse = (res, status, reason, details) => {
   res.status(status).send({
@@ -87,7 +85,7 @@ app.get('/ownerCreated/', (req, res) => {
   res.json(cnt > 0);
 });
 
-app.get('/users/', validateSessionMiddleware, (req, res) => {
+app.get('/users/', await validateSessionMiddleware, (req, res) => {
   const users = getAccountDb().all(
     `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(owner,0) as owner, roles.id as role 
      FROM users
@@ -106,7 +104,7 @@ app.get('/users/', validateSessionMiddleware, (req, res) => {
 });
 
 app.post('/users', validateSessionMiddleware, async (req, res) => {
-  if (isAdmin(req.userSession.user_id)) {
+  if (!isAdmin(req.userSession.user_id)) {
     res.status(401).send({
       status: 'error',
       reason: 'unauthorized',
@@ -190,7 +188,7 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
 });
 
 app.post('/users/delete-all', validateSessionMiddleware, async (req, res) => {
-  if (await isAdmin(req.userSession.user_id)) {
+  if (!isAdmin(req.userSession.user_id)) {
     res.status(401).send({
       status: 'error',
       reason: 'unauthorized',

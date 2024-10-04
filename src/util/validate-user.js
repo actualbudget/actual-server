@@ -2,7 +2,8 @@ import config from '../load-config.js';
 import proxyaddr from 'proxy-addr';
 import ipaddr from 'ipaddr.js';
 import { getSession } from '../account-db.js';
-import { TOKEN_EXPIRATION_NEVER } from '../app-admin.js';
+
+export const TOKEN_EXPIRATION_NEVER = -1;
 
 /**
  * @param {import('express').Request} req

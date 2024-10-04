@@ -1,8 +1,8 @@
 import getAccountDb, { clearExpiredSessions } from '../account-db.js';
 import * as uuid from 'uuid';
 import { generators, Issuer } from 'openid-client';
-import { TOKEN_EXPIRATION_NEVER } from '../app-admin.js';
 import finalConfig from '../load-config.js';
+import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
 export async function bootstrapOpenId(config) {
   if (!('issuer' in config)) {
