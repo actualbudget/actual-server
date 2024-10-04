@@ -172,12 +172,12 @@ export async function loginWithOpenIdFinalize(body) {
       return { error: 'openid-grant-failed: no identification was found' };
     }
 
-    let { c } = accountDb.first(
-      'SELECT count(*) as c FROM users WHERE user_name <> ?',
+    let { countUsersWithUserName } = accountDb.first(
+      'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
       [''],
     );
     let userId = null;
-    if (c === 0) {
+    if (countUsersWithUserName === 0) {
       userId = uuid.v4();
       accountDb.mutate(
         'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, 1, 1)',
