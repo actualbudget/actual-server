@@ -9,13 +9,12 @@ import getAccountDb, {
   needsBootstrap,
   getLoginMethod,
   listLoginMethods,
-  login,
   enableOpenID,
   disableOpenID,
   getUserInfo,
   getUserPermissions,
 } from './account-db.js';
-import { changePassword } from './accounts/password.js';
+import { changePassword, loginWithPassword } from './accounts/password.js';
 import {
   loginWithOpenIdSetup,
   loginWithOpenIdFinalize,
@@ -74,7 +73,7 @@ app.post('/login', async (req, res) => {
         return;
       } else {
         if (validateAuthHeader(req)) {
-          tokenRes = login(headerVal);
+          tokenRes = loginWithPassword(headerVal);
         } else {
           res.send({ status: 'error', reason: 'proxy-not-trusted' });
           return;
@@ -94,7 +93,7 @@ app.post('/login', async (req, res) => {
 
     case 'password':
     default:
-      tokenRes = login(req.body.password);
+      tokenRes = loginWithPassword(req.body.password);
       break;
   }
   let { error, token } = tokenRes;

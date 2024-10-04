@@ -1,11 +1,9 @@
 import { join } from 'node:path';
 import openDatabase from './db.js';
 import config from './load-config.js';
-import * as uuid from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { bootstrapPassword } from './accounts/password.js';
 import { bootstrapOpenId } from './accounts/openid.js';
-import { TOKEN_EXPIRATION_NEVER } from './app-admin.js';
 
 let _accountDb;
 
@@ -16,10 +14,6 @@ export default function getAccountDb() {
   }
 
   return _accountDb;
-}
-
-function hashPassword(password) {
-  return bcrypt.hashSync(password, 12);
 }
 
 export function needsBootstrap() {
@@ -160,93 +154,6 @@ export async function disableOpenID(
   getAccountDb().mutate('DELETE FROM users WHERE user_name <> ?', ['']);
   getAccountDb().mutate('DELETE FROM user_roles');
   getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
-}
-
-export function login(password) {
-  if (password === undefined || password === '') {
-    return { error: 'invalid-password' };
-  }
-
-  let accountDb = getAccountDb();
-  const { extra_data: passwordHash } =
-    accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
-      'password',
-    ]) || {};
-
-  let confirmed = passwordHash && bcrypt.compareSync(password, passwordHash);
-
-  if (!confirmed) {
-    return { error: 'invalid-password' };
-  }
-
-  let sessionRow = accountDb.first('SELECT * FROM sessions');
-
-  let token = sessionRow ? sessionRow.token : uuid.v4();
-
-  let { totalOfUsers } = accountDb.first('SELECT count(*) as totalOfUsers FROM users');
-  let userId = null;
-  if (totalOfUsers === 0) {
-    userId = uuid.v4();
-    accountDb.mutate(
-      'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, 1, 1)',
-      [userId, '', ''],
-    );
-
-    const { id: adminRoleId } = accountDb.first('SELECT id FROM roles WHERE name = ?', ['Admin']);
-
-    accountDb.mutate(
-      'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
-      [userId, adminRoleId],
-    );
-  } else {
-    let { id: userIdFromDb } = accountDb.first(
-      'SELECT id FROM users WHERE user_name = ?',
-      [''],
-    );
-
-    userId = userIdFromDb;
-  }
-
-  let expiration = TOKEN_EXPIRATION_NEVER;
-  if (
-    config.token_expiration != 'never' &&
-    config.token_expiration != 'openid-provider' &&
-    typeof config.token_expiration === 'number'
-  ) {
-    expiration = Math.floor(Date.now() / 1000) + config.token_expiration * 60;
-  }
-
-  if (!sessionRow) {
-    accountDb.mutate(
-      'INSERT INTO sessions (token, expires_at, user_id, auth_method) VALUES (?, ?, ?, ?)',
-      [token, expiration, userId, 'password'],
-    );
-  } else {
-    accountDb.mutate(
-      'UPDATE sessions SET user_id = ?, expires_at = ? WHERE token = ?',
-      [userId, expiration, token],
-    );
-  }
-
-  return { token };
-}
-
-export function changePassword(newPassword) {
-  if (newPassword === undefined || newPassword === '') {
-    return { error: 'invalid-password' };
-  }
-
-  let accountDb = getAccountDb();
-
-  let hashed = hashPassword(newPassword);
-  let token = uuid.v4();
-
-  // Note that this doesn't have a WHERE. This table only ever has 1
-  // row (maybe that will change in the future? if so this will not work)
-  accountDb.mutate('UPDATE auth SET password = ?', [hashed]);
-  accountDb.mutate('UPDATE sessions SET token = ?', [token]);
-
-  return {};
 }
 
 export function getSession(token) {

@@ -47,11 +47,11 @@ async function setupOpenIdClient(config) {
     typeof config.issuer === 'string'
       ? await Issuer.discover(config.issuer)
       : new Issuer({
-        issuer: config.issuer.name,
-        authorization_endpoint: config.issuer.authorization_endpoint,
-        token_endpoint: config.issuer.token_endpoint,
-        userinfo_endpoint: config.issuer.userinfo_endpoint,
-      });
+          issuer: config.issuer.name,
+          authorization_endpoint: config.issuer.authorization_endpoint,
+          token_endpoint: config.issuer.token_endpoint,
+          userinfo_endpoint: config.issuer.userinfo_endpoint,
+        });
 
   const client = new issuer.Client({
     client_id: config.client_id,
@@ -134,7 +134,6 @@ export async function loginWithOpenIdFinalize(body) {
   try {
     config = JSON.parse(config['extra_data']);
   } catch (err) {
-   
     return { error: 'openid-setup-failed: ' + err };
   }
   let client;
@@ -144,10 +143,16 @@ export async function loginWithOpenIdFinalize(body) {
     return { error: 'openid-setup-failed: ' + err };
   }
 
-  let { code_verifier, return_url } = accountDb.first(
+  let pendingRequest = accountDb.first(
     'SELECT code_verifier, return_url FROM pending_openid_requests WHERE state = ? AND expiry_time > ?',
     [body.state, Date.now()],
   );
+
+  if (!pendingRequest) {
+    return { error: 'invalid-or-expired-state' };
+  }
+
+  let { code_verifier, return_url } = pendingRequest;
 
   try {
     let grant = await client.grant({
@@ -179,9 +184,16 @@ export async function loginWithOpenIdFinalize(body) {
         [userId, identity, userInfo.name ?? userInfo.email ?? identity],
       );
 
+      const { id: adminRoleId } =
+        accountDb.first('SELECT id FROM roles WHERE name = ?', ['Admin']) || {};
+
+      if (!adminRoleId) {
+        return { error: 'administrator-role-not-found' };
+      }
+
       accountDb.mutate(
         'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
-        [userId, '213733c1-5645-46ad-8784-a7b20b400f93'],
+        [userId, adminRoleId],
       );
     } else {
       let { id: userIdFromDb, display_name: displayName } =
@@ -191,10 +203,7 @@ export async function loginWithOpenIdFinalize(body) {
         ) || {};
 
       if (userIdFromDb == null) {
-        return {
-          error:
-            'openid-grant-failed: user does not have access to Actual Budget',
-        };
+        return { error: 'openid-grant-failed' };
       }
 
       if (!displayName && userInfo.name) {
@@ -209,15 +218,16 @@ export async function loginWithOpenIdFinalize(body) {
 
     const token = uuid.v4();
 
-    let expiration = TOKEN_EXPIRATION_NEVER;
-    if (finalConfig.token_expiration == 'openid-provider') {
+    let expiration;
+    if (finalConfig.token_expiration === 'openid-provider') {
       expiration = grant.expires_at ?? TOKEN_EXPIRATION_NEVER;
-    } else if (
-      finalConfig.token_expiration != 'never' &&
-      typeof finalConfig.token_expiration === 'number'
-    ) {
+    } else if (finalConfig.token_expiration === 'never') {
+      expiration = TOKEN_EXPIRATION_NEVER;
+    } else if (typeof finalConfig.token_expiration === 'number') {
       expiration =
         Math.floor(Date.now() / 1000) + finalConfig.token_expiration * 60;
+    } else {
+      expiration = TOKEN_EXPIRATION_NEVER;
     }
 
     accountDb.mutate(
@@ -229,6 +239,7 @@ export async function loginWithOpenIdFinalize(body) {
 
     return { url: `${return_url}/openid-cb?token=${token}` };
   } catch (err) {
+    console.error('OpenID grant failed:', err);
     return { error: 'openid-grant-failed: ' + err };
   }
 }
