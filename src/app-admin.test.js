@@ -6,10 +6,10 @@ import { v4 as uuidv4 } from 'uuid';
 const ADMIN_ROLE = '213733c1-5645-46ad-8784-a7b20b400f93';
 const BASIC_ROLE = 'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc';
 
-const createUser = (userId, userName, role, master = 0, enabled = 1) => {
+const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   getAccountDb().mutate(
-    'INSERT INTO users (id, user_name, display_name, enabled, master) VALUES (?, ?, ?, ?, ?)',
-    [userId, userName, `${userName} display`, enabled, master],
+    'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, ?, ?)',
+    [userId, userName, `${userName} display`, enabled, owner],
   );
   getAccountDb().mutate(
     'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
@@ -32,15 +32,15 @@ const createSession = (userId, sessionToken) => {
 const generateSessionToken = () => `token-${uuidv4()}`;
 
 describe('/admin', () => {
-  describe('/masterCreated', () => {
-    it('should return 200 and true if a master user is created', async () => {
+  describe('/ownerCreated', () => {
+    it('should return 200 and true if a owner user is created', async () => {
       const sessionToken = generateSessionToken();
       const adminId = uuidv4();
       createUser(adminId, 'admin', ADMIN_ROLE, 1);
       createSession(adminId, sessionToken);
 
       const res = await request(app)
-        .get('/masterCreated')
+        .get('/ownerCreated')
         .set('x-actual-token', sessionToken);
 
       expect(res.statusCode).toEqual(200);
@@ -96,7 +96,7 @@ describe('/admin', () => {
           userName: 'user1',
           displayName: 'User One',
           enabled: 1,
-          master: 0,
+          owner: 0,
           role: BASIC_ROLE,
         };
 
@@ -115,7 +115,7 @@ describe('/admin', () => {
           userName: 'user1',
           displayName: 'User One',
           enabled: 1,
-          master: 0,
+          owner: 0,
           role: BASIC_ROLE,
         };
 

@@ -1,10 +1,10 @@
 import getAccountDb from './src/account-db.js';
 import runMigrations from './src/migrations.js';
 
-const createUser = (userId, userName, role, master = 0, enabled = 1) => {
+const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   getAccountDb().mutate(
-    'INSERT INTO users (id, user_name, display_name, enabled, master) VALUES (?, ?, ?, ?, ?)',
-    [userId, userName, `${userName} display`, enabled, master],
+    'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, ?, ?)',
+    [userId, userName, `${userName} display`, enabled, owner],
   );
   getAccountDb().mutate(
     'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',

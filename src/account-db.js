@@ -69,7 +69,7 @@ export async function bootstrap(loginSettings) {
     getAccountDb().first(
       `SELECT count(*) as cnt
    FROM users
-   WHERE users.user_name <> '' and users.master = 1`,
+   WHERE users.user_name <> '' and users.owner = 1`,
     ) || {};
 
   if (!openIdEnabled || (openIdEnabled && cnt > 0)) {
@@ -105,9 +105,9 @@ export async function bootstrap(loginSettings) {
 
 export function isAdmin(userId) {
   const user =
-    getAccountDb().first('SELECT master FROM users WHERE id = ?', [userId]) ||
+    getAccountDb().first('SELECT owner FROM users WHERE id = ?', [userId]) ||
     {};
-  if (user?.master === 1) return true;
+  if (user?.owner === 1) return true;
   return getUserPermissions(userId).some((value) => value === 'ADMINISTRATOR');
 }
 
@@ -196,7 +196,7 @@ export function login(password) {
   if (c === 0) {
     userId = uuid.v4();
     accountDb.mutate(
-      'INSERT INTO users (id, user_name, display_name, enabled, master) VALUES (?, ?, ?, 1, 1)',
+      'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, 1, 1)',
       [userId, '', ''],
     );
 

@@ -140,7 +140,7 @@ app.get('/openid-config', async (req, res) => {
     getAccountDb().first(
       `SELECT count(*) as cnt
    FROM users
-   WHERE users.user_name <> '' and users.master = 1`,
+   WHERE users.user_name <> '' and users.owner = 1`,
     ) || {};
 
   if (cnt > 0) {

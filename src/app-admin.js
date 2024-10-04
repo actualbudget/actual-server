@@ -86,12 +86,12 @@ const validateUserInput = (res, user) => {
   return true;
 };
 
-app.get('/masterCreated/', (req, res) => {
+app.get('/ownerCreated/', (req, res) => {
   const { cnt } =
     getAccountDb().first(
       `SELECT count(*) as cnt
      FROM users
-     WHERE users.user_name <> '' and users.master = 1`,
+     WHERE users.user_name <> '' and users.owner = 1`,
     ) || {};
 
   res.json(cnt > 0);
@@ -102,7 +102,7 @@ app.get('/users/', (req, res) => {
   if (!session) return;
 
   const users = getAccountDb().all(
-    `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(master,0) as master, roles.id as role 
+    `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(owner,0) as owner, roles.id as role 
      FROM users
      JOIN user_roles ON user_roles.user_id = users.id
      JOIN roles ON roles.id = user_roles.role_id
@@ -112,7 +112,7 @@ app.get('/users/', (req, res) => {
   res.json(
     users.map((u) => ({
       ...u,
-      master: u.master === 1,
+      owner: u.owner === 1,
       enabled: u.enabled === 1,
     })),
   );
@@ -141,7 +141,7 @@ app.post('/users', async (req, res) => {
   let enabled = newUser.enabled ? 1 : 0;
 
   getAccountDb().mutate(
-    'INSERT INTO users (id, user_name, display_name, enabled, master) VALUES (?, ?, ?, ?, 0)',
+    'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, ?, 0)',
     [userId, newUser.userName, displayName, enabled],
   );
 
@@ -197,19 +197,19 @@ app.post('/users/delete-all', async (req, res) => {
   const ids = req.body.ids;
   let totalDeleted = 0;
   ids.forEach((item) => {
-    const { id: masterId } =
-      getAccountDb().first('SELECT id FROM users WHERE master = 1') || {};
+    const { id: ownerId } =
+      getAccountDb().first('SELECT id FROM users WHERE owner = 1') || {};
 
-    if (item === masterId) return;
+    if (item === ownerId) return;
 
     getAccountDb().mutate('DELETE FROM user_roles WHERE user_id = ?', [item]);
     getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [item]);
     getAccountDb().mutate('UPDATE files set owner = ? WHERE owner = ?', [
-      masterId,
+      ownerId,
       item,
     ]);
     const usersDeleted = getAccountDb().mutate(
-      'DELETE FROM users WHERE id = ? and master = 0',
+      'DELETE FROM users WHERE id = ? and owner = 0',
       [item],
     ).changes;
     totalDeleted += usersDeleted;

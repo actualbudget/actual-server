@@ -165,7 +165,7 @@ export async function loginWithOpenIdFinalize(body) {
     if (c === 0) {
       userId = uuid.v4();
       accountDb.mutate(
-        'INSERT INTO users (id, user_name, display_name, enabled, master) VALUES (?, ?, ?, 1, 1)',
+        'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, 1, 1)',
         [userId, identity, userInfo.name ?? userInfo.email ?? identity],
       );
 

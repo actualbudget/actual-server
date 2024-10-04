@@ -7,7 +7,7 @@ export const up = async function () {
         user_name TEXT, 
         display_name TEXT,
         enabled INTEGER,
-        master INTEGER);
+        owner INTEGER);
 
     CREATE TABLE roles
       (id TEXT PRIMARY KEY,
