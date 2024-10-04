@@ -2,7 +2,10 @@ import getAccountDb from '../src/account-db.js';
 
 export const up = async function () {
   await getAccountDb().exec(
-    `CREATE TABLE users
+    `
+    BEGIN TRANSACTION;
+    
+    CREATE TABLE users
         (id TEXT PRIMARY KEY,
         user_name TEXT, 
         display_name TEXT,
@@ -38,6 +41,7 @@ export const up = async function () {
 
     ALTER TABLE sessions
         ADD auth_method TEXT;
+    COMMIT;        
         `,
   );
 };
@@ -45,9 +49,62 @@ export const up = async function () {
 export const down = async function () {
   await getAccountDb().exec(
     `
-      DROP TABLE users;
-      DROP TABLE roles;
-      DROP TABLE user_roles;
+      BEGIN TRANSACTION;
+
+      CREATE TABLE sessions_backup (
+          token TEXT PRIMARY KEY
+      );
+
+      INSERT INTO sessions_backup (token)
+      SELECT token FROM sessions;
+
+      ALTER TABLE sessions_backup RENAME TO sessions;
+
+      CREATE TABLE files_backup (
+          id TEXT PRIMARY KEY,
+          group_id TEXT,
+          sync_version SMALLINT,
+          encrypt_meta TEXT,
+          encrypt_keyid TEXT,
+          encrypt_salt TEXT,
+          encrypt_test TEXT,
+          deleted BOOLEAN DEFAULT FALSE,
+          name TEXT
+      );
+
+      INSERT INTO files_backup (
+          id,
+          group_id,
+          sync_version,
+          encrypt_meta,
+          encrypt_keyid,
+          encrypt_salt,
+          encrypt_test,
+          deleted,
+          name
+      )
+      SELECT
+          id,
+          group_id,
+          sync_version,
+          encrypt_meta,
+          encrypt_keyid,
+          encrypt_salt,
+          encrypt_test,
+          deleted,
+          name
+      FROM files;
+
+      DROP TABLE files;
+
+      ALTER TABLE files_backup RENAME TO files;
+
+      DROP TABLE IF EXISTS user_access;
+      DROP TABLE IF EXISTS user_roles;
+      DROP TABLE IF EXISTS roles;
+      DROP TABLE IF EXISTS users;
+
+      COMMIT;
       `,
   );
 };
