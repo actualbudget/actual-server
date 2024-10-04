@@ -2,8 +2,9 @@ import express from 'express';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
+  validateSessionMiddleware,
 } from './util/middlewares.js';
-import validateUser, { validateAuthHeader } from './util/validate-user.js';
+import validateSession, { validateAuthHeader } from './util/validate-user.js';
 import getAccountDb, {
   bootstrap,
   needsBootstrap,
@@ -13,18 +14,17 @@ import getAccountDb, {
   disableOpenID,
   getUserInfo,
   getUserPermissions,
+  isAdmin,
 } from './account-db.js';
 import { changePassword, loginWithPassword } from './accounts/password.js';
 import {
   loginWithOpenIdSetup,
   loginWithOpenIdFinalize,
 } from './accounts/openid.js';
-import { getAdminSessionFromRequest } from './app-admin.js';
-import bodyParser from 'body-parser';
 
 let app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
 export { app as handlers };
@@ -48,9 +48,8 @@ app.post('/bootstrap', async (req, res) => {
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
     return;
-  } else {
-    res.send({ status: 'ok' });
   }
+  res.send({ status: 'ok' });
 });
 
 app.get('/login-methods', (req, res) => {
@@ -84,7 +83,7 @@ app.post('/login', async (req, res) => {
     case 'openid': {
       let { error, url } = await loginWithOpenIdSetup(req.body);
       if (error) {
-        res.send({ status: 'error', reason: error });
+        res.status(400).send({ status: 'error', reason: error });
         return;
       }
       res.send({ status: 'ok', data: { redirect_url: url } });
@@ -106,44 +105,54 @@ app.post('/login', async (req, res) => {
   res.send({ status: 'ok', data: { token } });
 });
 
-app.post('/enable-openid', async (req, res) => {
-  const session = await getAdminSessionFromRequest(req, res);
-  if (!session) return;
+app.post('/enable-openid', validateSessionMiddleware, async (req, res) => {
+  if (!isAdmin(req.userSession.user_id)) {
+    res.status(401).send({
+      status: 'error',
+      reason: 'unauthorized',
+      details: 'permission-not-found',
+    });
+    return;
+  }
 
   let { error } = (await enableOpenID(req.body)) || {};
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
     return;
-  } else {
-    res.send({ status: 'ok' });
   }
+  res.send({ status: 'ok' });
 });
 
-app.post('/enable-password', async (req, res) => {
-  const session = await getAdminSessionFromRequest(req, res);
-  if (!session) return;
+app.post('/enable-password', validateSessionMiddleware, async (req, res) => {
+  if (!isAdmin(req.userSession.user_id)) {
+    res.status(401).send({
+      status: 'error',
+      reason: 'unauthorized',
+      details: 'permission-not-found',
+    });
+    return;
+  }
 
   let { error } = (await disableOpenID(req.body, true, true)) || {};
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
     return;
-  } else {
-    res.send({ status: 'ok' });
   }
+  res.send({ status: 'ok' });
 });
 
 app.get('/openid-config', async (req, res) => {
-  const { cnt } =
+  const { ownerCount } =
     getAccountDb().first(
-      `SELECT count(*) as cnt
+      `SELECT count(*) as ownerCount
    FROM users
    WHERE users.user_name <> '' and users.owner = 1`,
     ) || {};
 
-  if (cnt > 0) {
-    res.send({});
+  if (ownerCount > 0) {
+    res.status(400).send({ status: 'error', reason: 'already-bootstraped' });
     return;
   }
 
@@ -155,7 +164,7 @@ app.get('/openid-config', async (req, res) => {
     ) || {};
 
   if (!auth) {
-    res.send({});
+    res.status(500);
     return;
   }
 
@@ -173,13 +182,13 @@ app.get('/login-openid/cb', async (req, res) => {
 });
 
 app.post('/change-password', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) return;
+  let session = validateSession(req, res);
+  if (!session) return;
 
   let { error } = changePassword(req.body.password);
 
   if (error) {
-    res.send({ status: 'error', reason: error });
+    res.status(400).send({ status: 'error', reason: error });
     return;
   }
 
@@ -187,7 +196,7 @@ app.post('/change-password', (req, res) => {
 });
 
 app.get('/validate', (req, res) => {
-  let session = validateUser(req, res);
+  let session = validateSession(req, res);
   if (session) {
     const user = getUserInfo(session.user_id);
     let permissions = getUserPermissions(session.user_id);

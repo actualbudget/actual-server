@@ -8,7 +8,7 @@ import { TOKEN_EXPIRATION_NEVER } from '../app-admin.js';
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-export default function validateUser(req, res) {
+export default function validateSession(req, res) {
   let { token } = req.body || {};
 
   if (!token) {
@@ -31,7 +31,7 @@ export default function validateUser(req, res) {
     session.expires_at !== TOKEN_EXPIRATION_NEVER &&
     session.expires_at * 1000 <= Date.now()
   ) {
-    res.status(403);
+    res.status(401);
     res.send({
       status: 'error',
       reason: 'token-expired',

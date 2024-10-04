@@ -3,7 +3,7 @@ import { secretsService } from './services/secrets-service.js';
 import getAccountDb, { isAdmin } from './account-db.js';
 import {
   requestLoggerMiddleware,
-  validateUserMiddleware,
+  validateSessionMiddleware,
 } from './util/middlewares.js';
 
 const app = express();
@@ -11,7 +11,7 @@ const app = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
-app.use(validateUserMiddleware);
+app.use(validateSessionMiddleware);
 
 app.post('/', async (req, res) => {
   const { method } =
@@ -20,7 +20,7 @@ app.post('/', async (req, res) => {
   const { name, value } = req.body;
 
   if (method === 'openid') {
-    let canSaveSecrets = isAdmin(req.userSession);
+    let canSaveSecrets = isAdmin(req.userSession.user_id);
 
     if (!canSaveSecrets) {
       res.status(400).send({

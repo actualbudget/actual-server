@@ -5,7 +5,7 @@ import * as uuid from 'uuid';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
-  validateUserMiddleware,
+  validateSessionMiddleware,
 } from './util/middlewares.js';
 import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
@@ -21,7 +21,7 @@ app.use(express.raw({ type: 'application/actual-sync' }));
 app.use(express.raw({ type: 'application/encrypted-file' }));
 app.use(express.json());
 
-app.use(validateUserMiddleware);
+app.use(validateSessionMiddleware);
 export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };

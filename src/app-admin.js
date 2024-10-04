@@ -1,14 +1,18 @@
 import express from 'express';
 import * as uuid from 'uuid';
-import { errorMiddleware } from './util/middlewares.js';
-import validateUser from './util/validate-user.js';
+import {
+  errorMiddleware,
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from './util/middlewares.js';
+import validateSession from './util/validate-user.js';
 import getAccountDb, { isAdmin } from './account-db.js';
 import config from './load-config.js';
-import bodyParser from 'body-parser';
 
 let app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(requestLoggerMiddleware);
 app.use(errorMiddleware);
 
 export { app as handlers };
@@ -36,20 +40,6 @@ const getFileById = (fileId) => {
     getAccountDb().first('SELECT id FROM files WHERE files.id = ?', [fileId]) ||
     {}
   );
-};
-
-export const getAdminSessionFromRequest = async (req, res) => {
-  let session = validateUser(req, res);
-  if (!session) {
-    return null;
-  }
-
-  if (!(await isAdmin(session.user_id))) {
-    sendErrorResponse(res, 401, 'unauthorized', 'permission-not-found');
-    return null;
-  }
-
-  return session;
 };
 
 const validateUserInput = (res, user) => {
@@ -97,10 +87,7 @@ app.get('/ownerCreated/', (req, res) => {
   res.json(cnt > 0);
 });
 
-app.get('/users/', (req, res) => {
-  const session = validateUser(req, res);
-  if (!session) return;
-
+app.get('/users/', validateSessionMiddleware, (req, res) => {
   const users = getAccountDb().all(
     `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(owner,0) as owner, roles.id as role 
      FROM users
@@ -118,9 +105,15 @@ app.get('/users/', (req, res) => {
   );
 });
 
-app.post('/users', async (req, res) => {
-  const user = await getAdminSessionFromRequest(req, res);
-  if (!user) return;
+app.post('/users', validateSessionMiddleware, async (req, res) => {
+  if (isAdmin(req.userSession.user_id)) {
+    res.status(401).send({
+      status: 'error',
+      reason: 'unauthorized',
+      details: 'permission-not-found',
+    });
+    return;
+  }
 
   const newUser = req.body;
   const { id: userIdInDb } = getUserByUsername(newUser.userName);
@@ -153,9 +146,15 @@ app.post('/users', async (req, res) => {
   res.status(200).send({ status: 'ok', data: { id: userId } });
 });
 
-app.patch('/users', async (req, res) => {
-  const user = await getAdminSessionFromRequest(req, res);
-  if (!user) return;
+app.patch('/users', validateSessionMiddleware, async (req, res) => {
+  if (!isAdmin(req.userSession.user_id)) {
+    res.status(401).send({
+      status: 'error',
+      reason: 'unauthorized',
+      details: 'permission-not-found',
+    });
+    return;
+  }
 
   const userToUpdate = req.body;
   const { id: userIdInDb } =
@@ -190,9 +189,15 @@ app.patch('/users', async (req, res) => {
   res.status(200).send({ status: 'ok', data: { id: userIdInDb } });
 });
 
-app.post('/users/delete-all', async (req, res) => {
-  const user = await getAdminSessionFromRequest(req, res);
-  if (!user) return;
+app.post('/users/delete-all', validateSessionMiddleware, async (req, res) => {
+  if (await isAdmin(req.userSession.user_id)) {
+    res.status(401).send({
+      status: 'error',
+      reason: 'unauthorized',
+      details: 'permission-not-found',
+    });
+    return;
+  }
 
   const ids = req.body.ids;
   let totalDeleted = 0;
@@ -224,10 +229,8 @@ app.post('/users/delete-all', async (req, res) => {
   }
 });
 
-app.get('/access', (req, res) => {
+app.get('/access', validateSessionMiddleware, (req, res) => {
   const fileId = req.query.fileId;
-  const session = validateUser(req, res);
-  if (!session) return;
 
   const { id: fileIdInDb } = getFileById(fileId);
   if (!fileIdInDb) {
@@ -241,7 +244,11 @@ app.get('/access', (req, res) => {
      JOIN user_access ON user_access.user_id = users.id
      JOIN files ON files.id = user_access.file_id
      WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
-    [fileId, session.user_id, !isAdmin(session.user_id) ? 0 : 1],
+    [
+      fileId,
+      req.userSession.user_id,
+      !isAdmin(req.userSession.user_id) ? 0 : 1,
+    ],
   );
 
   res.json(accesses);
@@ -276,7 +283,7 @@ function checkFilePermission(fileId, userId, res) {
 
 app.post('/access', (req, res) => {
   const userAccess = req.body || {};
-  const session = validateUser(req, res);
+  const session = validateSession(req, res);
 
   if (!session) return;
 
@@ -313,7 +320,7 @@ app.post('/access', (req, res) => {
 
 app.post('/access/delete-all', (req, res) => {
   const fileId = req.query.fileId;
-  const session = validateUser(req, res);
+  const session = validateSession(req, res);
   if (!session) return;
 
   if (!checkFilePermission(fileId, session.user_id, res)) return;
@@ -337,12 +344,10 @@ app.post('/access/delete-all', (req, res) => {
   }
 });
 
-app.get('/access/users', async (req, res) => {
+app.get('/access/users', validateSessionMiddleware, async (req, res) => {
   const fileId = req.query.fileId;
-  const session = validateUser(req, res);
-  if (!session) return;
 
-  if (!checkFilePermission(fileId, session.user_id, res)) return;
+  if (!checkFilePermission(fileId, req.userSession.user_id, res)) return;
 
   const users = getAccountDb().all(
     `SELECT users.id as userId, user_name as userName, display_name as displayName, 
@@ -382,7 +387,7 @@ app.post('/access/get-bulk', (req, res) => {
 
 app.get('/access/check-access', (req, res) => {
   const fileId = req.query.fileId;
-  const session = validateUser(req, res);
+  const session = validateSession(req, res);
   if (!session) return;
 
   const { id: fileIdInDb } = getFileById(fileId);
@@ -407,52 +412,52 @@ app.get('/access/check-access', (req, res) => {
   res.json({ granted: owner === session.user_id });
 });
 
-app.post('/access/transfer-ownership/', (req, res) => {
-  const newUserOwner = req.body || {};
-  const session = validateUser(req, res);
-  if (!session) return;
+app.post(
+  '/access/transfer-ownership/',
+  validateSessionMiddleware,
+  (req, res) => {
+    const newUserOwner = req.body || {};
+    if (!checkFilePermission(newUserOwner.fileId, req.userSession.user_id, res))
+      return;
 
-  if (!checkFilePermission(newUserOwner.fileId, session.user_id, res)) return;
+    if (!newUserOwner.newUserId) {
+      sendErrorResponse(res, 400, 'user-cant-be-empty', 'User cannot be empty');
+      return;
+    }
 
-  if (!newUserOwner.newUserId) {
-    sendErrorResponse(res, 400, 'user-cant-be-empty', 'User cannot be empty');
-    return;
-  }
+    const { cnt } =
+      getAccountDb().first(
+        'SELECT count(*) AS cnt FROM users WHERE users.id = ?',
+        [newUserOwner.newUserId],
+      ) || {};
 
-  const { cnt } =
-    getAccountDb().first(
-      'SELECT count(*) AS cnt FROM users WHERE users.id = ?',
-      [newUserOwner.newUserId],
-    ) || {};
+    if (cnt === 0) {
+      sendErrorResponse(res, 400, 'new-user-not-found', 'New user not found');
+      return;
+    }
 
-  if (cnt === 0) {
-    sendErrorResponse(res, 400, 'new-user-not-found', 'New user not found');
-    return;
-  }
+    getAccountDb().mutate('UPDATE files SET owner = ? WHERE id = ?', [
+      newUserOwner.newUserId,
+      newUserOwner.fileId,
+    ]);
 
-  getAccountDb().mutate('UPDATE files SET owner = ? WHERE id = ?', [
-    newUserOwner.newUserId,
-    newUserOwner.fileId,
-  ]);
+    res.status(200).send({ status: 'ok', data: {} });
+  },
+);
 
-  res.status(200).send({ status: 'ok', data: {} });
-});
-
-app.get('/file/owner', async (req, res) => {
+app.get('/file/owner', validateSessionMiddleware, async (req, res) => {
   const fileId = req.query.fileId;
-  const session = validateUser(req, res);
-  if (!session) return;
 
-  if (!checkFilePermission(fileId, session.user_id, res)) return;
+  if (!checkFilePermission(fileId, req.userSession.user_id, res)) return;
 
-  let canGetOwner = await isAdmin(session.user_id);
+  let canGetOwner = isAdmin(req.userSession.user_id);
   if (!canGetOwner) {
     const { canListAvaiableUserFromDB } =
       getAccountDb().first(
         `SELECT count(*) as canListAvaiableUserFromDB
        FROM files
        WHERE files.id = ? and files.owner = ?`,
-        [fileId, session.user_id],
+        [fileId, req.userSession.user_id],
       ) || {};
     canGetOwner = canListAvaiableUserFromDB === 1;
   }
