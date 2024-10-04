@@ -102,7 +102,7 @@ export function isAdmin(userId) {
     getAccountDb().first('SELECT owner FROM users WHERE id = ?', [userId]) ||
     {};
   if (user?.owner === 1) return true;
-  return getUserPermissions(userId).some((value) => value === 'ADMINISTRATOR');
+  return hasPermission(userId, 'ADMINISTRATOR');
 }
 
 export function hasPermission(userId, permission) {
@@ -143,9 +143,7 @@ export async function disableOpenID(
     }
 
     if (passwordHash) {
-      let confirmed =
-        passwordHash &&
-        bcrypt.compareSync(loginSettings.password, passwordHash);
+      let confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
 
       if (!confirmed) {
         return { error: 'invalid-password' };
@@ -185,18 +183,20 @@ export function login(password) {
 
   let token = sessionRow ? sessionRow.token : uuid.v4();
 
-  let { c } = accountDb.first('SELECT count(*) as c FROM users');
+  let { totalOfUsers } = accountDb.first('SELECT count(*) as totalOfUsers FROM users');
   let userId = null;
-  if (c === 0) {
+  if (totalOfUsers === 0) {
     userId = uuid.v4();
     accountDb.mutate(
       'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, 1, 1)',
       [userId, '', ''],
     );
 
+    const { id: adminRoleId } = accountDb.first('SELECT id FROM roles WHERE name = ?', ['Admin']);
+
     accountDb.mutate(
       'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
-      [userId, '213733c1-5645-46ad-8784-a7b20b400f93'],
+      [userId, adminRoleId],
     );
   } else {
     let { id: userIdFromDb } = accountDb.first(
