@@ -75,7 +75,12 @@ export async function loginWithOpenIdSetup(body) {
   if (!config) {
     return { error: 'openid-not-configured' };
   }
-  config = JSON.parse(config['extra_data']);
+
+  try {
+    config = JSON.parse(config['extra_data']);
+  } catch (err) {
+    return { error: 'openid-setup-failed: ' + err };
+  }
 
   let client;
   try {
@@ -126,8 +131,12 @@ export async function loginWithOpenIdFinalize(body) {
   if (!config) {
     return { error: 'openid-not-configured' };
   }
-  config = JSON.parse(config['extra_data']);
-
+  try {
+    config = JSON.parse(config['extra_data']);
+  } catch (err) {
+   
+    return { error: 'openid-setup-failed: ' + err };
+  }
   let client;
   try {
     client = await setupOpenIdClient(config);
