@@ -9,8 +9,8 @@ export const up = async function () {
         (id TEXT PRIMARY KEY,
         user_name TEXT, 
         display_name TEXT,
-        enabled INTEGER,
-        owner INTEGER);
+        enabled INTEGER NOT NULL DEFAULT 1,
+        owner INTEGER NOT NULL DEFAULT 0);
 
     CREATE TABLE roles
       (id TEXT PRIMARY KEY,
@@ -22,11 +22,17 @@ export const up = async function () {
     
     CREATE TABLE user_roles
       (user_id TEXT,
-      role_id TEXT);
+      role_id TEXT,
+      , FOREIGN KEY (user_id) REFERENCES users(id)
+      , FOREIGN KEY (role_id) REFERENCES roles(id)
+      );
 
     CREATE TABLE user_access
       (user_id TEXT,
-      file_id TEXT);      
+      file_id TEXT,
+      , FOREIGN KEY (user_id) REFERENCES users(id)
+      , FOREIGN KEY (file_id) REFERENCES files(id)
+      );      
 
     ALTER TABLE files
         ADD COLUMN owner TEXT;
