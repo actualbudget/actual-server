@@ -23,7 +23,7 @@ app.post('/', async (req, res) => {
     let canSaveSecrets = isAdmin(req.userSession.user_id);
 
     if (!canSaveSecrets) {
-      res.status(400).send({
+      res.status(403).send({
         status: 'error',
         reason: 'not-admin',
         details: 'You have to be admin to set secrets',

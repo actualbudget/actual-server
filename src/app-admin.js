@@ -6,8 +6,9 @@ import {
   validateSessionMiddleware,
 } from './util/middlewares.js';
 import validateSession from './util/validate-user.js';
-import getAccountDb, { isAdmin } from './account-db.js';
+import { isAdmin } from './account-db.js';
 import config from './load-config.js';
+import UserService from './services/user-service.js';
 
 let app = express();
 app.use(express.json());
@@ -17,83 +18,13 @@ app.use(requestLoggerMiddleware);
 
 export { app as handlers };
 
-const sendErrorResponse = (res, status, reason, details) => {
-  res.status(status).send({
-    status: 'error',
-    reason,
-    details,
-  });
-};
-
-const getUserByUsername = (userName) => {
-  return (
-    getAccountDb().first('SELECT id FROM users WHERE user_name = ?', [
-      userName,
-    ]) || {}
-  );
-};
-
-const getFileById = (fileId) => {
-  return (
-    getAccountDb().first('SELECT id FROM files WHERE files.id = ?', [fileId]) ||
-    {}
-  );
-};
-
-const validateUserInput = (res, user) => {
-  if (!user.userName) {
-    sendErrorResponse(
-      res,
-      400,
-      'user-cant-be-empty',
-      'Username cannot be empty',
-    );
-    return false;
-  }
-
-  if (!user.role) {
-    sendErrorResponse(res, 400, 'role-cant-be-empty', 'Role cannot be empty');
-    return false;
-  }
-
-  const { id: roleId } =
-    getAccountDb().first('SELECT id FROM roles WHERE roles.id = ?', [
-      user.role,
-    ]) || {};
-
-  if (!roleId) {
-    sendErrorResponse(
-      res,
-      400,
-      'role-does-not-exists',
-      'Selected role does not exists',
-    );
-    return false;
-  }
-
-  return true;
-};
-
 app.get('/ownerCreated/', (req, res) => {
-  const { cnt } =
-    getAccountDb().first(
-      `SELECT count(*) as cnt
-     FROM users
-     WHERE users.user_name <> '' and users.owner = 1`,
-    ) || {};
-
+  const { cnt } = UserService.getOwnerCount() || {};
   res.json(cnt > 0);
 });
 
 app.get('/users/', await validateSessionMiddleware, (req, res) => {
-  const users = getAccountDb().all(
-    `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(owner,0) as owner, roles.id as role 
-     FROM users
-     JOIN user_roles ON user_roles.user_id = users.id
-     JOIN roles ON roles.id = user_roles.role_id
-     WHERE users.user_name <> ''`,
-  );
-
+  const users = UserService.getAllUsers();
   res.json(
     users.map((u) => ({
       ...u,
@@ -114,16 +45,44 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
   }
 
   const newUser = req.body;
-  const { id: userIdInDb } = getUserByUsername(newUser.userName);
 
-  if (!validateUserInput(res, newUser)) return;
+  if (!newUser.userName) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'user-cant-be-empty',
+      details: 'Username cannot be empty',
+    });
+    return;
+  }
+
+  if (!newUser.role) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'role-cant-be-empty',
+      details: 'Role cannot be empty',
+    });
+    return;
+  }
+
+  const { id: roleIdFromDb } = UserService.validateRole(newUser.role) || {};
+
+  if (!roleIdFromDb) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'role-does-not-exists',
+      details: 'Selected role does not exist',
+    });
+    return;
+  }
+
+  const { id: userIdInDb } = UserService.getUserByUsername(newUser.userName);
+
   if (userIdInDb) {
-    sendErrorResponse(
-      res,
-      400,
-      'user-already-exists',
-      `User ${newUser.userName} already exists`,
-    );
+    res.status(400).send({
+      status: 'error',
+      reason: 'user-already-exists',
+      details: `User ${newUser.userName} already exists`,
+    });
     return;
   }
 
@@ -131,15 +90,8 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
   let displayName = newUser.displayName || null;
   let enabled = newUser.enabled ? 1 : 0;
 
-  getAccountDb().mutate(
-    'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, ?, 0)',
-    [userId, newUser.userName, displayName, enabled],
-  );
-
-  getAccountDb().mutate(
-    'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
-    [userId, newUser.role],
-  );
+  UserService.insertUser(userId, newUser.userName, displayName, enabled);
+  UserService.insertUserRole(userId, newUser.role);
 
   res.status(200).send({ status: 'ok', data: { id: userId } });
 });
@@ -155,34 +107,57 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
   }
 
   const userToUpdate = req.body;
-  const { id: userIdInDb } =
-    getAccountDb().first('SELECT id FROM users WHERE id = ?', [
-      userToUpdate.id,
-    ]) || {};
+  const { id: userIdInDb } = UserService.getUserByUsername(userToUpdate.id);
 
-  if (!validateUserInput(res, userToUpdate)) return;
+  if (!userToUpdate.userName) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'user-cant-be-empty',
+      details: 'Username cannot be empty',
+    });
+    return;
+  }
+
+  if (!userToUpdate.role) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'role-cant-be-empty',
+      details: 'Role cannot be empty',
+    });
+    return;
+  }
+
+  const { id: roleIdFromDb } =
+    UserService.validateRole(userToUpdate.role) || {};
+
+  if (!roleIdFromDb) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'role-does-not-exists',
+      details: 'Selected role does not exist',
+    });
+    return;
+  }
+
   if (!userIdInDb) {
-    sendErrorResponse(
-      res,
-      400,
-      'cannot-find-user-to-update',
-      `Cannot find ${userToUpdate.userName} to update`,
-    );
+    res.status(400).send({
+      status: 'error',
+      reason: 'cannot-find-user-to-update',
+      details: `Cannot find ${userToUpdate.userName} to update`,
+    });
     return;
   }
 
   let displayName = userToUpdate.displayName || null;
   let enabled = userToUpdate.enabled ? 1 : 0;
 
-  getAccountDb().mutate(
-    'UPDATE users SET user_name = ?, display_name = ?, enabled = ? WHERE id = ?',
-    [userToUpdate.userName, displayName, enabled, userIdInDb],
-  );
-
-  getAccountDb().mutate('UPDATE user_roles SET role_id = ? WHERE user_id = ?', [
-    userToUpdate.role,
+  UserService.updateUser(
     userIdInDb,
-  ]);
+    userToUpdate.userName,
+    displayName,
+    enabled,
+  );
+  UserService.updateUserRole(userIdInDb, userToUpdate.role);
 
   res.status(200).send({ status: 'ok', data: { id: userIdInDb } });
 });
@@ -200,21 +175,14 @@ app.post('/users/delete-all', validateSessionMiddleware, async (req, res) => {
   const ids = req.body.ids;
   let totalDeleted = 0;
   ids.forEach((item) => {
-    const { id: ownerId } =
-      getAccountDb().first('SELECT id FROM users WHERE owner = 1') || {};
+    const { id: ownerId } = UserService.getOwnerCount() || {};
 
     if (item === ownerId) return;
 
-    getAccountDb().mutate('DELETE FROM user_roles WHERE user_id = ?', [item]);
-    getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [item]);
-    getAccountDb().mutate('UPDATE files set owner = ? WHERE owner = ?', [
-      ownerId,
-      item,
-    ]);
-    const usersDeleted = getAccountDb().mutate(
-      'DELETE FROM users WHERE id = ? and owner = 0',
-      [item],
-    ).changes;
+    UserService.deleteUserRoles(item);
+    UserService.deleteUserAccess(item);
+    UserService.updateFileOwner(ownerId, item);
+    const usersDeleted = UserService.deleteUser(item);
     totalDeleted += usersDeleted;
   });
 
@@ -223,56 +191,57 @@ app.post('/users/delete-all', validateSessionMiddleware, async (req, res) => {
       .status(200)
       .send({ status: 'ok', data: { someDeletionsFailed: false } });
   } else {
-    sendErrorResponse(res, 400, 'not-all-deleted', '');
+    res.status(400).send({
+      status: 'error',
+      reason: 'not-all-deleted',
+      details: '',
+    });
   }
 });
 
 app.get('/access', validateSessionMiddleware, (req, res) => {
   const fileId = req.query.fileId;
 
-  const { id: fileIdInDb } = getFileById(fileId);
+  const { id: fileIdInDb } = UserService.getFileById(fileId);
   if (!fileIdInDb) {
-    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
+    res.status(400).send({
+      status: 'error',
+      reason: 'invalid-file-id',
+      details: 'File not found at server',
+    });
     return false;
   }
 
-  const accesses = getAccountDb().all(
-    `SELECT users.id as userId, user_name as userName, files.owner, display_name as displayName
-     FROM users
-     JOIN user_access ON user_access.user_id = users.id
-     JOIN files ON files.id = user_access.file_id
-     WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
-    [
-      fileId,
-      req.userSession.user_id,
-      !isAdmin(req.userSession.user_id) ? 0 : 1,
-    ],
+  const accesses = UserService.getUserAccess(
+    fileId,
+    req.userSession.user_id,
+    isAdmin(req.userSession.user_id),
   );
 
   res.json(accesses);
 });
 
 function checkFilePermission(fileId, userId, res) {
-  const { granted } = getAccountDb().first(
-    `SELECT 1 as granted
-      FROM files
-      WHERE files.id = ? and (files.owner = ?)`,
-    [fileId, userId],
-  ) || { granted: 0 };
+  const { granted } = UserService.checkFilePermission(fileId, userId) || {
+    granted: 0,
+  };
 
   if (granted === 0 && !isAdmin(userId)) {
-    sendErrorResponse(
-      res,
-      400,
-      'file-denied',
-      "You don't have permissions over this file",
-    );
+    res.status(400).send({
+      status: 'error',
+      reason: 'file-denied',
+      details: "You don't have permissions over this file",
+    });
     return false;
   }
 
-  const { id: fileIdInDb } = getFileById(fileId);
+  const { id: fileIdInDb } = UserService.getFileById(fileId);
   if (!fileIdInDb) {
-    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
+    res.status(400).send({
+      status: 'error',
+      reason: 'invalid-file-id',
+      details: 'File not found at server',
+    });
     return false;
   }
 
@@ -288,35 +257,33 @@ app.post('/access', (req, res) => {
   if (!checkFilePermission(userAccess.fileId, session.user_id, res)) return;
 
   if (!userAccess.userId) {
-    sendErrorResponse(res, 400, 'user-cant-be-empty', 'User cannot be empty');
+    res.status(400).send({
+      status: 'error',
+      reason: 'user-cant-be-empty',
+      details: 'User cannot be empty',
+    });
     return;
   }
 
   const { cnt } =
-    getAccountDb().first(
-      'SELECT count(*) AS cnt FROM user_access WHERE user_access.file_id = ? and user_access.user_id = ?',
-      [userAccess.fileId, userAccess.userId],
-    ) || {};
+    UserService.getUserAccess(userAccess.fileId, userAccess.userId, false) ||
+    {};
 
   if (cnt > 0) {
-    sendErrorResponse(
-      res,
-      400,
-      'user-already-have-access',
-      'User already have access',
-    );
+    res.status(400).send({
+      status: 'error',
+      reason: 'user-already-have-access',
+      details: 'User already have access',
+    });
     return;
   }
 
-  getAccountDb().mutate(
-    'INSERT INTO user_access (user_id, file_id) VALUES (?, ?)',
-    [userAccess.userId, userAccess.fileId],
-  );
+  UserService.addUserAccess(userAccess.userId, userAccess.fileId);
 
   res.status(200).send({ status: 'ok', data: {} });
 });
 
-app.post('/access/delete-all', (req, res) => {
+app.delete('/access', (req, res) => {
   const fileId = req.query.fileId;
   const session = validateSession(req, res);
   if (!session) return;
@@ -324,21 +291,18 @@ app.post('/access/delete-all', (req, res) => {
   if (!checkFilePermission(fileId, session.user_id, res)) return;
 
   const ids = req.body.ids;
-  let totalDeleted = 0;
-  ids.forEach((item) => {
-    const accessDeleted = getAccountDb().mutate(
-      'DELETE FROM user_access WHERE user_id = ?',
-      [item],
-    ).changes;
-    totalDeleted += accessDeleted;
-  });
+  let totalDeleted = UserService.deleteUserAccessByIds(ids);
 
   if (ids.length === totalDeleted) {
     res
       .status(200)
       .send({ status: 'ok', data: { someDeletionsFailed: false } });
   } else {
-    sendErrorResponse(res, 400, 'not-all-deleted', '');
+    res.status(400).send({
+      status: 'error',
+      reason: 'not-all-deleted',
+      details: '',
+    });
   }
 });
 
@@ -347,144 +311,8 @@ app.get('/access/users', validateSessionMiddleware, async (req, res) => {
 
   if (!checkFilePermission(fileId, req.userSession.user_id, res)) return;
 
-  const users = getAccountDb().all(
-    `SELECT users.id as userId, user_name as userName, display_name as displayName, 
-            CASE WHEN user_access.file_id IS NULL THEN 0 ELSE 1 END as haveAccess,
-            CASE WHEN files.id IS NULL THEN 0 ELSE 1 END as owner
-      FROM users
-      LEFT JOIN user_access ON user_access.file_id = ? and user_access.user_id = users.id
-      LEFT JOIN files ON files.id = ? and files.owner = users.id
-      WHERE users.enabled = 1 AND users.user_name <> ''`,
-    [fileId, fileId],
-  );
+  const users = UserService.getAllUserAccess(fileId);
   res.json(users);
-});
-
-app.post('/access/get-bulk', (req, res) => {
-  const fileIds = req.body || {};
-  const accessMap = new Map();
-
-  fileIds.forEach((fileId) => {
-    const userAccess = getAccountDb().all(
-      `SELECT user_access.file_id as fileId, user_access.user_id as userId, users.display_name as displayName, users.user_name as userName
-       FROM users
-       JOIN user_access ON user_access.user_id = users.id
-       WHERE user_access.file_id = ?
-       UNION
-       SELECT files.id, users.id, users.display_name, users.user_name
-       FROM users
-       JOIN files ON files.owner = users.id
-       WHERE files.id = ?`,
-      [fileId, fileId],
-    );
-    accessMap.set(fileId, userAccess);
-  });
-
-  res.status(200).send({ status: 'ok', data: Array.from(accessMap.entries()) });
-});
-
-app.get('/access/check-access', (req, res) => {
-  const fileId = req.query.fileId;
-  const session = validateSession(req, res);
-  if (!session) return;
-
-  const { id: fileIdInDb } = getFileById(fileId);
-  if (!fileIdInDb) {
-    sendErrorResponse(res, 400, 'invalid-file-id', 'File not found at server');
-    return false;
-  }
-
-  if (isAdmin(session.user_id)) {
-    res.json({ granted: true });
-    return;
-  }
-
-  const { owner } =
-    getAccountDb().first(
-      `SELECT files.owner
-     FROM files
-     WHERE files.id = ?`,
-      [fileId],
-    ) || {};
-
-  res.json({ granted: owner === session.user_id });
-});
-
-app.post(
-  '/access/transfer-ownership/',
-  validateSessionMiddleware,
-  (req, res) => {
-    const newUserOwner = req.body || {};
-    if (!checkFilePermission(newUserOwner.fileId, req.userSession.user_id, res))
-      return;
-
-    if (!newUserOwner.newUserId) {
-      sendErrorResponse(res, 400, 'user-cant-be-empty', 'User cannot be empty');
-      return;
-    }
-
-    const { cnt } =
-      getAccountDb().first(
-        'SELECT count(*) AS cnt FROM users WHERE users.id = ?',
-        [newUserOwner.newUserId],
-      ) || {};
-
-    if (cnt === 0) {
-      sendErrorResponse(res, 400, 'new-user-not-found', 'New user not found');
-      return;
-    }
-
-    getAccountDb().mutate('UPDATE files SET owner = ? WHERE id = ?', [
-      newUserOwner.newUserId,
-      newUserOwner.fileId,
-    ]);
-
-    res.status(200).send({ status: 'ok', data: {} });
-  },
-);
-
-app.get('/file/owner', validateSessionMiddleware, async (req, res) => {
-  const fileId = req.query.fileId;
-
-  if (!checkFilePermission(fileId, req.userSession.user_id, res)) return;
-
-  let canGetOwner = isAdmin(req.userSession.user_id);
-  if (!canGetOwner) {
-    const { canListAvaiableUserFromDB } =
-      getAccountDb().first(
-        `SELECT count(*) as canListAvaiableUserFromDB
-       FROM files
-       WHERE files.id = ? and files.owner = ?`,
-        [fileId, req.userSession.user_id],
-      ) || {};
-    canGetOwner = canListAvaiableUserFromDB === 1;
-  }
-
-  if (canGetOwner) {
-    const owner =
-      getAccountDb().first(
-        `SELECT users.id, users.user_name userName, users.display_name as displayName
-     FROM files
-      JOIN users
-      ON users.id = files.owner
-     WHERE files.id = ?`,
-        [fileId],
-      ) || {};
-
-    res.json(owner);
-  }
-
-  return null;
-});
-
-app.get('/auth-mode', (req, res) => {
-  const { method } =
-    getAccountDb().first(
-      `SELECT method from auth
-        where active = 1`,
-    ) || {};
-
-  res.json({ method });
 });
 
 app.get('/multiuser', (req, res) => {

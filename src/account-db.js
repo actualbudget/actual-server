@@ -200,11 +200,11 @@ export function clearExpiredSessions() {
 
 export async function toggleAuthentication() {
   if (config.loginMethod === 'openid') {
-    const { cnt } = getAccountDb().first(
-      'SELECT count(*) as cnt FROM auth WHERE method = ? and active = 1',
+    const { openidIsEnabled } = getAccountDb().first(
+      'SELECT count(*) as openidIsEnabled FROM auth WHERE method = ? and active = 1',
       ['openid'],
     );
-    if (cnt == 0) {
+    if (openidIsEnabled == 0) {
       const { error } = (await enableOpenID(config, false)) || {};
 
       if (error) {
@@ -213,11 +213,11 @@ export async function toggleAuthentication() {
       }
     }
   } else if (config.loginMethod) {
-    const { cnt } = getAccountDb().first(
-      'SELECT count(*) as cnt FROM auth WHERE method <> ? and active = 1',
+    const { enabledMethodsButOpenId } = getAccountDb().first(
+      'SELECT count(*) as enabledMethodsButOpenId FROM auth WHERE method <> ? and active = 1',
       ['openid'],
     );
-    if (cnt == 0) {
+    if (enabledMethodsButOpenId == 0) {
       const { error } = (await disableOpenID(config, false)) || {};
 
       if (error) {

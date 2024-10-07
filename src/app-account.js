@@ -2,24 +2,19 @@ import express from 'express';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
-  validateSessionMiddleware,
 } from './util/middlewares.js';
 import validateSession, { validateAuthHeader } from './util/validate-user.js';
-import getAccountDb, {
+import {
   bootstrap,
   needsBootstrap,
   getLoginMethod,
   listLoginMethods,
-  enableOpenID,
-  disableOpenID,
   getUserInfo,
   getUserPermissions,
-  isAdmin,
 } from './account-db.js';
 import { changePassword, loginWithPassword } from './accounts/password.js';
 import {
   loginWithOpenIdSetup,
-  loginWithOpenIdFinalize,
 } from './accounts/openid.js';
 
 let app = express();
@@ -103,82 +98,6 @@ app.post('/login', async (req, res) => {
   }
 
   res.send({ status: 'ok', data: { token } });
-});
-
-app.post('/enable-openid', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(req.userSession.user_id)) {
-    res.status(401).send({
-      status: 'error',
-      reason: 'unauthorized',
-      details: 'permission-not-found',
-    });
-    return;
-  }
-
-  let { error } = (await enableOpenID(req.body)) || {};
-
-  if (error) {
-    res.status(400).send({ status: 'error', reason: error });
-    return;
-  }
-  res.send({ status: 'ok' });
-});
-
-app.post('/enable-password', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(req.userSession.user_id)) {
-    res.status(401).send({
-      status: 'error',
-      reason: 'unauthorized',
-      details: 'permission-not-found',
-    });
-    return;
-  }
-
-  let { error } = (await disableOpenID(req.body, true, true)) || {};
-
-  if (error) {
-    res.status(400).send({ status: 'error', reason: error });
-    return;
-  }
-  res.send({ status: 'ok' });
-});
-
-app.get('/openid-config', async (req, res) => {
-  const { ownerCount } =
-    getAccountDb().first(
-      `SELECT count(*) as ownerCount
-   FROM users
-   WHERE users.user_name <> '' and users.owner = 1`,
-    ) || {};
-
-  if (ownerCount > 0) {
-    res.status(400).send({ status: 'error', reason: 'already-bootstraped' });
-    return;
-  }
-
-  const auth =
-    getAccountDb().first(
-      `SELECT * FROM auth
-       WHERE method = ?`,
-      ['openid'],
-    ) || {};
-
-  if (!auth) {
-    res.status(500);
-    return;
-  }
-
-  res.send({ openId: JSON.parse(auth.extra_data) });
-});
-
-app.get('/login-openid/cb', async (req, res) => {
-  let { error, url } = await loginWithOpenIdFinalize(req.query);
-  if (error) {
-    res.send({ error });
-    return;
-  }
-
-  res.redirect(url);
 });
 
 app.post('/change-password', (req, res) => {

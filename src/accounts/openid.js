@@ -33,11 +33,13 @@ export async function bootstrapOpenId(config) {
   // this might not be a real issue since an analogous situation happens
   // if they forget their password.
   let accountDb = getAccountDb();
-  accountDb.mutate('UPDATE auth SET active = 0');
-  accountDb.mutate(
-    "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
-    [JSON.stringify(config)],
-  );
+  accountDb.transaction(() => {
+    accountDb.mutate('UPDATE auth SET active = 0');
+    accountDb.mutate(
+      "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
+      [JSON.stringify(config)],
+    );
+  });
 
   return {};
 }
@@ -56,7 +58,7 @@ async function setupOpenIdClient(config) {
   const client = new issuer.Client({
     client_id: config.client_id,
     client_secret: config.client_secret,
-    redirect_uri: config.server_hostname + '/account/login-openid/cb',
+    redirect_uri: config.server_hostname + '/openid/callback',
     validate_id_token: true,
   });
 

@@ -17,11 +17,13 @@ export function bootstrapPassword(password) {
 
   let hashed = hashPassword(password);
   let accountDb = getAccountDb();
-  accountDb.mutate('UPDATE auth SET active = 0');
-  accountDb.mutate(
-    "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('password', 'Password', ?, 1)",
-    [hashed],
-  );
+  accountDb.transaction(() => {
+    accountDb.mutate('UPDATE auth SET active = 0');
+    accountDb.mutate(
+      "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('password', 'Password', ?, 1)",
+      [hashed],
+    );
+  });
 
   return {};
 }
