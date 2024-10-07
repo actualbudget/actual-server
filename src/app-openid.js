@@ -64,7 +64,9 @@ app.get('/config', async (req, res) => {
   const auth = UserService.getOpenIDConfig();
 
   if (!auth) {
-    res.status(500).send({ status: 'error', reason: 'OpenID configuration not found' });
+    res
+      .status(500)
+      .send({ status: 'error', reason: 'OpenID configuration not found' });
     return;
   }
 

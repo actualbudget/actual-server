@@ -134,7 +134,7 @@ class UserService {
 
   static deleteUserAccessByIds(userIds) {
     return getAccountDb().deleteByIds('user_access', userIds);
-  }  
+  }
 
   static getAllUserAccess(fileId) {
     return getAccountDb().all(

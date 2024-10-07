@@ -13,9 +13,7 @@ import {
   getUserPermissions,
 } from './account-db.js';
 import { changePassword, loginWithPassword } from './accounts/password.js';
-import {
-  loginWithOpenIdSetup,
-} from './accounts/openid.js';
+import { loginWithOpenIdSetup } from './accounts/openid.js';
 
 let app = express();
 app.use(express.json());
