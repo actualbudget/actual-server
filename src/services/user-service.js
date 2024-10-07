@@ -108,6 +108,20 @@ class UserService {
     );
   }
 
+  static countUserAccess(fileId, userId, isAdmin) {
+    const { countUserAccess } =
+      getAccountDb().first(
+        `SELECT count(*) as countUserAccess
+           FROM users
+           JOIN user_access ON user_access.user_id = users.id
+           JOIN files ON files.id = user_access.file_id
+           WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
+        [fileId, userId, isAdmin ? 1 : 0],
+      ) || {};
+
+    return countUserAccess;
+  }
+
   static checkFilePermission(fileId, userId) {
     return (
       getAccountDb().first(

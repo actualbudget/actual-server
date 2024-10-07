@@ -19,8 +19,8 @@ app.use(requestLoggerMiddleware);
 export { app as handlers };
 
 app.get('/ownerCreated/', (req, res) => {
-  const { cnt } = UserService.getOwnerCount() || {};
-  res.json(cnt > 0);
+  const { ownerCount } = UserService.getOwnerCount() || {};
+  res.json(ownerCount > 0);
 });
 
 app.get('/users/', await validateSessionMiddleware, (req, res) => {
@@ -265,11 +265,9 @@ app.post('/access', (req, res) => {
     return;
   }
 
-  const { cnt } =
-    UserService.getUserAccess(userAccess.fileId, userAccess.userId, false) ||
-    {};
-
-  if (cnt > 0) {
+  if (
+    UserService.countUserAccess(userAccess.fileId, userAccess.userId, false) > 0
+  ) {
     res.status(400).send({
       status: 'error',
       reason: 'user-already-have-access',
