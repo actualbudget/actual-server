@@ -353,6 +353,19 @@ app.get('/list-user-files', (req, res) => {
         [req.userSession.user_id, req.userSession.user_id],
       );
 
+  let allUserAccess = accountDb.all(
+    `SELECT UA.user_id, users.display_name, users.user_name, UA.file_id
+            FROM files
+              JOIN user_access UA ON UA.file_id = files.id
+              JOIN users on users.id = UA.user_id
+        UNION ALL
+      SELECT users.id, users.display_name, users.user_name, files.id
+            FROM files
+              JOIN users on users.id = files.owner
+        `,
+    [],
+  );
+
   res.send({
     status: 'ok',
     data: rows.map((row) => ({
@@ -362,6 +375,13 @@ app.get('/list-user-files', (req, res) => {
       name: row.name,
       encryptKeyId: row.encrypt_keyid,
       owner: row.owner,
+      usersWithAccess: allUserAccess
+        .filter((ua) => ua.file_id === row.id)
+        .map((ua) => ({
+          userId: ua.user_id,
+          userName: ua.user_name,
+          displayName: ua.display_name,
+        })),
     })),
   });
 });

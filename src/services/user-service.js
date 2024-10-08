@@ -2,37 +2,69 @@ import getAccountDb from '../account-db.js';
 
 class UserService {
   static getUserByUsername(userName) {
-    return (
+    const { id } =
       getAccountDb().first('SELECT id FROM users WHERE user_name = ?', [
         userName,
-      ]) || {}
-    );
+      ]) || {};
+    return id;
+  }
+
+  static getUserById(userId) {
+    const { id } =
+      getAccountDb().first('SELECT id FROM users WHERE id = ?', [userId]) || {};
+    return id;
   }
 
   static getFileById(fileId) {
-    return (
+    const { id } =
       getAccountDb().first('SELECT id FROM files WHERE files.id = ?', [
         fileId,
-      ]) || {}
-    );
+      ]) || {};
+    return id;
   }
 
   static validateRole(roleId) {
-    return (
+    const { id } =
       getAccountDb().first('SELECT id FROM roles WHERE roles.id = ?', [
         roleId,
-      ]) || {}
-    );
+      ]) || {};
+    return id;
   }
 
   static getOwnerCount() {
-    return (
+    const { cnt } =
       getAccountDb().first(
-        `SELECT count(*) as cnt
-             FROM users
-             WHERE users.user_name <> '' and users.owner = 1`,
-      ) || {}
-    );
+        `SELECT count(*) as cnt FROM users WHERE users.user_name <> '' and users.owner = 1`,
+      ) || {};
+    return cnt;
+  }
+
+  static getOwnerId() {
+    const { id } =
+      getAccountDb().first(
+        `SELECT users.id FROM users WHERE users.user_name <> '' and users.owner = 1`,
+      ) || {};
+    return id;
+  }
+
+  static getFileOwnerId(fileId) {
+    const { owner } =
+      getAccountDb().first(`SELECT files.owner FROM files WHERE files.id = ?`, [
+        fileId,
+      ]) || {};
+    return owner;
+  }
+
+  static getFileOwnerById(fileId) {
+    const { id, userName, displayName } =
+      getAccountDb().first(
+        `SELECT users.id, users.user_name userName, users.display_name as displayName
+       FROM files
+       JOIN users ON users.id = files.owner
+       WHERE files.id = ?`,
+        [fileId],
+      ) || {};
+    return { id, userName, displayName };
   }
 
   static getAllUsers() {
@@ -73,6 +105,13 @@ class UserService {
     );
   }
 
+  static deleteUser(userId) {
+    return getAccountDb().mutate(
+      'DELETE FROM users WHERE id = ? and owner = 0',
+      [userId],
+    ).changes;
+  }
+
   static deleteUserRoles(userId) {
     getAccountDb().mutate('DELETE FROM user_roles WHERE user_id = ?', [userId]);
   }
@@ -83,18 +122,18 @@ class UserService {
     ]);
   }
 
-  static updateFileOwner(ownerId, userId) {
+  static transferAllFilesFromUser(ownerId, oldUserId) {
     getAccountDb().mutate('UPDATE files set owner = ? WHERE owner = ?', [
       ownerId,
-      userId,
+      oldUserId,
     ]);
   }
 
-  static deleteUser(userId) {
-    return getAccountDb().mutate(
-      'DELETE FROM users WHERE id = ? and owner = 0',
-      [userId],
-    ).changes;
+  static updateFileOwner(ownerId, fileId) {
+    getAccountDb().mutate('UPDATE files set owner = ? WHERE id = ?', [
+      ownerId,
+      fileId,
+    ]);
   }
 
   static getUserAccess(fileId, userId, isAdmin) {
@@ -140,14 +179,27 @@ class UserService {
     );
   }
 
-  static deleteUserAccessById(userId) {
-    return getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [
-      userId,
-    ]).changes;
-  }
+  static deleteUserAccessByFileId(userIds, fileId) {
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      throw new Error('The provided userIds must be a non-empty array.');
+    }
 
-  static deleteUserAccessByIds(userIds) {
-    return getAccountDb().deleteByIds('user_access', userIds);
+    const CHUNK_SIZE = 999; // SQLite and many databases have a limit for the number of placeholders in a query
+    let totalChanges = 0;
+
+    for (let i = 0; i < userIds.length; i += CHUNK_SIZE) {
+      const chunk = userIds.slice(i, i + CHUNK_SIZE).map(String); // Convert numbers to strings
+      const placeholders = chunk.map(() => '?').join(',');
+
+      // Use parameterized query to prevent SQL injection
+      const sql = `DELETE FROM user_access WHERE user_id IN (${placeholders}) AND file_id = ?`;
+
+      // Execute the delete query with user IDs and the fileId as parameters
+      const result = getAccountDb().mutate(sql, [...chunk, fileId]); // Assuming mutate properly handles parameterized queries
+      totalChanges += result.changes;
+    }
+
+    return totalChanges;
   }
 
   static getAllUserAccess(fileId) {
@@ -183,22 +235,10 @@ class UserService {
     return Array.from(accessMap.entries());
   }
 
-  static getAuthMode() {
-    return (
-      getAccountDb().first(
-        `SELECT method from auth
-             where active = 1`,
-      ) || {}
-    );
-  }
-
   static getOpenIDConfig() {
     return (
-      getAccountDb().first(
-        `SELECT * FROM auth
-         WHERE method = ?`,
-        ['openid'],
-      ) || {}
+      getAccountDb().first(`SELECT * FROM auth WHERE method = ?`, ['openid']) ||
+      {}
     );
   }
 }

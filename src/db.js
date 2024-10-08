@@ -50,31 +50,6 @@ class WrappedDatabase {
   close() {
     this.db.close();
   }
-
-  /**
-   * Delete items by a list of IDs
-   * @param {string} tableName
-   * @param {number[]} ids
-   * @returns {number} Total number of rows deleted
-   */
-  deleteByIds(tableName, ids) {
-    if (!Array.isArray(ids) || ids.length === 0) {
-      throw new Error('The provided ids must be a non-empty array.');
-    }
-
-    const CHUNK_SIZE = 999;
-    let totalChanges = 0;
-
-    for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
-      const chunk = ids.slice(i, i + CHUNK_SIZE).map(String); // Convert numbers to strings
-      const placeholders = chunk.map(() => '?').join(',');
-      const sql = `DELETE FROM ${tableName} WHERE id IN (${placeholders})`;
-      const result = this.mutate(sql, chunk);
-      totalChanges += result.changes;
-    }
-
-    return totalChanges;
-  }
 }
 
 /** @param {string} filename */

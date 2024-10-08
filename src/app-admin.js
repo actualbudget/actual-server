@@ -19,7 +19,7 @@ app.use(requestLoggerMiddleware);
 export { app as handlers };
 
 app.get('/ownerCreated/', (req, res) => {
-  const { ownerCount } = UserService.getOwnerCount() || {};
+  const ownerCount = UserService.getOwnerCount();
   res.json(ownerCount > 0);
 });
 
@@ -44,28 +44,18 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  const newUser = req.body;
+  const { userName, role, displayName, enabled } = req.body;
 
-  if (!newUser.userName) {
+  if (!userName || !role) {
     res.status(400).send({
       status: 'error',
-      reason: 'user-cant-be-empty',
-      details: 'Username cannot be empty',
+      reason: `${!userName ? 'user-cant-be-empty' : 'role-cant-be-empty'}`,
+      details: `${!userName ? 'Username' : 'Role'} cannot be empty`,
     });
     return;
   }
 
-  if (!newUser.role) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'role-cant-be-empty',
-      details: 'Role cannot be empty',
-    });
-    return;
-  }
-
-  const { id: roleIdFromDb } = UserService.validateRole(newUser.role) || {};
-
+  const roleIdFromDb = UserService.validateRole(role);
   if (!roleIdFromDb) {
     res.status(400).send({
       status: 'error',
@@ -75,23 +65,24 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  const { id: userIdInDb } = UserService.getUserByUsername(newUser.userName);
-
+  const userIdInDb = UserService.getUserByUsername(userName);
   if (userIdInDb) {
     res.status(400).send({
       status: 'error',
       reason: 'user-already-exists',
-      details: `User ${newUser.userName} already exists`,
+      details: `User ${userName} already exists`,
     });
     return;
   }
 
   const userId = uuid.v4();
-  let displayName = newUser.displayName || null;
-  let enabled = newUser.enabled ? 1 : 0;
-
-  UserService.insertUser(userId, newUser.userName, displayName, enabled);
-  UserService.insertUserRole(userId, newUser.role);
+  UserService.insertUser(
+    userId,
+    userName,
+    displayName || null,
+    enabled ? 1 : 0,
+  );
+  UserService.insertUserRole(userId, role);
 
   res.status(200).send({ status: 'ok', data: { id: userId } });
 });
@@ -106,30 +97,18 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  const userToUpdate = req.body;
-  const { id: userIdInDb } = UserService.getUserByUsername(userToUpdate.id);
+  const { id, userName, role, displayName, enabled } = req.body;
 
-  if (!userToUpdate.userName) {
+  if (!userName || !role) {
     res.status(400).send({
       status: 'error',
-      reason: 'user-cant-be-empty',
-      details: 'Username cannot be empty',
+      reason: `${!userName ? 'user-cant-be-empty' : 'role-cant-be-empty'}`,
+      details: `${!userName ? 'Username' : 'Role'} cannot be empty`,
     });
     return;
   }
 
-  if (!userToUpdate.role) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'role-cant-be-empty',
-      details: 'Role cannot be empty',
-    });
-    return;
-  }
-
-  const { id: roleIdFromDb } =
-    UserService.validateRole(userToUpdate.role) || {};
-
+  const roleIdFromDb = UserService.validateRole(role);
   if (!roleIdFromDb) {
     res.status(400).send({
       status: 'error',
@@ -139,25 +118,23 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
+  const userIdInDb = UserService.getUserByUsername(id);
   if (!userIdInDb) {
     res.status(400).send({
       status: 'error',
       reason: 'cannot-find-user-to-update',
-      details: `Cannot find ${userToUpdate.userName} to update`,
+      details: `Cannot find user ${userName} to update`,
     });
     return;
   }
 
-  let displayName = userToUpdate.displayName || null;
-  let enabled = userToUpdate.enabled ? 1 : 0;
-
   UserService.updateUser(
     userIdInDb,
-    userToUpdate.userName,
-    displayName,
-    enabled,
+    userName,
+    displayName || null,
+    enabled ? 1 : 0,
   );
-  UserService.updateUserRole(userIdInDb, userToUpdate.role);
+  UserService.updateUserRole(userIdInDb, role);
 
   res.status(200).send({ status: 'ok', data: { id: userIdInDb } });
 });
@@ -175,13 +152,13 @@ app.post('/users/delete-all', validateSessionMiddleware, async (req, res) => {
   const ids = req.body.ids;
   let totalDeleted = 0;
   ids.forEach((item) => {
-    const { id: ownerId } = UserService.getOwnerCount() || {};
+    const ownerId = UserService.getOwnerId();
 
     if (item === ownerId) return;
 
     UserService.deleteUserRoles(item);
     UserService.deleteUserAccess(item);
-    UserService.updateFileOwner(ownerId, item);
+    UserService.transferAllFilesFromUser(ownerId, item);
     const usersDeleted = UserService.deleteUser(item);
     totalDeleted += usersDeleted;
   });
@@ -202,7 +179,7 @@ app.post('/users/delete-all', validateSessionMiddleware, async (req, res) => {
 app.get('/access', validateSessionMiddleware, (req, res) => {
   const fileId = req.query.fileId;
 
-  const { id: fileIdInDb } = UserService.getFileById(fileId);
+  const fileIdInDb = UserService.getFileById(fileId);
   if (!fileIdInDb) {
     res.status(400).send({
       status: 'error',
@@ -235,7 +212,7 @@ function checkFilePermission(fileId, userId, res) {
     return false;
   }
 
-  const { id: fileIdInDb } = UserService.getFileById(fileId);
+  const fileIdInDb = UserService.getFileById(fileId);
   if (!fileIdInDb) {
     res.status(400).send({
       status: 'error',
@@ -289,7 +266,7 @@ app.delete('/access', (req, res) => {
   if (!checkFilePermission(fileId, session.user_id, res)) return;
 
   const ids = req.body.ids;
-  let totalDeleted = UserService.deleteUserAccessByIds(ids);
+  let totalDeleted = UserService.deleteUserAccessByFileId(ids, fileId);
 
   if (ids.length === totalDeleted) {
     res
@@ -311,6 +288,58 @@ app.get('/access/users', validateSessionMiddleware, async (req, res) => {
 
   const users = UserService.getAllUserAccess(fileId);
   res.json(users);
+});
+
+app.post(
+  '/access/transfer-ownership/',
+  validateSessionMiddleware,
+  (req, res) => {
+    const newUserOwner = req.body || {};
+    if (!checkFilePermission(newUserOwner.fileId, req.userSession.user_id, res))
+      return;
+
+    if (!newUserOwner.newUserId) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'user-cant-be-empty',
+        details: 'Username cannot be empty',
+      });
+      return;
+    }
+
+    const newUserIdFromDb = UserService.getUserById(newUserOwner.newUserId);
+    if (newUserIdFromDb === 0) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'new-user-not-found',
+        details: 'New user not found',
+      });
+      return;
+    }
+
+    UserService.updateFileOwner(newUserOwner.newUserId, newUserOwner.fileId);
+
+    res.status(200).send({ status: 'ok', data: {} });
+  },
+);
+
+app.get('/file/owner', validateSessionMiddleware, async (req, res) => {
+  const fileId = req.query.fileId;
+
+  if (!checkFilePermission(fileId, req.userSession.user_id, res)) return;
+
+  let canGetOwner = isAdmin(req.userSession.user_id);
+  if (!canGetOwner) {
+    const fileIdOwner = UserService.getFileOwnerId(fileId);
+    canGetOwner = fileIdOwner === req.userSession.user_id;
+  }
+
+  if (canGetOwner) {
+    const owner = UserService.getFileOwnerById(fileId);
+    res.json(owner);
+  }
+
+  return null;
 });
 
 app.get('/multiuser', (req, res) => {
