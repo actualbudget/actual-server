@@ -36,7 +36,7 @@ class UserService {
       getAccountDb().first(
         `SELECT count(*) as cnt FROM users WHERE users.user_name <> '' and users.owner = 1`,
       ) || {};
-    return cnt;
+    return cnt || 0;
   }
 
   static getOwnerId() {
@@ -158,7 +158,7 @@ class UserService {
         [fileId, userId, isAdmin ? 1 : 0],
       ) || {};
 
-    return countUserAccess;
+    return countUserAccess || 0;
   }
 
   static checkFilePermission(fileId, userId) {

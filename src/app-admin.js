@@ -139,7 +139,7 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
   res.status(200).send({ status: 'ok', data: { id: userIdInDb } });
 });
 
-app.post('/users/delete-all', validateSessionMiddleware, async (req, res) => {
+app.delete('/users', validateSessionMiddleware, async (req, res) => {
   if (!isAdmin(req.userSession.user_id)) {
     res.status(401).send({
       status: 'error',
