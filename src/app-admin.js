@@ -243,9 +243,7 @@ app.post('/access', (req, res) => {
     return;
   }
 
-  if (
-    UserService.countUserAccess(userAccess.fileId, userAccess.userId, false) > 0
-  ) {
+  if (UserService.countUserAccess(userAccess.fileId, userAccess.userId) > 0) {
     res.status(400).send({
       status: 'error',
       reason: 'user-already-have-access',

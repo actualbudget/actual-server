@@ -102,7 +102,7 @@ const finalConfig = {
     ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
     : config.loginMethod,
   multiuser: process.env.ACTUAL_MULTIUSER
-    ? ['true', '1', 'yes', 'on'].includes(process.env.ACTUAL_MULTIUSER.toLowerCase())
+    ? process.env.ACTUAL_MULTIUSER.toLowerCase() === 'true'
     : config.multiuser,
   trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
     ? process.env.ACTUAL_TRUSTED_PROXIES.split(',').map((q) => q.trim())

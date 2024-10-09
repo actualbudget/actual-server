@@ -16,17 +16,15 @@ export function getUserById(userId) {
 
 export function getFileById(fileId) {
   const { id } =
-    getAccountDb().first('SELECT id FROM files WHERE files.id = ?', [
-      fileId,
-    ]) || {};
+    getAccountDb().first('SELECT id FROM files WHERE files.id = ?', [fileId]) ||
+    {};
   return id;
 }
 
 export function validateRole(roleId) {
   const { id } =
-    getAccountDb().first('SELECT id FROM roles WHERE roles.id = ?', [
-      roleId,
-    ]) || {};
+    getAccountDb().first('SELECT id FROM roles WHERE roles.id = ?', [roleId]) ||
+    {};
   return id;
 }
 
@@ -98,13 +96,19 @@ export function updateUser(userId, userName, displayName, enabled) {
 }
 
 export function updateUserRole(userId, roleId) {
-  getAccountDb().mutate(
-    'UPDATE user_roles SET role_id = ? WHERE user_id = ?',
-    [roleId, userId],
-  );
+  getAccountDb().mutate('UPDATE user_roles SET role_id = ? WHERE user_id = ?', [
+    roleId,
+    userId,
+  ]);
 }
 
-export function updateUserWithRole(userId, userName, displayName, enabled, roleId) {
+export function updateUserWithRole(
+  userId,
+  userName,
+  displayName,
+  enabled,
+  roleId,
+) {
   getAccountDb().transaction(() => {
     getAccountDb().mutate(
       'UPDATE users SET user_name = ?, display_name = ?, enabled = ? WHERE id = ?',
@@ -118,10 +122,9 @@ export function updateUserWithRole(userId, userName, displayName, enabled, roleI
 }
 
 export function deleteUser(userId) {
-  return getAccountDb().mutate(
-    'DELETE FROM users WHERE id = ? and owner = 0',
-    [userId],
-  ).changes;
+  return getAccountDb().mutate('DELETE FROM users WHERE id = ? and owner = 0', [
+    userId,
+  ]).changes;
 }
 
 export function deleteUserRoles(userId) {
@@ -129,9 +132,7 @@ export function deleteUserRoles(userId) {
 }
 
 export function deleteUserAccess(userId) {
-  getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [
-    userId,
-  ]);
+  getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [userId]);
 }
 
 export function transferAllFilesFromUser(ownerId, oldUserId) {
@@ -159,7 +160,7 @@ export function getUserAccess(fileId, userId, isAdmin) {
   );
 }
 
-export function countUserAccess(fileId, userId, isAdmin) {
+export function countUserAccess(fileId, userId) {
   const { countUserAccess } =
     getAccountDb().first(
       `SELECT count(*) as countUserAccess
@@ -227,6 +228,7 @@ export function getAllUserAccess(fileId) {
 
 export function getOpenIDConfig() {
   return (
-    getAccountDb().first(`SELECT * FROM auth WHERE method = ?`, ['openid']) || {}
+    getAccountDb().first(`SELECT * FROM auth WHERE method = ?`, ['openid']) ||
+    {}
   );
 }
