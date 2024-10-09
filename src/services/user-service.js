@@ -163,12 +163,17 @@ export function getUserAccess(fileId, userId, isAdmin) {
 export function countUserAccess(fileId, userId) {
   const { countUserAccess } =
     getAccountDb().first(
-      `SELECT count(*) as countUserAccess
-       FROM users
-       LEFT JOIN user_access ON user_access.user_id = users.id
-       JOIN files ON files.id = user_access.file_id
-       WHERE files.id = ? and files.owner = ? OR users.id = ?`,
-      [fileId, userId, userId],
+      `SELECT SUM(countUserAccess) as countUserAccess FROM
+      (
+        SELECT count(*) as countUserAccess
+        FROM user_access 
+            WHERE user_access.user_id = ? and user_access.file_id = ?
+        UNION ALL
+        SELECT count(*) from files 
+            WHERE files.id = ? and files.owner = ?
+       ) as z
+       `,
+      [userId, fileId, fileId, userId],
     ) || {};
 
   return countUserAccess || 0;
@@ -229,6 +234,6 @@ export function getAllUserAccess(fileId) {
 export function getOpenIDConfig() {
   return (
     getAccountDb().first(`SELECT * FROM auth WHERE method = ?`, ['openid']) ||
-    {}
+    null
   );
 }
