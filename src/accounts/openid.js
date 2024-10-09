@@ -3,6 +3,10 @@ import * as uuid from 'uuid';
 import { generators, Issuer } from 'openid-client';
 import finalConfig from '../load-config.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
+import {
+  getUserByUsername,
+  transferAllFilesFromUser,
+} from '../services/user-service.js';
 
 export async function bootstrapOpenId(config) {
   if (!('issuer' in config)) {
@@ -197,6 +201,11 @@ export async function loginWithOpenIdFinalize(body) {
         'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
         [userId, adminRoleId],
       );
+
+      const userFromPasswordMethod = getUserByUsername('');
+      if (userFromPasswordMethod) {
+        transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
+      }
     } else {
       let { id: userIdFromDb, display_name: displayName } =
         accountDb.first(

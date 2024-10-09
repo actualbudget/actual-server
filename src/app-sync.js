@@ -381,6 +381,7 @@ app.get('/list-user-files', (req, res) => {
           userId: ua.user_id,
           userName: ua.user_name,
           displayName: ua.display_name,
+          owner: ua.user_id === row.owner,
         })),
     })),
   });
