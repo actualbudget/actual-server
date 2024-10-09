@@ -95,6 +95,8 @@ describe('/admin', () => {
 
     describe('POST /users', () => {
       let sessionUserId, sessionToken;
+      let createdUserId;
+      let duplicateUserId;
 
       beforeEach(() => {
         sessionUserId = uuidv4();
@@ -105,6 +107,15 @@ describe('/admin', () => {
 
       afterEach(() => {
         deleteUser(sessionUserId);
+        if (createdUserId) {
+          deleteUser(createdUserId);
+          createdUserId = null;
+        }
+
+        if (duplicateUserId) {
+          deleteUser(duplicateUserId);
+          duplicateUserId = null;
+        }
       });
 
       it('should return 200 and create a new user', async () => {
@@ -124,6 +135,8 @@ describe('/admin', () => {
         expect(res.statusCode).toEqual(200);
         expect(res.body.status).toBe('ok');
         expect(res.body.data).toHaveProperty('id');
+
+        createdUserId = res.body.data.id;
       });
 
       it('should return 400 if the user already exists', async () => {
@@ -135,12 +148,14 @@ describe('/admin', () => {
           role: BASIC_ROLE,
         };
 
-        await request(app)
+        let res = await request(app)
           .post('/users')
           .send(newUser)
           .set('x-actual-token', sessionToken);
 
-        const res = await request(app)
+        duplicateUserId = res.body.data.id;
+
+        res = await request(app)
           .post('/users')
           .send(newUser)
           .set('x-actual-token', sessionToken);
@@ -232,7 +247,7 @@ describe('/admin', () => {
         };
 
         const res = await request(app)
-          .post('/users/delete-all')
+          .delete('/users')
           .send(userToDelete)
           .set('x-actual-token', sessionToken);
 
@@ -247,7 +262,7 @@ describe('/admin', () => {
         };
 
         const res = await request(app)
-          .post('/users/delete-all')
+          .delete('/users')
           .send(userToDelete)
           .set('x-actual-token', sessionToken);
 
@@ -354,7 +369,7 @@ describe('/admin', () => {
         };
 
         const res = await request(app)
-          .post('/access/delete-all')
+          .delete('/access')
           .send(deleteAccess)
           .query({ fileId })
           .set('x-actual-token', sessionToken);
@@ -370,7 +385,7 @@ describe('/admin', () => {
         };
 
         const res = await request(app)
-          .post('/access/delete-all')
+          .delete('/access')
           .send(deleteAccess)
           .query({ fileId })
           .set('x-actual-token', sessionToken);

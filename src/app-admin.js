@@ -8,7 +8,7 @@ import {
 import validateSession from './util/validate-user.js';
 import { isAdmin } from './account-db.js';
 import config from './load-config.js';
-import UserService from './services/user-service.js';
+import * as UserService from './services/user-service.js';
 
 let app = express();
 app.use(express.json());
@@ -19,8 +19,12 @@ app.use(requestLoggerMiddleware);
 export { app as handlers };
 
 app.get('/ownerCreated/', (req, res) => {
-  const ownerCount = UserService.getOwnerCount();
-  res.json(ownerCount > 0);
+  try {
+    const ownerCount = UserService.getOwnerCount();
+    res.json(ownerCount > 0);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve owner count' });
+  }
 });
 
 app.get('/users/', await validateSessionMiddleware, (req, res) => {
@@ -36,9 +40,9 @@ app.get('/users/', await validateSessionMiddleware, (req, res) => {
 
 app.post('/users', validateSessionMiddleware, async (req, res) => {
   if (!isAdmin(req.userSession.user_id)) {
-    res.status(401).send({
+    res.status(403).send({
       status: 'error',
-      reason: 'unauthorized',
+      reason: 'forbidden',
       details: 'permission-not-found',
     });
     return;
@@ -89,9 +93,9 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
 
 app.patch('/users', validateSessionMiddleware, async (req, res) => {
   if (!isAdmin(req.userSession.user_id)) {
-    res.status(401).send({
+    res.status(403).send({
       status: 'error',
-      reason: 'unauthorized',
+      reason: 'forbidden',
       details: 'permission-not-found',
     });
     return;
@@ -118,7 +122,7 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  const userIdInDb = UserService.getUserByUsername(id);
+  const userIdInDb = UserService.getUserById(id);
   if (!userIdInDb) {
     res.status(400).send({
       status: 'error',
@@ -128,22 +132,22 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  UserService.updateUser(
+  UserService.updateUserWithRole(
     userIdInDb,
     userName,
     displayName || null,
     enabled ? 1 : 0,
+    role,
   );
-  UserService.updateUserRole(userIdInDb, role);
 
   res.status(200).send({ status: 'ok', data: { id: userIdInDb } });
 });
 
 app.delete('/users', validateSessionMiddleware, async (req, res) => {
   if (!isAdmin(req.userSession.user_id)) {
-    res.status(401).send({
+    res.status(403).send({
       status: 'error',
-      reason: 'unauthorized',
+      reason: 'forbidden',
       details: 'permission-not-found',
     });
     return;
@@ -198,40 +202,37 @@ app.get('/access', validateSessionMiddleware, (req, res) => {
   res.json(accesses);
 });
 
-function checkFilePermission(fileId, userId, res) {
-  const { granted } = UserService.checkFilePermission(fileId, userId) || {
-    granted: 0,
-  };
-
-  if (granted === 0 && !isAdmin(userId)) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'file-denied',
-      details: "You don't have permissions over this file",
-    });
-    return false;
-  }
-
-  const fileIdInDb = UserService.getFileById(fileId);
-  if (!fileIdInDb) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'invalid-file-id',
-      details: 'File not found at server',
-    });
-    return false;
-  }
-
-  return true;
-}
-
 app.post('/access', (req, res) => {
   const userAccess = req.body || {};
   const session = validateSession(req, res);
 
   if (!session) return;
 
-  if (!checkFilePermission(userAccess.fileId, session.user_id, res)) return;
+  const { granted } = UserService.checkFilePermission(
+    userAccess.fileId,
+    session.user_id,
+  ) || {
+    granted: 0,
+  };
+
+  if (granted === 0 && !isAdmin(session.user_id)) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'file-denied',
+      details: "You don't have permissions over this file",
+    });
+    return;
+  }
+
+  const fileIdInDb = UserService.getFileById(userAccess.fileId);
+  if (!fileIdInDb) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'invalid-file-id',
+      details: 'File not found at server',
+    });
+    return;
+  }
 
   if (!userAccess.userId) {
     res.status(400).send({
@@ -263,7 +264,31 @@ app.delete('/access', (req, res) => {
   const session = validateSession(req, res);
   if (!session) return;
 
-  if (!checkFilePermission(fileId, session.user_id, res)) return;
+  const { granted } = UserService.checkFilePermission(
+    fileId,
+    session.user_id,
+  ) || {
+    granted: 0,
+  };
+
+  if (granted === 0 && !isAdmin(session.user_id)) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'file-denied',
+      details: "You don't have permissions over this file",
+    });
+    return;
+  }
+
+  const fileIdInDb = UserService.getFileById(fileId);
+  if (!fileIdInDb) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'invalid-file-id',
+      details: 'File not found at server',
+    });
+    return;
+  }
 
   const ids = req.body.ids;
   let totalDeleted = UserService.deleteUserAccessByFileId(ids, fileId);
@@ -284,7 +309,31 @@ app.delete('/access', (req, res) => {
 app.get('/access/users', validateSessionMiddleware, async (req, res) => {
   const fileId = req.query.fileId;
 
-  if (!checkFilePermission(fileId, req.userSession.user_id, res)) return;
+  const { granted } = UserService.checkFilePermission(
+    fileId,
+    req.userSession.user_id,
+  ) || {
+    granted: 0,
+  };
+
+  if (granted === 0 && !isAdmin(req.userSession.user_id)) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'file-denied',
+      details: "You don't have permissions over this file",
+    });
+    return;
+  }
+
+  const fileIdInDb = UserService.getFileById(fileId);
+  if (!fileIdInDb) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'invalid-file-id',
+      details: 'File not found at server',
+    });
+    return;
+  }
 
   const users = UserService.getAllUserAccess(fileId);
   res.json(users);
@@ -295,8 +344,32 @@ app.post(
   validateSessionMiddleware,
   (req, res) => {
     const newUserOwner = req.body || {};
-    if (!checkFilePermission(newUserOwner.fileId, req.userSession.user_id, res))
+
+    const { granted } = UserService.checkFilePermission(
+      newUserOwner.fileId,
+      req.userSession.user_id,
+    ) || {
+      granted: 0,
+    };
+
+    if (granted === 0 && !isAdmin(req.userSession.user_id)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'file-denied',
+        details: "You don't have permissions over this file",
+      });
       return;
+    }
+
+    const fileIdInDb = UserService.getFileById(newUserOwner.fileId);
+    if (!fileIdInDb) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-file-id',
+        details: 'File not found at server',
+      });
+      return;
+    }
 
     if (!newUserOwner.newUserId) {
       res.status(400).send({
@@ -326,7 +399,31 @@ app.post(
 app.get('/file/owner', validateSessionMiddleware, async (req, res) => {
   const fileId = req.query.fileId;
 
-  if (!checkFilePermission(fileId, req.userSession.user_id, res)) return;
+  const { granted } = UserService.checkFilePermission(
+    fileId,
+    req.userSession.user_id,
+  ) || {
+    granted: 0,
+  };
+
+  if (granted === 0 && !isAdmin(req.userSession.user_id)) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'file-denied',
+      details: "You don't have permissions over this file",
+    });
+    return;
+  }
+
+  const fileIdInDb = UserService.getFileById(fileId);
+  if (!fileIdInDb) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'invalid-file-id',
+      details: 'File not found at server',
+    });
+    return;
+  }
 
   let canGetOwner = isAdmin(req.userSession.user_id);
   if (!canGetOwner) {

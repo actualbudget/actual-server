@@ -83,7 +83,6 @@ app.post('/login', async (req, res) => {
       return;
     }
 
-    case 'password':
     default:
       tokenRes = loginWithPassword(req.body.password);
       break;

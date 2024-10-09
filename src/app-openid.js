@@ -6,7 +6,7 @@ import {
 } from './util/middlewares.js';
 import { disableOpenID, enableOpenID, isAdmin } from './account-db.js';
 import { loginWithOpenIdFinalize } from './accounts/openid.js';
-import UserService from './services/user-service.js';
+import * as UserService from './services/user-service.js';
 
 let app = express();
 app.use(express.json());
@@ -17,9 +17,9 @@ export { app as handlers };
 
 app.post('/enable', validateSessionMiddleware, async (req, res) => {
   if (!isAdmin(req.userSession.user_id)) {
-    res.status(401).send({
+    res.status(403).send({
       status: 'error',
-      reason: 'unauthorized',
+      reason: 'forbidden',
       details: 'permission-not-found',
     });
     return;
@@ -36,9 +36,9 @@ app.post('/enable', validateSessionMiddleware, async (req, res) => {
 
 app.post('/disable', validateSessionMiddleware, async (req, res) => {
   if (!isAdmin(req.userSession.user_id)) {
-    res.status(401).send({
+    res.status(403).send({
       status: 'error',
-      reason: 'unauthorized',
+      reason: 'forbidden',
       details: 'permission-not-found',
     });
     return;
@@ -47,7 +47,7 @@ app.post('/disable', validateSessionMiddleware, async (req, res) => {
   let { error } = (await disableOpenID(req.body, true, true)) || {};
 
   if (error) {
-    res.status(400).send({ status: 'error', reason: error });
+    res.status(500).send({ status: 'error', reason: error });
     return;
   }
   res.send({ status: 'ok' });

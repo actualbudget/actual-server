@@ -14,7 +14,6 @@ import * as secretApp from './app-secrets.js';
 import * as adminApp from './app-admin.js';
 import * as openidApp from './app-openid.js';
 import { toggleAuthentication } from './account-db.js';
-import { exit } from 'node:process';
 
 const app = express();
 
@@ -91,7 +90,7 @@ export default async function run() {
     app.listen(config.port, config.hostname);
   }
 
-  if (!(await toggleAuthentication())) exit(-1);
+  if (!(await toggleAuthentication())) process.exit(-1);
 
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
 }

@@ -4,20 +4,23 @@ import * as uuid from 'uuid';
 import finalConfig from '../load-config.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
+function isValidPassword(password) {
+  return password != null && password !== '';
+}
+
 function hashPassword(password) {
   return bcrypt.hashSync(password, 12);
 }
 
 export function bootstrapPassword(password) {
-  if (!password) {
+  if (!isValidPassword(password)) {
     return { error: 'invalid-password' };
   }
-
-  getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['password']);
 
   let hashed = hashPassword(password);
   let accountDb = getAccountDb();
   accountDb.transaction(() => {
+    accountDb.mutate('DELETE FROM auth WHERE method = ?', ['password']);
     accountDb.mutate('UPDATE auth SET active = 0');
     accountDb.mutate(
       "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('password', 'Password', ?, 1)",
@@ -29,7 +32,7 @@ export function bootstrapPassword(password) {
 }
 
 export function loginWithPassword(password) {
-  if (password === undefined || password === '') {
+  if (!isValidPassword(password)) {
     return { error: 'invalid-password' };
   }
 
@@ -39,13 +42,16 @@ export function loginWithPassword(password) {
       'password',
     ]) || {};
 
-  let confirmed = passwordHash && bcrypt.compareSync(password, passwordHash);
+  let confirmed = bcrypt.compareSync(password, passwordHash);
 
   if (!confirmed) {
     return { error: 'invalid-password' };
   }
 
-  let sessionRow = accountDb.first('SELECT * FROM sessions');
+  let sessionRow = accountDb.first(
+    'SELECT * FROM sessions WHERE auth_method = ?',
+    ['password'],
+  );
 
   let token = sessionRow ? sessionRow.token : uuid.v4();
 
@@ -78,6 +84,10 @@ export function loginWithPassword(password) {
     );
 
     userId = userIdFromDb;
+
+    if (!userId) {
+      return { error: 'user-not-found' };
+    }
   }
 
   let expiration = TOKEN_EXPIRATION_NEVER;
@@ -110,7 +120,7 @@ export function loginWithPassword(password) {
 export function changePassword(newPassword) {
   let accountDb = getAccountDb();
 
-  if (newPassword == null || newPassword === '') {
+  if (isValidPassword(newPassword)) {
     return { error: 'invalid-password' };
   }
 
