@@ -120,7 +120,7 @@ export function loginWithPassword(password) {
 export function changePassword(newPassword) {
   let accountDb = getAccountDb();
 
-  if (isValidPassword(newPassword)) {
+  if (!isValidPassword(newPassword)) {
     return { error: 'invalid-password' };
   }
 
