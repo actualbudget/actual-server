@@ -48,7 +48,6 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
-  loginMethod: 'password',
   // assume local networks are trusted for header authentication
   trustedProxies: [
     '10.0.0.0/8',
@@ -72,6 +71,8 @@ let defaultConfig = {
     fileSizeLimitMB: 20,
   },
   projectRoot,
+  multiuser: false,
+  token_expiration: 'never',
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -100,6 +101,9 @@ const finalConfig = {
   loginMethod: process.env.ACTUAL_LOGIN_METHOD
     ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
     : config.loginMethod,
+  multiuser: process.env.ACTUAL_MULTIUSER
+    ? process.env.ACTUAL_MULTIUSER.toLowerCase() === 'true'
+    : config.multiuser,
   trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
     ? process.env.ACTUAL_TRUSTED_PROXIES.split(',').map((q) => q.trim())
     : config.trustedProxies,
@@ -134,6 +138,46 @@ const finalConfig = {
             config.upload.fileSizeLimitMB,
         }
       : config.upload,
+  openId:
+    process.env.ACTUAL_OPENID_DISCOVERY_URL ||
+    process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT
+      ? {
+          ...(process.env.ACTUAL_OPENID_DISCOVERY_URL
+            ? {
+                issuer: process.env.ACTUAL_OPENID_DISCOVERY_URL,
+              }
+            : process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT
+            ? {
+                issuer: {
+                  name: process.env.ACTUAL_OPENID_PROVIDER_NAME,
+                  authorization_endpoint:
+                    process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT,
+                  token_endpoint: process.env.ACTUAL_OPENID_TOKEN_ENDPOINT,
+                  userinfo_endpoint:
+                    process.env.ACTUAL_OPENID_USERINFO_ENDPOINT,
+                },
+              }
+            : config.openId),
+          ...{
+            client_id: process.env.ACTUAL_OPENID_CLIENT_ID
+              ? process.env.ACTUAL_OPENID_CLIENT_ID
+              : config.openId?.client_id,
+          },
+          ...{
+            client_secret: process.env.ACTUAL_OPENID_CLIENT_SECRET
+              ? process.env.ACTUAL_OPENID_CLIENT_SECRET
+              : config.openId?.client_secret,
+          },
+          ...{
+            server_hostname: process.env.ACTUAL_OPENID_SERVER_HOSTNAME
+              ? process.env.ACTUAL_OPENID_SERVER_HOSTNAME
+              : config.openId?.server_hostname,
+          },
+        }
+      : config.openId,
+  token_expiration: process.env.ACTUAL_TOKEN_EXPIRATION
+    ? process.env.ACTUAL_TOKEN_EXPIRATION
+    : config.token_expiration,
 };
 
 debug(`using port ${finalConfig.port}`);
@@ -142,7 +186,7 @@ debug(`using data directory ${finalConfig.dataDir}`);
 debug(`using server files directory ${finalConfig.serverFiles}`);
 debug(`using user files directory ${finalConfig.userFiles}`);
 debug(`using web root directory ${finalConfig.webRoot}`);
-debug(`using login method ${finalConfig.loginMethod}`);
+debug(`using login method ${finalConfig.loginMethod ?? 'password'}`);
 debug(`using trusted proxies ${finalConfig.trustedProxies.join(', ')}`);
 
 if (finalConfig.https) {

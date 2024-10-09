@@ -5,14 +5,14 @@ import * as uuid from 'uuid';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
-  validateUserMiddleware,
+  validateSessionMiddleware,
 } from './util/middlewares.js';
-import getAccountDb from './account-db.js';
 import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
 import * as simpleSync from './sync-simple.js';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
+import getAccountDb, { isAdmin } from './account-db.js';
 
 const app = express();
 app.use(errorMiddleware);
@@ -21,7 +21,7 @@ app.use(express.raw({ type: 'application/actual-sync' }));
 app.use(express.raw({ type: 'application/encrypted-file' }));
 app.use(express.json());
 
-app.use(validateUserMiddleware);
+app.use(validateSessionMiddleware);
 export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
@@ -260,8 +260,15 @@ app.post('/upload-user-file', async (req, res) => {
     // it's new
     groupId = uuid.v4();
     accountDb.mutate(
-      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta) VALUES (?, ?, ?, ?, ?)',
-      [fileId, groupId, syncFormatVersion, name, encryptMeta],
+      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, owner) VALUES (?, ?, ?, ?, ?, ?)',
+      [
+        fileId,
+        groupId,
+        syncFormatVersion,
+        name,
+        encryptMeta,
+        req.userSession.user_id,
+      ],
     );
     res.send({ status: 'ok', groupId });
   } else {
@@ -328,8 +335,36 @@ app.post('/update-user-filename', (req, res) => {
 });
 
 app.get('/list-user-files', (req, res) => {
+  const canSeeAll = isAdmin(req.userSession.user_id);
+
   let accountDb = getAccountDb();
-  let rows = accountDb.all('SELECT * FROM files');
+  let rows = canSeeAll
+    ? accountDb.all('SELECT * FROM files')
+    : accountDb.all(
+        `SELECT files.* 
+          FROM files
+          WHERE files.owner = ?
+        UNION
+         SELECT files.*
+          FROM files
+          JOIN user_access
+            ON user_access.file_id = files.id
+            AND user_access.user_id = ?`,
+        [req.userSession.user_id, req.userSession.user_id],
+      );
+
+  let allUserAccess = accountDb.all(
+    `SELECT UA.user_id, users.display_name, users.user_name, UA.file_id
+            FROM files
+              JOIN user_access UA ON UA.file_id = files.id
+              JOIN users on users.id = UA.user_id
+        UNION ALL
+      SELECT users.id, users.display_name, users.user_name, files.id
+            FROM files
+              JOIN users on users.id = files.owner
+        `,
+    [],
+  );
 
   res.send({
     status: 'ok',
@@ -339,6 +374,15 @@ app.get('/list-user-files', (req, res) => {
       groupId: row.group_id,
       name: row.name,
       encryptKeyId: row.encrypt_keyid,
+      owner: row.owner,
+      usersWithAccess: allUserAccess
+        .filter((ua) => ua.file_id === row.id)
+        .map((ua) => ({
+          userId: ua.user_id,
+          userName: ua.user_name,
+          displayName: ua.display_name,
+          owner: ua.user_id === row.owner,
+        })),
     })),
   });
 });

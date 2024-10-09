@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import request from 'supertest';
 import { handlers as app } from './app-sync.js';
-import getAccountDb from './account-db.js';
 import { getPathForUserFile } from './util/paths.js';
+import getAccountDb from './account-db.js';
 import { SyncProtoBuf } from '@actual-app/crdt';
 import crypto from 'node:crypto';
 
@@ -25,8 +25,8 @@ describe('/user-get-key', () => {
     const encrypt_test = 'test-encrypt-test';
 
     getAccountDb().mutate(
-      'INSERT INTO files (id, encrypt_salt, encrypt_keyid, encrypt_test) VALUES (?, ?, ?, ?)',
-      [fileId, encrypt_salt, encrypt_keyid, encrypt_test],
+      'INSERT INTO files (id, encrypt_salt, encrypt_keyid, encrypt_test, owner) VALUES (?, ?, ?, ?, ?)',
+      [fileId, encrypt_salt, encrypt_keyid, encrypt_test, 'genericAdmin'],
     );
 
     const res = await request(app)
@@ -87,8 +87,13 @@ describe('/reset-user-file', () => {
 
     // Use addMockFile to insert a mock file into the database
     getAccountDb().mutate(
-      'INSERT INTO files (id, group_id, deleted) VALUES (?, ?, FALSE)',
-      [fileId, groupId],
+      'INSERT INTO files (id, group_id, deleted, owner) VALUES (?, ?, FALSE, ?)',
+      [fileId, groupId, 'genericAdmin'],
+    );
+
+    getAccountDb().mutate(
+      'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
+      [fileId, 'genericAdmin'],
     );
 
     const res = await request(app)
@@ -477,12 +482,12 @@ describe('/list-user-files', () => {
 
     // Insert mock files into the database
     getAccountDb().mutate(
-      'INSERT INTO files (id, name, deleted) VALUES (?, ?, FALSE)',
-      [fileId1, fileName1],
+      'INSERT INTO files (id, name, deleted, owner) VALUES (?, ?, FALSE, ?)',
+      [fileId1, fileName1, ''],
     );
     getAccountDb().mutate(
-      'INSERT INTO files (id, name, deleted) VALUES (?, ?, FALSE)',
-      [fileId2, fileName2],
+      'INSERT INTO files (id, name, deleted, owner) VALUES (?, ?, FALSE, ?)',
+      [fileId2, fileName2, ''],
     );
 
     const res = await request(app)
@@ -782,8 +787,8 @@ describe('/sync', () => {
 
 function addMockFile(fileId, groupId, keyId, encryptMeta, syncVersion) {
   getAccountDb().mutate(
-    'INSERT INTO files (id, group_id, encrypt_keyid, encrypt_meta, sync_version) VALUES (?, ?, ?,?, ?)',
-    [fileId, groupId, keyId, encryptMeta, syncVersion],
+    'INSERT INTO files (id, group_id, encrypt_keyid, encrypt_meta, sync_version, owner) VALUES (?, ?, ?,?, ?, ?)',
+    [fileId, groupId, keyId, encryptMeta, syncVersion, 'genericAdmin'],
   );
 }
 
