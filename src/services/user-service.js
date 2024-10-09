@@ -32,11 +32,11 @@ class UserService {
   }
 
   static getOwnerCount() {
-    const { cnt } =
+    const { ownerCount } =
       getAccountDb().first(
-        `SELECT count(*) as cnt FROM users WHERE users.user_name <> '' and users.owner = 1`,
+        `SELECT count(*) as ownerCount FROM users WHERE users.user_name <> '' and users.owner = 1`,
       ) || {};
-    return cnt || 0;
+    return ownerCount || 0;
   }
 
   static getOwnerId() {
