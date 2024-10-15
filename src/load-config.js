@@ -11,6 +11,11 @@ debug(`project root: '${projectRoot}'`);
 export const sqlDir = path.join(projectRoot, 'src', 'sql');
 
 let defaultDataDir = fs.existsSync('/data') ? '/data' : projectRoot;
+
+if (process.env.ACTUAL_DATA_DIR) {
+  defaultDataDir = process.env.ACTUAL_DATA_DIR;
+}
+
 debug(`default data directory: '${defaultDataDir}'`);
 
 function parseJSON(path, allowMissing = false) {
@@ -86,7 +91,7 @@ if (process.env.NODE_ENV === 'test') {
   };
 } else {
   config = {
-    mode: 'development',
+    mode: 'development', // Huh? We're in development when we are not in test?
     ...defaultConfig,
     dataDir: defaultDataDir,
     serverFiles: path.join(defaultDataDir, 'server-files'),
@@ -135,7 +140,6 @@ const finalConfig = {
         }
       : config.upload,
 };
-
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);
 debug(`using data directory ${finalConfig.dataDir}`);
