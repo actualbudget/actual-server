@@ -91,7 +91,7 @@ if (process.env.NODE_ENV === 'test') {
   };
 } else {
   config = {
-    mode: 'development', // Huh? We're in development when we are not in test?
+    mode: 'development',
     ...defaultConfig,
     dataDir: defaultDataDir,
     serverFiles: path.join(defaultDataDir, 'server-files'),
