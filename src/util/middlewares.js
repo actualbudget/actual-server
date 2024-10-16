@@ -1,4 +1,4 @@
-import validateUser from './validate-user.js';
+import validateSession from './validate-user.js';
 
 import * as winston from 'winston';
 import * as expressWinston from 'express-winston';
@@ -19,11 +19,13 @@ async function errorMiddleware(err, req, res, _next) {
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-const validateUserMiddleware = async (req, res, next) => {
-  let user = await validateUser(req, res);
-  if (!user) {
+const validateSessionMiddleware = async (req, res, next) => {
+  let session = await validateSession(req, res);
+  if (!session) {
     return;
   }
+
+  req.userSession = session;
   next();
 };
 
@@ -41,4 +43,4 @@ const requestLoggerMiddleware = expressWinston.logger({
   ),
 });
 
-export { validateUserMiddleware, errorMiddleware, requestLoggerMiddleware };
+export { validateSessionMiddleware, errorMiddleware, requestLoggerMiddleware };
