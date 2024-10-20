@@ -36,7 +36,6 @@ export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
 
-
 function boolToInt(deleted) {
   return deleted ? 1 : 0;
 }
@@ -55,7 +54,6 @@ const verifyFileExists = (fileId, filesService, res, errorObject) => {
     throw e;
   }
 };
-
 
 app.post('/sync', async (req, res) => {
   let requestPb;
@@ -177,7 +175,7 @@ app.post('/reset-user-file', async (req, res) => {
   if (groupId) {
     try {
       await fs.unlink(getPathForGroupFile(groupId));
-    } catch (e) {
+    } catch {
       console.log(`Unable to delete sync data for group "${groupId}"`);
     }
   }
