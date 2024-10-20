@@ -32,10 +32,30 @@ app.use(express.raw({ type: 'application/encrypted-file' }));
 app.use(express.json());
 
 app.use(validateUserMiddleware);
-app.use(errorMiddleware);
 export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
+
+
+function boolToInt(deleted) {
+  return deleted ? 1 : 0;
+}
+
+const verifyFileExists = (fileId, filesService, res, errorObject) => {
+  try {
+    return filesService.get(fileId);
+  } catch (e) {
+    if (e instanceof FileNotFound) {
+      //FIXME: error code should be 404. Need to make sure frontend is ok with it.
+      //TODO: put this into a middleware that checks if FileNotFound is thrown and returns 404 and same error message
+      // for every FileNotFound error
+      res.status(400).send(errorObject);
+      return;
+    }
+    throw e;
+  }
+};
+
 
 app.post('/sync', async (req, res) => {
   let requestPb;
@@ -355,22 +375,3 @@ app.post('/delete-user-file', (req, res) => {
 
   res.send(OK_RESPONSE);
 });
-
-function boolToInt(deleted) {
-  return deleted ? 1 : 0;
-}
-
-const verifyFileExists = (fileId, filesService, res, errorObject) => {
-  try {
-    return filesService.get(fileId);
-  } catch (e) {
-    if (e instanceof FileNotFound) {
-      //FIXME: error code should be 404. Need to make sure frontend is ok with it.
-      //TODO: put this into a middleware that checks if FileNotFound is thrown and returns 404 and same error message
-      // for every FileNotFound error
-      res.status(400).send(errorObject);
-      return;
-    }
-    throw e;
-  }
-};
