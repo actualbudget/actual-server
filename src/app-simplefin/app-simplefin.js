@@ -347,7 +347,6 @@ async function getAccounts(accessKey, accounts, startDate, endDate) {
     queryString += '?' + params.join('&');
   }
   return new Promise((resolve, reject) => {
-    console.log(`${sfin.baseUrl}/accounts${queryString}`);
     const req = https.request(
       new URL(`${sfin.baseUrl}/accounts${queryString}`),
       options,
