@@ -95,7 +95,11 @@ app.post(
       : startDate;
     let results;
     try {
-      results = await getTransactions(accessKey, Array.isArray(accountId) ? accountId : [accountId], new Date(earliestStartDate));
+      results = await getTransactions(
+        accessKey,
+        Array.isArray(accountId) ? accountId : [accountId],
+        new Date(earliestStartDate),
+      );
     } catch (e) {
       if (e.message === 'Forbidden') {
         invalidToken(res);
