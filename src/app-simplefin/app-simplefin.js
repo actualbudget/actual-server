@@ -52,7 +52,7 @@ app.post(
     const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     try {
-      const accounts = await getAccounts(accessKey, startDate, endDate);
+      const accounts = await getAccounts(accessKey, null, startDate, endDate);
 
       res.send({
         status: 'ok',
@@ -95,7 +95,7 @@ app.post(
       : startDate;
     let results;
     try {
-      results = await getTransactions(accessKey, new Date(earliestStartDate));
+      results = await getTransactions(accessKey, Array.isArray(accountId) ? accountId : [accountId], new Date(earliestStartDate));
     } catch (e) {
       if (e.message === 'Forbidden') {
         invalidToken(res);
@@ -297,12 +297,12 @@ async function getAccessKey(base64Token) {
   });
 }
 
-async function getTransactions(accessKey, startDate, endDate) {
+async function getTransactions(accessKey, accounts, startDate, endDate) {
   const now = new Date();
   startDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
   endDate = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 1);
   console.log(`${getDate(startDate)} - ${getDate(endDate)}`);
-  return await getAccounts(accessKey, startDate, endDate);
+  return await getAccounts(accessKey, accounts, startDate, endDate);
 }
 
 function getDate(date) {
@@ -313,7 +313,7 @@ function normalizeDate(date) {
   return (date.valueOf() - date.getTimezoneOffset() * 60 * 1000) / 1000;
 }
 
-async function getAccounts(accessKey, startDate, endDate) {
+async function getAccounts(accessKey, accounts, startDate, endDate) {
   const sfin = parseAccessKey(accessKey);
   const options = {
     headers: {
@@ -333,10 +333,17 @@ async function getAccounts(accessKey, startDate, endDate) {
 
   params.push(`pending=1`);
 
+  if (accounts) {
+    accounts.forEach((id) => {
+      params.push(`account=${id}`);
+    });
+  }
+
   if (params.length > 0) {
     queryString += '?' + params.join('&');
   }
   return new Promise((resolve, reject) => {
+    console.log(`${sfin.baseUrl}/accounts${queryString}`);
     const req = https.request(
       new URL(`${sfin.baseUrl}/accounts${queryString}`),
       options,
