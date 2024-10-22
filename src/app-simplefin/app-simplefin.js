@@ -339,7 +339,7 @@ async function getAccounts(accessKey, accounts, startDate, endDate) {
 
   if (accounts) {
     accounts.forEach((id) => {
-      params.push(`account=${id}`);
+      params.push(`account=${encodeURIComponent(id)}`);
     });
   }
 
