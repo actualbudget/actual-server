@@ -309,7 +309,12 @@ function normalizeDate(date) {
   return (date.valueOf() - date.getTimezoneOffset() * 60 * 1000) / 1000;
 }
 
-async function getAccounts(accessKey, startDate, endDate, noTransactions=false) {
+async function getAccounts(
+  accessKey,
+  startDate,
+  endDate,
+  noTransactions = false,
+) {
   const sfin = parseAccessKey(accessKey);
   const options = {
     headers: {
