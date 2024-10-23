@@ -4,12 +4,12 @@ import Fallback from './integration-bank.js';
 export default {
   ...Fallback,
 
-  institutionIds: [ 'DIREKT_HELADEF1822' ],
+  institutionIds: ['DIREKT_HELADEF1822'],
 
   normalizeTransaction(transaction, booked) {
     transaction.remittanceInformationUnstructured =
       transaction.remittanceInformationUnstructured ??
-      transaction.remittanceInformationStructured
+      transaction.remittanceInformationStructured;
 
     return Fallback.normalizeTransaction(transaction, booked);
   },
