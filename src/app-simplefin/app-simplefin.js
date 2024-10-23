@@ -42,17 +42,13 @@ app.post(
           }
         }
       }
-    } catch (error) {
+    } catch {
       invalidToken(res);
       return;
     }
 
-    const now = new Date();
-    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
     try {
-      const accounts = await getAccounts(accessKey, null, startDate, endDate);
+      const accounts = await getAccounts(accessKey, null, null, null, true);
 
       res.send({
         status: 'ok',
@@ -317,7 +313,13 @@ function normalizeDate(date) {
   return (date.valueOf() - date.getTimezoneOffset() * 60 * 1000) / 1000;
 }
 
-async function getAccounts(accessKey, accounts, startDate, endDate) {
+async function getAccounts(
+  accessKey,
+  accounts,
+  startDate,
+  endDate,
+  noTransactions = false,
+) {
   const sfin = parseAccessKey(accessKey);
   const options = {
     headers: {
@@ -327,15 +329,18 @@ async function getAccounts(accessKey, accounts, startDate, endDate) {
     },
   };
   const params = [];
-  let queryString = '';
-  if (startDate) {
-    params.push(`start-date=${normalizeDate(startDate)}`);
-  }
-  if (endDate) {
-    params.push(`end-date=${normalizeDate(endDate)}`);
-  }
+  if (!noTransactions) {
+    if (startDate) {
+      params.push(`start-date=${normalizeDate(startDate)}`);
+    }
+    if (endDate) {
+      params.push(`end-date=${normalizeDate(endDate)}`);
+    }
 
-  params.push(`pending=1`);
+    params.push(`pending=1`);
+  } else {
+    params.push(`balances-only=1`);
+  }
 
   if (accounts) {
     accounts.forEach((id) => {
@@ -343,6 +348,7 @@ async function getAccounts(accessKey, accounts, startDate, endDate) {
     });
   }
 
+  let queryString = '';
   if (params.length > 0) {
     queryString += '?' + params.join('&');
   }
