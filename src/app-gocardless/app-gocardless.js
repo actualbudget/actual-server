@@ -227,7 +227,7 @@ app.post(
             error_type: 'RATE_LIMIT_EXCEEDED',
             error_code: 'NORDIGEN_ERROR',
             status: 'rejected',
-            reason: 'Rate limit exceeded',
+            reason: `Rate limit exceeded. Details: ${error.details}`,
           });
           break;
         case error instanceof GenericGoCardlessError:
