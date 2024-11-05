@@ -26,44 +26,18 @@ describe('#normalizeTransaction', () => {
     ).toEqual('2024-10-28');
   });
 
-  it('normalizes non-card transactions as usual', () => {
-    const nonCardTransaction1 = {
+  it.each([
+    ['regular text', 'Some info'],
+    ['partial card text', 'PIRKUMS xxx'],
+    ['null value', null],
+  ])('normalizes non-card transaction with %s', (_, remittanceInfo) => {
+    const transaction = {
       ...cardTransaction,
-      remittanceInformationUnstructured: 'Some info',
+      remittanceInformationUnstructured: remittanceInfo,
     };
-    expect(
-      SwedbankHabaLV22.normalizeTransaction(nonCardTransaction1, true)
-        .bookingDate,
-    ).toEqual('2024-10-29');
+    const normalized = SwedbankHabaLV22.normalizeTransaction(transaction, true);
 
-    expect(
-      SwedbankHabaLV22.normalizeTransaction(nonCardTransaction1, true).date,
-    ).toEqual('2024-10-29');
-
-    const nonCardTransaction2 = {
-      ...cardTransaction,
-      remittanceInformationUnstructured: 'PIRKUMS xxx',
-    };
-    expect(
-      SwedbankHabaLV22.normalizeTransaction(nonCardTransaction2, true)
-        .bookingDate,
-    ).toEqual('2024-10-29');
-
-    expect(
-      SwedbankHabaLV22.normalizeTransaction(nonCardTransaction2, true).date,
-    ).toEqual('2024-10-29');
-
-    const nonCardTransaction3 = {
-      ...cardTransaction,
-      remittanceInformationUnstructured: null,
-    };
-    expect(
-      SwedbankHabaLV22.normalizeTransaction(nonCardTransaction3, true)
-        .bookingDate,
-    ).toEqual('2024-10-29');
-
-    expect(
-      SwedbankHabaLV22.normalizeTransaction(nonCardTransaction3, true).date,
-    ).toEqual('2024-10-29');
+    expect(normalized.bookingDate).toEqual('2024-10-29');
+    expect(normalized.date).toEqual('2024-10-29');
   });
 });
