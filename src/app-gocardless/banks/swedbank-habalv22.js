@@ -15,7 +15,7 @@ export default {
    */
   normalizeTransaction(transaction, booked) {
     const dateMatch = transaction.remittanceInformationUnstructured?.match(
-      /PIRKUMS [\d*]+ (\d{2}.\d{2}.\d{4})/,
+      /PIRKUMS [\d*]+ (\d{2}\.\d{2}\.\d{4})/,
     );
 
     if (dateMatch) {
