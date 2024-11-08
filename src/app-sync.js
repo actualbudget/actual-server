@@ -12,7 +12,7 @@ import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 import * as simpleSync from './sync-simple.js';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
-import getAccountDb, { isAdmin } from './account-db.js';
+import getAccountDb from './account-db.js';
 import {
   File,
   FilesService,
@@ -246,7 +246,7 @@ app.post('/upload-user-file', async (req, res) => {
         syncVersion: syncFormatVersion,
         name: name,
         encryptMeta: encryptMeta,
-        userId: res.locals.user_id,
+        owner: res.locals.user_id,
       }),
     );
 
@@ -316,14 +316,12 @@ app.get('/list-user-files', (req, res) => {
       name: row.name,
       encryptKeyId: row.encryptKeyId,
       owner: row.owner,
-      usersWithAccess: [] /*allUserAccess
-        .filter((ua) => ua.file_id === row.id)
-        .map((ua) => ({
-          userId: ua.user_id,
-          userName: ua.user_name,
-          displayName: ua.display_name,
-          owner: ua.user_id === row.owner,
-        }))*/,
+      usersWithAccess: fileService
+        .findUsersWithAccess(row.id)
+        .map((access) => ({
+          ...access,
+          owner: access.userId === row.owner,
+        })),
     })),
   });
 });
