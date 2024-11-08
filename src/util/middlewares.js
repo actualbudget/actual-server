@@ -25,7 +25,7 @@ const validateSessionMiddleware = async (req, res, next) => {
     return;
   }
 
-  req.userSession = session;
+  res.locals = session;
   next();
 };
 

@@ -22,18 +22,15 @@ export function getFileById(fileId) {
 }
 
 export function validateRole(roleId) {
-  const { id } =
-    getAccountDb().first('SELECT id FROM roles WHERE roles.id = ?', [roleId]) ||
-    {};
-  return id;
+  const possibleRoles = ['BASIC', 'ADMIN'];
+  return possibleRoles.some((a) => a === roleId);
 }
 
 export function getOwnerCount() {
-  const { ownerCount } =
-    getAccountDb().first(
-      `SELECT count(*) as ownerCount FROM users WHERE users.user_name <> '' and users.owner = 1`,
-    ) || {};
-  return ownerCount || 0;
+  const { ownerCount } = getAccountDb().first(
+    `SELECT count(*) as ownerCount FROM users WHERE users.user_name <> '' and users.owner = 1`,
+  ) || { ownerCount: 0 };
+  return ownerCount;
 }
 
 export function getOwnerId() {
@@ -66,25 +63,16 @@ export function getFileOwnerById(fileId) {
 
 export function getAllUsers() {
   return getAccountDb().all(
-    `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(owner,0) as owner, roles.id as role
+    `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(owner,0) as owner, role
      FROM users
-     JOIN user_roles ON user_roles.user_id = users.id
-     JOIN roles ON roles.id = user_roles.role_id
      WHERE users.user_name <> ''`,
   );
 }
 
-export function insertUser(userId, userName, displayName, enabled) {
+export function insertUser(userId, userName, displayName, enabled, role) {
   getAccountDb().mutate(
-    'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, ?, 0)',
-    [userId, userName, displayName, enabled],
-  );
-}
-
-export function insertUserRole(userId, roleId) {
-  getAccountDb().mutate(
-    'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
-    [userId, roleId],
+    'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, 0, ?)',
+    [userId, userName, displayName, enabled, role],
   );
 }
 
@@ -93,13 +81,6 @@ export function updateUser(userId, userName, displayName, enabled) {
     'UPDATE users SET user_name = ?, display_name = ?, enabled = ? WHERE id = ?',
     [userName, displayName, enabled, userId],
   );
-}
-
-export function updateUserRole(userId, roleId) {
-  getAccountDb().mutate('UPDATE user_roles SET role_id = ? WHERE user_id = ?', [
-    roleId,
-    userId,
-  ]);
 }
 
 export function updateUserWithRole(
@@ -111,12 +92,8 @@ export function updateUserWithRole(
 ) {
   getAccountDb().transaction(() => {
     getAccountDb().mutate(
-      'UPDATE users SET user_name = ?, display_name = ?, enabled = ? WHERE id = ?',
-      [userName, displayName, enabled, userId],
-    );
-    getAccountDb().mutate(
-      'UPDATE user_roles SET role_id = ? WHERE user_id = ?',
-      [roleId, userId],
+      'UPDATE users SET user_name = ?, display_name = ?, enabled = ?, role = ? WHERE id = ?',
+      [userName, displayName, enabled, roleId, userId],
     );
   });
 }
@@ -126,11 +103,6 @@ export function deleteUser(userId) {
     userId,
   ]).changes;
 }
-
-export function deleteUserRoles(userId) {
-  getAccountDb().mutate('DELETE FROM user_roles WHERE user_id = ?', [userId]);
-}
-
 export function deleteUserAccess(userId) {
   getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [userId]);
 }

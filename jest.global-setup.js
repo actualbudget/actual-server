@@ -2,7 +2,7 @@ import getAccountDb from './src/account-db.js';
 import runMigrations from './src/migrations.js';
 
 const GENERIC_ADMIN_ID = 'genericAdmin';
-const ADMIN_ROLE_ID = '213733c1-5645-46ad-8784-a7b20b400f93';
+const ADMIN_ROLE_ID = 'ADMIN';
 
 const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   if (!userId || !userName || !role) {
@@ -11,12 +11,8 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
 
   try {
     getAccountDb().mutate(
-      'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, ?, ?)',
-      [userId, userName, `${userName} display`, enabled, owner],
-    );
-    getAccountDb().mutate(
-      'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
-      [userId, role],
+      'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, ?, ?)',
+      [userId, userName, `${userName} display`, enabled, owner, role],
     );
   } catch (error) {
     console.error('Error creating user:', error);

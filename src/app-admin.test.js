@@ -3,32 +3,19 @@ import { handlers as app } from './app-admin.js';
 import getAccountDb from './account-db.js';
 import { v4 as uuidv4 } from 'uuid';
 
-const ADMIN_ROLE = '213733c1-5645-46ad-8784-a7b20b400f93';
-const BASIC_ROLE = 'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc';
-
-// Create role helper to ensure roles exist before creating users
-const createRole = (roleId, name, permissions = '') => {
-  getAccountDb().mutate(
-    'INSERT OR IGNORE INTO roles (id, permissions, name) VALUES (?, ?, ?)',
-    [roleId, permissions, name],
-  );
-};
+const ADMIN_ROLE = 'ADMIN';
+const BASIC_ROLE = 'BASIC';
 
 // Create user helper function
 const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   getAccountDb().mutate(
-    'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, ?, ?)',
-    [userId, userName, `${userName} display`, enabled, owner],
-  );
-  getAccountDb().mutate(
-    'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
-    [userId, role],
+    'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, ?, ?)',
+    [userId, userName, `${userName} display`, enabled, owner, role],
   );
 };
 
 const deleteUser = (userId) => {
   getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [userId]);
-  getAccountDb().mutate('DELETE FROM user_roles WHERE user_id = ?', [userId]);
   getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
 };
 
@@ -41,14 +28,8 @@ const createSession = (userId, sessionToken) => {
 
 const generateSessionToken = () => `token-${uuidv4()}`;
 
-// Ensure roles are created before each test run
-beforeAll(() => {
-  createRole(ADMIN_ROLE, 'Admin', 'ADMINISTRATOR');
-  createRole(BASIC_ROLE, 'Basic', '');
-});
-
 describe('/admin', () => {
-  describe('/ownerCreated', () => {
+  describe('/owner-created', () => {
     it('should return 200 and true if an owner user is created', async () => {
       const sessionToken = generateSessionToken();
       const adminId = uuidv4();
@@ -56,7 +37,7 @@ describe('/admin', () => {
       createSession(adminId, sessionToken);
 
       const res = await request(app)
-        .get('/ownerCreated')
+        .get('/owner-created')
         .set('x-actual-token', sessionToken);
 
       expect(res.statusCode).toEqual(200);

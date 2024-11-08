@@ -7,7 +7,6 @@ import {
 } from './util/middlewares.js';
 import validateSession from './util/validate-user.js';
 import { isAdmin } from './account-db.js';
-import config from './load-config.js';
 import * as UserService from './services/user-service.js';
 
 let app = express();
@@ -18,7 +17,7 @@ app.use(requestLoggerMiddleware);
 
 export { app as handlers };
 
-app.get('/ownerCreated/', (req, res) => {
+app.get('/owner-created/', (req, res) => {
   try {
     const ownerCount = UserService.getOwnerCount();
     res.json(ownerCount > 0);
@@ -39,7 +38,7 @@ app.get('/users/', await validateSessionMiddleware, (req, res) => {
 });
 
 app.post('/users', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(req.userSession.user_id)) {
+  if (!isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
@@ -86,13 +85,12 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
     displayName || null,
     enabled ? 1 : 0,
   );
-  UserService.insertUserRole(userId, role);
 
   res.status(200).send({ status: 'ok', data: { id: userId } });
 });
 
 app.patch('/users', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(req.userSession.user_id)) {
+  if (!isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
@@ -144,7 +142,7 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
 });
 
 app.delete('/users', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(req.userSession.user_id)) {
+  if (!isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
@@ -160,7 +158,6 @@ app.delete('/users', validateSessionMiddleware, async (req, res) => {
 
     if (item === ownerId) return;
 
-    UserService.deleteUserRoles(item);
     UserService.deleteUserAccess(item);
     UserService.transferAllFilesFromUser(ownerId, item);
     const usersDeleted = UserService.deleteUser(item);
@@ -195,8 +192,8 @@ app.get('/access', validateSessionMiddleware, (req, res) => {
 
   const accesses = UserService.getUserAccess(
     fileId,
-    req.userSession.user_id,
-    isAdmin(req.userSession.user_id),
+    res.locals.user_id,
+    isAdmin(res.locals.user_id),
   );
 
   res.json(accesses);
@@ -309,12 +306,12 @@ app.get('/access/users', validateSessionMiddleware, async (req, res) => {
 
   const { granted } = UserService.checkFilePermission(
     fileId,
-    req.userSession.user_id,
+    res.locals.user_id,
   ) || {
     granted: 0,
   };
 
-  if (granted === 0 && !isAdmin(req.userSession.user_id)) {
+  if (granted === 0 && !isAdmin(res.locals.user_id)) {
     res.status(400).send({
       status: 'error',
       reason: 'file-denied',
@@ -345,12 +342,12 @@ app.post(
 
     const { granted } = UserService.checkFilePermission(
       newUserOwner.fileId,
-      req.userSession.user_id,
+      res.locals.user_id,
     ) || {
       granted: 0,
     };
 
-    if (granted === 0 && !isAdmin(req.userSession.user_id)) {
+    if (granted === 0 && !isAdmin(res.locals.user_id)) {
       res.status(400).send({
         status: 'error',
         reason: 'file-denied',
@@ -399,12 +396,12 @@ app.get('/file/owner', validateSessionMiddleware, async (req, res) => {
 
   const { granted } = UserService.checkFilePermission(
     fileId,
-    req.userSession.user_id,
+    res.locals.user_id,
   ) || {
     granted: 0,
   };
 
-  if (granted === 0 && !isAdmin(req.userSession.user_id)) {
+  if (granted === 0 && !isAdmin(res.locals.user_id)) {
     res.status(400).send({
       status: 'error',
       reason: 'file-denied',
@@ -423,10 +420,10 @@ app.get('/file/owner', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  let canGetOwner = isAdmin(req.userSession.user_id);
+  let canGetOwner = isAdmin(res.locals.user_id);
   if (!canGetOwner) {
     const fileIdOwner = UserService.getFileOwnerId(fileId);
-    canGetOwner = fileIdOwner === req.userSession.user_id;
+    canGetOwner = fileIdOwner === res.locals.user_id;
   }
 
   if (canGetOwner) {
@@ -435,10 +432,6 @@ app.get('/file/owner', validateSessionMiddleware, async (req, res) => {
   }
 
   return null;
-});
-
-app.get('/multiuser', (req, res) => {
-  res.json(config.multiuser);
 });
 
 app.use(errorMiddleware);

@@ -73,6 +73,7 @@ let defaultConfig = {
   projectRoot,
   multiuser: false,
   token_expiration: 'never',
+  loginMethod: 'password',
 };
 
 /** @type {import('./config-types.js').Config} */

@@ -96,11 +96,11 @@ export function isAdmin(userId) {
     getAccountDb().first('SELECT owner FROM users WHERE id = ?', [userId]) ||
     {};
   if (user?.owner === 1) return true;
-  return hasPermission(userId, 'ADMINISTRATOR');
+  return hasPermission(userId, 'ADMIN');
 }
 
 export function hasPermission(userId, permission) {
-  return getUserPermissions(userId).some((value) => value === permission);
+  return getUserPermission(userId) === permission;
 }
 
 export async function enableOpenID(loginSettings, checkFileConfig = true) {
@@ -152,7 +152,6 @@ export async function disableOpenID(
 
   getAccountDb().mutate('DELETE FROM sessions');
   getAccountDb().mutate('DELETE FROM users WHERE user_name <> ?', ['']);
-  getAccountDb().mutate('DELETE FROM user_roles');
   getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
 }
 
@@ -166,25 +165,15 @@ export function getUserInfo(userId) {
   return accountDb.first('SELECT * FROM users WHERE id = ?', [userId]);
 }
 
-export function getUserPermissions(userId) {
+export function getUserPermission(userId) {
   let accountDb = getAccountDb();
-  const permissions =
-    accountDb.all(
-      `SELECT roles.permissions FROM users
-                              JOIN user_roles ON user_roles.user_id = users.id
-                              JOIN roles ON roles.id = user_roles.role_id
-                              WHERE users.id = ?`,
-      [userId],
-    ) || [];
+  const { role } = accountDb.first(
+    `SELECT role FROM users
+          WHERE users.id = ?`,
+    [userId],
+  ) || { role: '' };
 
-  const uniquePermissions = Array.from(
-    new Set(
-      permissions.flatMap((rolePermission) =>
-        rolePermission.permissions.split(',').map((perm) => perm.trim()),
-      ),
-    ),
-  );
-  return uniquePermissions;
+  return role;
 }
 
 export function clearExpiredSessions() {

@@ -20,7 +20,7 @@ app.post('/', async (req, res) => {
   const { name, value } = req.body;
 
   if (method === 'openid') {
-    let canSaveSecrets = isAdmin(req.userSession.user_id);
+    let canSaveSecrets = isAdmin(res.locals.user_id);
 
     if (!canSaveSecrets) {
       res.status(403).send({

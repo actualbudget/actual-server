@@ -10,10 +10,10 @@ import {
   getLoginMethod,
   listLoginMethods,
   getUserInfo,
-  getUserPermissions,
 } from './account-db.js';
 import { changePassword, loginWithPassword } from './accounts/password.js';
 import { loginWithOpenIdSetup } from './accounts/openid.js';
+import config from './load-config.js';
 
 let app = express();
 app.use(express.json());
@@ -31,7 +31,11 @@ export { app as handlers };
 app.get('/needs-bootstrap', (req, res) => {
   res.send({
     status: 'ok',
-    data: { bootstrapped: !needsBootstrap(), loginMethod: getLoginMethod() },
+    data: {
+      bootstrapped: !needsBootstrap(),
+      loginMethod: getLoginMethod(),
+      multiuser: config.multiuser,
+    },
   });
 });
 
@@ -115,14 +119,13 @@ app.get('/validate', (req, res) => {
   let session = validateSession(req, res);
   if (session) {
     const user = getUserInfo(session.user_id);
-    let permissions = getUserPermissions(session.user_id);
 
     res.send({
       status: 'ok',
       data: {
         validated: true,
         userName: user?.user_name,
-        permissions: permissions,
+        permission: user?.role,
         userId: session?.user_id,
         displayName: user?.display_name,
         loginMethod: session?.auth_method,

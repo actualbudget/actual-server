@@ -267,7 +267,7 @@ app.post('/upload-user-file', async (req, res) => {
         syncFormatVersion,
         name,
         encryptMeta,
-        req.userSession.user_id,
+        res.locals.user_id,
       ],
     );
     res.send({ status: 'ok', groupId });
@@ -335,7 +335,7 @@ app.post('/update-user-filename', (req, res) => {
 });
 
 app.get('/list-user-files', (req, res) => {
-  const canSeeAll = isAdmin(req.userSession.user_id);
+  const canSeeAll = isAdmin(res.locals.user_id);
 
   let accountDb = getAccountDb();
   let rows = canSeeAll
@@ -350,7 +350,7 @@ app.get('/list-user-files', (req, res) => {
           JOIN user_access
             ON user_access.file_id = files.id
             AND user_access.user_id = ?`,
-        [req.userSession.user_id, req.userSession.user_id],
+        [res.locals.user_id, res.locals.user_id],
       );
 
   let allUserAccess = accountDb.all(

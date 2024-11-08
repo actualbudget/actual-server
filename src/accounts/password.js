@@ -62,20 +62,8 @@ export function loginWithPassword(password) {
   if (totalOfUsers === 0) {
     userId = uuid.v4();
     accountDb.mutate(
-      'INSERT INTO users (id, user_name, display_name, enabled, owner) VALUES (?, ?, ?, 1, 1)',
-      [userId, '', ''],
-    );
-
-    const { id: adminRoleId } =
-      accountDb.first('SELECT id FROM roles WHERE name = ?', ['Admin']) || {};
-
-    if (!adminRoleId) {
-      return { error: 'administrator-role-not-found' };
-    }
-
-    accountDb.mutate(
-      'INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)',
-      [userId, adminRoleId],
+      'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
+      [userId, '', '', 'ADMIN'],
     );
   } else {
     let { id: userIdFromDb } = accountDb.first(

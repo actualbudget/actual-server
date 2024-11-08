@@ -9,23 +9,9 @@ export const up = async function () {
         (id TEXT PRIMARY KEY,
         user_name TEXT, 
         display_name TEXT,
+        role TEXT,
         enabled INTEGER NOT NULL DEFAULT 1,
         owner INTEGER NOT NULL DEFAULT 0);
-
-    CREATE TABLE roles
-      (id TEXT PRIMARY KEY,
-      permissions TEXT,
-      name TEXT);
-
-    INSERT INTO roles VALUES ('213733c1-5645-46ad-8784-a7b20b400f93', 'ADMINISTRATOR','Admin');
-    INSERT INTO roles VALUES ('e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc', '','Basic');
-    
-    CREATE TABLE user_roles
-      (user_id TEXT,
-      role_id TEXT,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-      , FOREIGN KEY (role_id) REFERENCES roles(id)
-      );
 
     CREATE TABLE user_access
       (user_id TEXT,
@@ -58,9 +44,6 @@ export const down = async function () {
       BEGIN TRANSACTION;
 
       DROP TABLE IF EXISTS user_access;
-      DROP TABLE IF EXISTS user_roles;
-      DROP TABLE IF EXISTS roles;
-
 
       CREATE TABLE sessions_backup (
           token TEXT PRIMARY KEY
