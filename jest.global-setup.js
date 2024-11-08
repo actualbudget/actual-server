@@ -12,9 +12,15 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   if (missingParams.length > 0) {
     throw new Error(`Missing required parameters: ${missingParams.join(', ')}`);
   }
-  
-  if (typeof userId !== 'string' || typeof userName !== 'string' || typeof role !== 'string') {
-    throw new Error('Invalid parameter types. userId, userName, and role must be strings');
+
+  if (
+    typeof userId !== 'string' ||
+    typeof userName !== 'string' ||
+    typeof role !== 'string'
+  ) {
+    throw new Error(
+      'Invalid parameter types. userId, userName, and role must be strings',
+    );
   }
 
   try {
