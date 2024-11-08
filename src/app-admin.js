@@ -391,47 +391,4 @@ app.post(
   },
 );
 
-app.get('/file/owner', validateSessionMiddleware, async (req, res) => {
-  const fileId = req.query.fileId;
-
-  const { granted } = UserService.checkFilePermission(
-    fileId,
-    res.locals.user_id,
-  ) || {
-    granted: 0,
-  };
-
-  if (granted === 0 && !isAdmin(res.locals.user_id)) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'file-denied',
-      details: "You don't have permissions over this file",
-    });
-    return;
-  }
-
-  const fileIdInDb = UserService.getFileById(fileId);
-  if (!fileIdInDb) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'invalid-file-id',
-      details: 'File not found at server',
-    });
-    return;
-  }
-
-  let canGetOwner = isAdmin(res.locals.user_id);
-  if (!canGetOwner) {
-    const fileIdOwner = UserService.getFileOwnerId(fileId);
-    canGetOwner = fileIdOwner === res.locals.user_id;
-  }
-
-  if (canGetOwner) {
-    const owner = UserService.getFileOwnerById(fileId);
-    res.json(owner);
-  }
-
-  return null;
-});
-
 app.use(errorMiddleware);
