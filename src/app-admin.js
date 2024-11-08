@@ -26,7 +26,7 @@ app.get('/owner-created/', (req, res) => {
   }
 });
 
-app.get('/users/', await validateSessionMiddleware, (req, res) => {
+app.get('/users/', validateSessionMiddleware, (req, res) => {
   const users = UserService.getAllUsers();
   res.json(
     users.map((u) => ({
