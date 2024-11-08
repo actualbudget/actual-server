@@ -6,6 +6,21 @@ import getAccountDb from './account-db.js';
 import { SyncProtoBuf } from '@actual-app/crdt';
 import crypto from 'node:crypto';
 
+
+const ADMIN_ROLE = 'ADMIN';
+
+const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
+  getAccountDb().mutate(
+    'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, ?, ?)',
+    [userId, userName, `${userName} display`, enabled, owner, role],
+  );
+};
+
+const setSessionUser = (userId) => {
+  getAccountDb().mutate('UPDATE sessions SET user_id = ?', [userId]);
+};
+
+
 describe('/user-get-key', () => {
   it('returns 401 if the user is not authenticated', async () => {
     const res = await request(app).post('/user-get-key');
@@ -523,6 +538,7 @@ describe('/list-user-files', () => {
   });
 
   it('returns a list of user files for an authenticated user', async () => {
+    createUser('fileListAdminId', 'admin', ADMIN_ROLE, 1);
     const fileId1 = crypto.randomBytes(16).toString('hex');
     const fileId2 = crypto.randomBytes(16).toString('hex');
     const fileName1 = 'file1.txt';

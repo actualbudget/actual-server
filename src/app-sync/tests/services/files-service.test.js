@@ -156,7 +156,7 @@ describe('FilesService', () => {
     expect(allFiles.length).toBe(2);
 
     // Limit the number of files returned
-    const limitedFiles = filesService.find(1);
+    const limitedFiles = filesService.find({ limit: 1 });
     expect(limitedFiles.length).toBe(1);
   });
 

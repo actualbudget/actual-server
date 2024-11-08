@@ -119,8 +119,8 @@ class FilesService {
     );
   }
 
-  find(userId, limit = 1000) {
-    const canSeeAll = isAdmin(userId);
+  find({ userId = null, limit = 1000 } = {}) {
+    const canSeeAll = userId === null || isAdmin(userId);
 
     return (
       canSeeAll
@@ -150,9 +150,9 @@ class FilesService {
               FROM files
                 JOIN user_access UA ON UA.file_id = files.id
                 JOIN users on users.id = UA.user_id
-              WHERE files.id = ?
+              WHERE files.id = ? 
           UNION ALL
-        SELECT users.id, users.display_name, users.user_name, files.id
+        SELECT users.id, users.display_name, users.user_name
               FROM files
                 JOIN users on users.id = files.owner
               WHERE files.id = ?
