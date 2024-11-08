@@ -28,6 +28,7 @@ describe('FilesService', () => {
   };
 
   const clearDatabase = () => {
+    accountDb.mutate('DELETE FROM user_access');
     accountDb.mutate('DELETE FROM files');
   };
 
