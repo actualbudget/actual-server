@@ -29,7 +29,7 @@ app.post('/', async (req, res) => {
         details: 'You have to be admin to set secrets',
       });
 
-      return null;
+      return;
     }
   }
 

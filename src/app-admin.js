@@ -12,7 +12,6 @@ import * as UserService from './services/user-service.js';
 let app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
 
 export { app as handlers };
