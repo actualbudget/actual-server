@@ -316,6 +316,12 @@ app.get('/list-user-files', (req, res) => {
       name: row.name,
       encryptKeyId: row.encryptKeyId,
       owner: row.owner,
+      usersWithAccess: fileService
+        .findUsersWithAccess(row.id)
+        .map((access) => ({
+          ...access,
+          owner: access.userId === row.owner,
+        })),
     })),
   });
 });
