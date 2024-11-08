@@ -28,22 +28,19 @@ export async function bootstrapOpenId(config) {
     return { error: 'configuration-error' };
   }
 
-  getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
-
-  // Beyond verifying that the configuration exists, we do not attempt
-  // to check if the configuration is actually correct.
-  // If the user improperly configures this during bootstrap, there is
-  // no way to recover without manually editing the database. However,
-  // this might not be a real issue since an analogous situation happens
-  // if they forget their password.
   let accountDb = getAccountDb();
-  accountDb.transaction(() => {
-    accountDb.mutate('UPDATE auth SET active = 0');
-    accountDb.mutate(
-      "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
-      [JSON.stringify(config)],
-    );
-  });
+  //accountDb.transaction(() => {
+  accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
+  accountDb.mutate('UPDATE auth SET active = 0');
+  accountDb.mutate(
+    "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
+    [JSON.stringify(config)],
+  );
+
+  console.log(accountDb.all('select * from auth'));
+  //});
+
+  console.log(accountDb.all('select * from auth'));
 
   return {};
 }

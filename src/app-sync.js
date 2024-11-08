@@ -316,12 +316,6 @@ app.get('/list-user-files', (req, res) => {
       name: row.name,
       encryptKeyId: row.encryptKeyId,
       owner: row.owner,
-      usersWithAccess: fileService
-        .findUsersWithAccess(row.id)
-        .map((access) => ({
-          ...access,
-          owner: access.userId === row.owner,
-        })),
     })),
   });
 });
@@ -357,6 +351,12 @@ app.get('/get-user-file-info', (req, res) => {
       groupId: file.groupId,
       name: file.name,
       encryptMeta: file.encryptMeta ? JSON.parse(file.encryptMeta) : null,
+      usersWithAccess: fileService
+        .findUsersWithAccess(file.id)
+        .map((access) => ({
+          ...access,
+          owner: access.userId === file.owner,
+        })),
     },
   });
 });

@@ -51,7 +51,7 @@ export function getLoginMethod(req) {
 
 export async function bootstrap(loginSettings) {
   const passEnabled = 'password' in loginSettings;
-  const openIdEnabled = 'openid' in loginSettings;
+  const openIdEnabled = 'openId' in loginSettings;
 
   const { countOfOwner } =
     getAccountDb().first(
@@ -103,11 +103,7 @@ export function hasPermission(userId, permission) {
   return getUserPermission(userId) === permission;
 }
 
-export async function enableOpenID(loginSettings, checkFileConfig = true) {
-  if (checkFileConfig && config.loginMethod) {
-    return { error: 'unable-to-change-file-config-enabled' };
-  }
-
+export async function enableOpenID(loginSettings) {
   let { error } = (await bootstrapOpenId(loginSettings.openId)) || {};
   if (error) {
     return { error };
@@ -118,13 +114,8 @@ export async function enableOpenID(loginSettings, checkFileConfig = true) {
 
 export async function disableOpenID(
   loginSettings,
-  checkFileConfig = true,
   checkForOldPassword = false,
 ) {
-  if (checkFileConfig && config.loginMethod) {
-    return { error: 'unable-to-change-file-config-enabled' };
-  }
-
   if (checkForOldPassword) {
     let accountDb = getAccountDb();
     const { extra_data: passwordHash } =

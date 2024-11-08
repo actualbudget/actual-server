@@ -616,6 +616,7 @@ describe('/get-user-file-info', () => {
         groupId: fileInfo.group_id,
         name: fileInfo.name,
         encryptMeta: { key: 'value' },
+        usersWithAccess: [],
       },
     });
   });

@@ -12,6 +12,7 @@ class FileBase {
     syncVersion,
     deleted,
     owner,
+    usersWithAccess,
   ) {
     this.name = name;
     this.groupId = groupId;
@@ -22,6 +23,7 @@ class FileBase {
     this.syncVersion = syncVersion;
     this.deleted = typeof deleted === 'boolean' ? deleted : Boolean(deleted);
     this.owner = owner;
+    this.usersWithAccess = usersWithAccess;
   }
 }
 
@@ -37,6 +39,7 @@ class File extends FileBase {
     syncVersion = null,
     deleted = false,
     owner = null,
+    usersWithAccess = [],
   }) {
     super(
       name,
@@ -48,6 +51,7 @@ class File extends FileBase {
       syncVersion,
       deleted,
       owner,
+      usersWithAccess,
     );
     this.id = id;
   }
@@ -232,6 +236,10 @@ class FilesService {
       syncVersion: rawFile.sync_version,
       deleted: Boolean(rawFile.deleted),
       owner: rawFile.owner,
+      usersWithAccess: this.findUsersWithAccess(rawFile.id).map((access) => ({
+        ...access,
+        owner: access.userId === rawFile.owner,
+      })),
     });
   }
 }

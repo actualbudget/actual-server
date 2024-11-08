@@ -33,7 +33,7 @@ app.get('/needs-bootstrap', (req, res) => {
     status: 'ok',
     data: {
       bootstrapped: !needsBootstrap(),
-      loginMethod: getLoginMethod(),
+      loginMethods: listLoginMethods(),
       multiuser: config.multiuser,
     },
   });
