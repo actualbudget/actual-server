@@ -5,17 +5,25 @@ const GENERIC_ADMIN_ID = 'genericAdmin';
 const ADMIN_ROLE_ID = 'ADMIN';
 
 const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
-  if (!userId || !userName || !role) {
-    throw new Error('Missing required parameters');
+  const missingParams = [];
+  if (!userId) missingParams.push('userId');
+  if (!userName) missingParams.push('userName');
+  if (!role) missingParams.push('role');
+  if (missingParams.length > 0) {
+    throw new Error(`Missing required parameters: ${missingParams.join(', ')}`);
+  }
+  
+  if (typeof userId !== 'string' || typeof userName !== 'string' || typeof role !== 'string') {
+    throw new Error('Invalid parameter types. userId, userName, and role must be strings');
   }
 
   try {
     getAccountDb().mutate(
       'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, userName, `${userName} display`, enabled, owner, role],
+      [userId, userName, userName, enabled, owner, role],
     );
   } catch (error) {
-    console.error('Error creating user:', error);
+    console.error(`Error creating user ${userName}:`, error);
     throw error;
   }
 };
