@@ -188,18 +188,22 @@ export function clearExpiredSessions() {
 }
 
 export async function toggleAuthentication() {
+  console.log('Checking if login method changed');
   if (config.loginMethod === 'openid') {
     const { openidIsEnabled } = getAccountDb().first(
       'SELECT count(*) as openidIsEnabled FROM auth WHERE method = ? and active = 1',
       ['openid'],
     );
     if (openidIsEnabled == 0) {
+      console.log('Enabling OpenID...');
       const { error } = (await enableOpenID(config, false)) || {};
 
       if (error) {
+        console.log('Error enabling OpenID:');
         console.error(error);
         return false;
       }
+      console.log('OpenID enabled.');
     }
   } else if (config.loginMethod) {
     const { enabledMethodsButOpenId } = getAccountDb().first(
@@ -207,12 +211,15 @@ export async function toggleAuthentication() {
       ['openid'],
     );
     if (enabledMethodsButOpenId == 0) {
+      console.log('Disabling OpenID...');
       const { error } = (await disableOpenID(config, false)) || {};
 
       if (error) {
+        console.log('Error disabling OpenID:');
         console.error(error);
         return false;
       }
+      console.log('OpenID disabled.');
     }
   }
 
