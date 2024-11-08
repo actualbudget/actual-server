@@ -6,7 +6,6 @@ import getAccountDb from './account-db.js';
 import { SyncProtoBuf } from '@actual-app/crdt';
 import crypto from 'node:crypto';
 
-
 const ADMIN_ROLE = 'ADMIN';
 
 const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
@@ -15,11 +14,6 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
     [userId, userName, `${userName} display`, enabled, owner, role],
   );
 };
-
-const setSessionUser = (userId) => {
-  getAccountDb().mutate('UPDATE sessions SET user_id = ?', [userId]);
-};
-
 
 describe('/user-get-key', () => {
   it('returns 401 if the user is not authenticated', async () => {
