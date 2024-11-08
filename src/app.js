@@ -13,7 +13,6 @@ import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as secretApp from './app-secrets.js';
 import * as adminApp from './app-admin.js';
 import * as openidApp from './app-openid.js';
-import { toggleAuthentication } from './account-db.js';
 
 const app = express();
 
@@ -89,8 +88,6 @@ export default async function run() {
   } else {
     app.listen(config.port, config.hostname);
   }
-
-  if (!(await toggleAuthentication())) process.exit(-1);
 
   console.log('Listening on ' + config.hostname + ':' + config.port + '...');
 }
