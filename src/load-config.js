@@ -11,6 +11,11 @@ debug(`project root: '${projectRoot}'`);
 export const sqlDir = path.join(projectRoot, 'src', 'sql');
 
 let defaultDataDir = fs.existsSync('/data') ? '/data' : projectRoot;
+
+if (process.env.ACTUAL_DATA_DIR) {
+  defaultDataDir = process.env.ACTUAL_DATA_DIR;
+}
+
 debug(`default data directory: '${defaultDataDir}'`);
 
 function parseJSON(path, allowMissing = false) {
@@ -180,7 +185,6 @@ const finalConfig = {
     ? process.env.ACTUAL_TOKEN_EXPIRATION
     : config.token_expiration,
 };
-
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);
 debug(`using data directory ${finalConfig.dataDir}`);

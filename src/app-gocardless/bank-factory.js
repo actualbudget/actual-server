@@ -26,6 +26,7 @@ import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import SpkWormsAlzeyRiedMalade51wor from './banks/spk-worms-alzey-ried-malade51wor.js';
+import SwedbankHabaLV22 from './banks/swedbank-habalv22.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
 
 export const banks = [
@@ -56,6 +57,7 @@ export const banks = [
   SpkKarlsruhekarsde66,
   SpkMarburgBiedenkopfHeladef1mar,
   SpkWormsAlzeyRiedMalade51wor,
+  SwedbankHabaLV22,
   VirginNrnbgb22,
 ];
 
@@ -75,6 +77,8 @@ export const BANKS_WITH_LIMITED_HISTORY = [
   'CESKA_SPORITELNA_LONG_GIBACZPX',
   'COOP_EKRDEE22',
   'DOTS_HYEEIT22',
+  'FINECO_FEBIITM2XXX',
+  'FINECO_UK_FEBIITM2XXX',
   'HYPE_BUSINESS_HYEEIT22',
   'HYPE_HYEEIT2',
   'ILLIMITY_ITTPIT2M',
@@ -90,6 +94,7 @@ export const BANKS_WITH_LIMITED_HISTORY = [
   'LUMINOR_RIKOLV2X',
   'MEDICINOSBANK_MDBALT22XXX',
   'NORDEA_NDEADKKK',
+  'N26_NTSBDEB1',
   'OPYN_BITAITRRB2B',
   'PAYTIPPER_PAYTITM1',
   'REVOLUT_REVOLT21',
