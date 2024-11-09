@@ -11,6 +11,7 @@ import {
   needsBootstrap,
   getLoginMethod,
 } from './account-db.js';
+import config from './load-config.js';
 
 let app = express();
 app.use(errorMiddleware);
@@ -45,6 +46,10 @@ app.post('/login', (req, res) => {
   let loginMethod = getLoginMethod(req);
   console.log('Logging in via ' + loginMethod);
   let tokenRes = null;
+  if (!config.allowedLoginMethods.includes(loginMethod)) {
+    res.send({ status: 'error', reason: 'login-method-unsupported' });
+    return;
+  }
   switch (loginMethod) {
     case 'header': {
       let headerVal = req.get('x-actual-password') || '';

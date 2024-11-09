@@ -1,9 +1,13 @@
 import { ServerOptions } from 'https';
 
+type LoginMethod = 'password' | 'header';
+
 export interface Config {
   mode: 'test' | 'development';
-  loginMethod: 'password' | 'header';
+  loginMethod: LoginMethod;
+  allowedLoginMethods: LoginMethod[];
   trustedProxies: string[];
+  trustedAuthProxies?: string[];
   dataDir: string;
   projectRoot: string;
   port: number;
