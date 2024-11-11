@@ -16,8 +16,9 @@ export const up = async function () {
     CREATE TABLE user_access
       (user_id TEXT,
       file_id TEXT,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-      , FOREIGN KEY (file_id) REFERENCES files(id)
+      PRIMARY KEY (user_id, file_id),
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (file_id) REFERENCES files(id)
       );      
 
     ALTER TABLE files
