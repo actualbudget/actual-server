@@ -31,14 +31,14 @@ export async function bootstrapOpenId(config) {
 
   let accountDb = getAccountDb();
   accountDb.transaction(() => {
-  accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
-  accountDb.mutate('UPDATE auth SET active = 0');
-  accountDb.mutate(
-    "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
-    [JSON.stringify(config)],
-  );
+    accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
+    accountDb.mutate('UPDATE auth SET active = 0');
+    accountDb.mutate(
+      "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
+      [JSON.stringify(config)],
+    );
 
-  console.log(accountDb.all('select * from auth'));
+    console.log(accountDb.all('select * from auth'));
   });
 
   console.log(accountDb.all('select * from auth'));
@@ -163,14 +163,17 @@ export async function loginWithOpenIdFinalize(body) {
 
   try {
     const params = { code: body.code, state: body.state };
-    let tokenSet = await client.callback(client.redirect_uris[0], params, { code_verifier });
+    let tokenSet = await client.callback(client.redirect_uris[0], params, {
+      code_verifier,
+    });
     const userInfo = await client.userinfo(tokenSet.access_token);
     const identity =
       userInfo.preferred_username ??
       userInfo.login ??
       userInfo.email ??
       userInfo.id ??
-      userInfo.name;
+      userInfo.name ??
+      'default-username';
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
     }
