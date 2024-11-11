@@ -121,10 +121,9 @@ export function deleteUser(userId) {
 }
 export function deleteUserAccess(userId) {
   try {
-    return getAccountDb().mutate(
-      'DELETE FROM user_access WHERE user_id = ?',
-      [userId],
-    ).changes;
+    return getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [
+      userId,
+    ]).changes;
   } catch (error) {
     throw new Error(`Failed to delete user access: ${error.message}`);
   }
@@ -142,10 +141,10 @@ export function updateFileOwner(ownerId, fileId) {
     throw new Error('Invalid parameters');
   }
   try {
-    const result = getAccountDb().mutate('UPDATE files set owner = ? WHERE id = ?', [
-      ownerId,
-      fileId,
-    ]);
+    const result = getAccountDb().mutate(
+      'UPDATE files set owner = ? WHERE id = ?',
+      [ownerId, fileId],
+    );
     if (result.changes === 0) {
       throw new Error('File not found');
     }
