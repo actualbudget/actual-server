@@ -25,13 +25,13 @@ import {
 } from './app-sync/validation.js';
 
 const app = express();
+app.use(validateSessionMiddleware);
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
 app.use(express.raw({ type: 'application/actual-sync' }));
 app.use(express.raw({ type: 'application/encrypted-file' }));
 app.use(express.json());
 
-app.use(validateSessionMiddleware);
 export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
@@ -113,6 +113,8 @@ app.post('/sync', async (req, res) => {
 });
 
 app.post('/user-get-key', (req, res) => {
+  if (!res.locals) return;
+
   let { fileId } = req.body;
 
   const filesService = new FilesService(getAccountDb());
@@ -247,7 +249,7 @@ app.post('/upload-user-file', async (req, res) => {
         name: name,
         encryptMeta: encryptMeta,
         owner:
-          res.locals.session.user_id ||
+          res.locals.user_id ||
           (() => {
             throw new Error('User ID is required for file creation');
           })(),
@@ -310,7 +312,7 @@ app.post('/update-user-filename', (req, res) => {
 
 app.get('/list-user-files', (req, res) => {
   const fileService = new FilesService(getAccountDb());
-  const rows = fileService.find({ userId: res.locals.session.user_id });
+  const rows = fileService.find({ userId: res.locals.user_id });
   res.send({
     status: 'ok',
     data: rows.map((row) => ({

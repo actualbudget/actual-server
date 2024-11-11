@@ -18,7 +18,7 @@ app.use(requestLoggerMiddleware);
 export { app as handlers };
 
 app.post('/enable', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.session.user_id)) {
+  if (!isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
@@ -37,7 +37,7 @@ app.post('/enable', validateSessionMiddleware, async (req, res) => {
 });
 
 app.post('/disable', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.session.user_id)) {
+  if (!isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',

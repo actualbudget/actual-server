@@ -41,7 +41,7 @@ const setSessionUser = (userId, token = 'valid-token') => {
 
   try {
     const db = getAccountDb();
-    const session = db.get('SELECT token FROM sessions WHERE token = ?', [
+    const session = db.first('SELECT token FROM sessions WHERE token = ?', [
       token,
     ]);
     if (!session) {

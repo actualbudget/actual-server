@@ -37,7 +37,7 @@ app.get('/users/', validateSessionMiddleware, (req, res) => {
 });
 
 app.post('/users', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.session.user_id)) {
+  if (!isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
@@ -89,7 +89,7 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
 });
 
 app.patch('/users', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.session.user_id)) {
+  if (!isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
@@ -141,7 +141,7 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
 });
 
 app.delete('/users', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.session.user_id)) {
+  if (!isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
@@ -191,8 +191,8 @@ app.get('/access', validateSessionMiddleware, (req, res) => {
 
   const accesses = UserService.getUserAccess(
     fileId,
-    res.locals.session.user_id,
-    isAdmin(res.locals.session.user_id),
+    res.locals.user_id,
+    isAdmin(res.locals.user_id),
   );
 
   res.json(accesses);
@@ -305,12 +305,12 @@ app.get('/access/users', validateSessionMiddleware, async (req, res) => {
 
   const { granted } = UserService.checkFilePermission(
     fileId,
-    res.locals.session.user_id,
+    res.locals.user_id,
   ) || {
     granted: 0,
   };
 
-  if (granted === 0 && !isAdmin(res.locals.session.user_id)) {
+  if (granted === 0 && !isAdmin(res.locals.user_id)) {
     res.status(400).send({
       status: 'error',
       reason: 'file-denied',
@@ -341,12 +341,12 @@ app.post(
 
     const { granted } = UserService.checkFilePermission(
       newUserOwner.fileId,
-      res.locals.session.user_id,
+      res.locals.user_id,
     ) || {
       granted: 0,
     };
 
-    if (granted === 0 && !isAdmin(res.locals.session.user_id)) {
+    if (granted === 0 && !isAdmin(res.locals.user_id)) {
       res.status(400).send({
         status: 'error',
         reason: 'file-denied',
