@@ -86,10 +86,17 @@ export function insertUser(userId, userName, displayName, enabled, role) {
 }
 
 export function updateUser(userId, userName, displayName, enabled) {
-  getAccountDb().mutate(
-    'UPDATE users SET user_name = ?, display_name = ?, enabled = ? WHERE id = ?',
-    [userName, displayName, enabled, userId],
-  );
+  if (!userId || !userName) {
+    throw new Error('Invalid user parameters');
+  }
+  try {
+    getAccountDb().mutate(
+      'UPDATE users SET user_name = ?, display_name = ?, enabled = ? WHERE id = ?',
+      [userName, displayName, enabled, userId],
+    );
+  } catch (error) {
+    throw new Error(`Failed to update user: ${error.message}`);
+  }
 }
 
 export function updateUserWithRole(
@@ -113,7 +120,14 @@ export function deleteUser(userId) {
   ]).changes;
 }
 export function deleteUserAccess(userId) {
-  getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [userId]);
+  try {
+    return getAccountDb().mutate(
+      'DELETE FROM user_access WHERE user_id = ?',
+      [userId],
+    ).changes;
+  } catch (error) {
+    throw new Error(`Failed to delete user access: ${error.message}`);
+  }
 }
 
 export function transferAllFilesFromUser(ownerId, oldUserId) {
@@ -124,10 +138,20 @@ export function transferAllFilesFromUser(ownerId, oldUserId) {
 }
 
 export function updateFileOwner(ownerId, fileId) {
-  getAccountDb().mutate('UPDATE files set owner = ? WHERE id = ?', [
-    ownerId,
-    fileId,
-  ]);
+  if (!ownerId || !fileId) {
+    throw new Error('Invalid parameters');
+  }
+  try {
+    const result = getAccountDb().mutate('UPDATE files set owner = ? WHERE id = ?', [
+      ownerId,
+      fileId,
+    ]);
+    if (result.changes === 0) {
+      throw new Error('File not found');
+    }
+  } catch (error) {
+    throw new Error(`Failed to update file owner: ${error.message}`);
+  }
 }
 
 export function getUserAccess(fileId, userId, isAdmin) {
