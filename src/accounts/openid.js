@@ -164,7 +164,7 @@ export async function loginWithOpenIdFinalize(body) {
   try {
     const params = { code: body.code, state: body.state };
     let tokenSet = await client.callback(client.redirect_uris[0], params, { code_verifier });
-    const userInfo = await client.userinfo(grant);
+    const userInfo = await client.userinfo(tokenSet.access_token);
     const identity =
       userInfo.preferred_username ??
       userInfo.login ??
