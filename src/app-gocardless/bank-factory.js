@@ -60,7 +60,7 @@ export const banks = [
   SpkWormsAlzeyRiedMalade51wor,
   SwedbankHabaLV22,
   VirginNrnbgb22,
-  Dkb_byladem1
+  Dkb_byladem1,
 ];
 
 export default (institutionId) =>
