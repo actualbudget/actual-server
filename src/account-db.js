@@ -56,42 +56,55 @@ export async function bootstrap(loginSettings) {
   const passEnabled = 'password' in loginSettings;
   const openIdEnabled = 'openId' in loginSettings;
 
-  const { countOfOwner } =
-    getAccountDb().first(
-      `SELECT count(*) as countOfOwner
+  const accountDb = getAccountDb();
+  accountDb.mutate('BEGIN TRANSACTION');
+  try {
+    const { countOfOwner } =
+      accountDb.first(
+        `SELECT count(*) as countOfOwner
    FROM users
    WHERE users.user_name <> '' and users.owner = 1`,
-    ) || {};
+      ) || {};
 
-  if (!openIdEnabled || countOfOwner > 0) {
-    if (!needsBootstrap()) {
-      return { error: 'already-bootstrapped' };
+    if (!openIdEnabled || countOfOwner > 0) {
+      if (!needsBootstrap()) {
+        accountDb.mutate('ROLLBACK');
+        return { error: 'already-bootstrapped' };
+      }
     }
-  }
 
-  if (!passEnabled && !openIdEnabled) {
-    return { error: 'no-auth-method-selected' };
-  }
-
-  if (passEnabled && openIdEnabled) {
-    return { error: 'max-one-method-allowed' };
-  }
-
-  if (passEnabled) {
-    let { error } = bootstrapPassword(loginSettings.password);
-    if (error) {
-      return { error };
+    if (!passEnabled && !openIdEnabled) {
+      accountDb.mutate('ROLLBACK');
+      return { error: 'no-auth-method-selected' };
     }
-  }
 
-  if (openIdEnabled) {
-    let { error } = await bootstrapOpenId(loginSettings.openId);
-    if (error) {
-      return { error };
+    if (passEnabled && openIdEnabled) {
+      accountDb.mutate('ROLLBACK');
+      return { error: 'max-one-method-allowed' };
     }
-  }
 
-  return {};
+    if (passEnabled) {
+      let { error } = bootstrapPassword(loginSettings.password);
+      if (error) {
+        accountDb.mutate('ROLLBACK');
+        return { error };
+      }
+    }
+
+    if (openIdEnabled) {
+      let { error } = await bootstrapOpenId(loginSettings.openId);
+      if (error) {
+        accountDb.mutate('ROLLBACK');
+        return { error };
+      }
+    }
+
+    accountDb.mutate('COMMIT');
+    return {};
+  } catch (error) {
+    accountDb.mutate('ROLLBACK');
+    throw error;
+  }
 }
 
 export function isAdmin(userId) {

@@ -168,10 +168,25 @@ export function checkFilePermission(fileId, userId) {
 }
 
 export function addUserAccess(userId, fileId) {
-  getAccountDb().mutate(
-    'INSERT INTO user_access (user_id, file_id) VALUES (?, ?)',
-    [userId, fileId],
-  );
+  if (!userId || !fileId) {
+    throw new Error('Invalid parameters');
+  }
+  try {
+    const userExists = getUserById(userId);
+    const fileExists = getFileById(fileId);
+    if (!userExists || !fileExists) {
+      throw new Error('User or file not found');
+    }
+    getAccountDb().mutate(
+      'INSERT INTO user_access (user_id, file_id) VALUES (?, ?)',
+      [userId, fileId],
+    );
+  } catch (error) {
+    if (error.message.includes('UNIQUE constraint')) {
+      throw new Error('Access already exists');
+    }
+    throw new Error(`Failed to add user access: ${error.message}`);
+  }
 }
 
 export function deleteUserAccessByFileId(userIds, fileId) {

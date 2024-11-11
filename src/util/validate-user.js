@@ -37,8 +37,6 @@ export default function validateSession(req, res) {
     res.send({
       status: 'error',
       reason: 'token-expired',
-      details: 'token-expired',
-      message: 'Token expired. Please login again.',
     });
     return null;
   }

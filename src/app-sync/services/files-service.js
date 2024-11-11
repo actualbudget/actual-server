@@ -68,6 +68,7 @@ class FileUpdate extends FileBase {
     encryptMeta = undefined,
     syncVersion = undefined,
     deleted = undefined,
+    owner = undefined,
   }) {
     super(
       name,
@@ -78,6 +79,7 @@ class FileUpdate extends FileBase {
       encryptMeta,
       syncVersion,
       deleted,
+      owner,
     );
   }
 }
