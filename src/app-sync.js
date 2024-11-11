@@ -113,8 +113,6 @@ app.post('/sync', async (req, res) => {
 });
 
 app.post('/user-get-key', (req, res) => {
-  if (!res.locals) return;
-
   let { fileId } = req.body;
 
   const filesService = new FilesService(getAccountDb());

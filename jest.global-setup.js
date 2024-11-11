@@ -59,21 +59,32 @@ const setSessionUser = (userId, token = 'valid-token') => {
 };
 
 export default async function setup() {
+  const NEVER_EXPIRES = -1; // or consider using a far future timestamp
+
   await runMigrations();
 
   createUser(GENERIC_ADMIN_ID, 'admin', ADMIN_ROLE_ID, 1);
 
   // Insert a fake "valid-token" fixture that can be reused
   const db = getAccountDb();
-  await db.mutate('DELETE FROM sessions');
-  await db.mutate(
-    'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
-    ['valid-token', -1, 'genericAdmin'],
-  );
-  await db.mutate(
-    'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
-    ['valid-token-admin', -1, 'genericAdmin'],
-  );
+  try {
+    await db.mutate('BEGIN TRANSACTION');
+
+    await db.mutate('DELETE FROM sessions');
+    await db.mutate(
+      'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
+      ['valid-token', NEVER_EXPIRES, 'genericAdmin'],
+    );
+    await db.mutate(
+      'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
+      ['valid-token-admin', NEVER_EXPIRES, 'genericAdmin'],
+    );
+
+    await db.mutate('COMMIT');
+  } catch (error) {
+    await db.mutate('ROLLBACK');
+    throw new Error(`Failed to setup test sessions: ${error.message}`);
+  }
 
   setSessionUser('genericAdmin');
   setSessionUser('genericAdmin', 'valid-token-admin');

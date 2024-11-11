@@ -70,10 +70,17 @@ export function getAllUsers() {
 }
 
 export function insertUser(userId, userName, displayName, enabled, role) {
-  getAccountDb().mutate(
-    'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, 0, ?)',
-    [userId, userName, displayName, enabled, role],
-  );
+  if (!userId || !userName || !validateRole(role)) {
+    throw new Error('Invalid user parameters');
+  }
+  try {
+    getAccountDb().mutate(
+      'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, 0, ?)',
+      [userId, userName, displayName, enabled, role],
+    );
+  } catch (error) {
+    throw new Error(`Failed to insert user: ${error.message}`);
+  }
 }
 
 export function updateUser(userId, userName, displayName, enabled) {
@@ -90,12 +97,22 @@ export function updateUserWithRole(
   enabled,
   roleId,
 ) {
-  getAccountDb().transaction(() => {
-    getAccountDb().mutate(
-      'UPDATE users SET user_name = ?, display_name = ?, enabled = ?, role = ? WHERE id = ?',
-      [userName, displayName, enabled, roleId, userId],
-    );
-  });
+  if (!userId || !userName || !validateRole(roleId)) {
+    throw new Error('Invalid user parameters');
+  }
+  try {
+    getAccountDb().transaction(() => {
+      const result = getAccountDb().mutate(
+        'UPDATE users SET user_name = ?, display_name = ?, enabled = ?, role = ? WHERE id = ?',
+        [userName, displayName, enabled, roleId, userId],
+      );
+      if (result.changes === 0) {
+        throw new Error('User not found');
+      }
+    });
+  } catch (error) {
+    throw new Error(`Failed to update user: ${error.message}`);
+  }
 }
 
 export function deleteUser(userId) {
@@ -108,10 +125,26 @@ export function deleteUserAccess(userId) {
 }
 
 export function transferAllFilesFromUser(ownerId, oldUserId) {
-  getAccountDb().mutate('UPDATE files set owner = ? WHERE owner = ?', [
-    ownerId,
-    oldUserId,
-  ]);
+  if (!ownerId || !oldUserId) {
+    throw new Error('Invalid user IDs');
+  }
+  try {
+    getAccountDb().transaction(() => {
+      const ownerExists = getUserById(ownerId);
+      if (!ownerExists) {
+        throw new Error('New owner not found');
+      }
+      const result = getAccountDb().mutate(
+        'UPDATE files set owner = ? WHERE owner = ?',
+        [ownerId, oldUserId],
+      );
+      if (result.changes === 0) {
+        throw new Error('No files found for transfer');
+      }
+    });
+  } catch (error) {
+    throw new Error(`Failed to transfer files: ${error.message}`);
+  }
 }
 
 export function updateFileOwner(ownerId, fileId) {

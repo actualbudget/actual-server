@@ -37,11 +37,7 @@ export async function bootstrapOpenId(config) {
       "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
       [JSON.stringify(config)],
     );
-
-    console.log(accountDb.all('select * from auth'));
   });
-
-  console.log(accountDb.all('select * from auth'));
 
   return {};
 }
