@@ -30,19 +30,16 @@ export async function bootstrapOpenId(config) {
   }
 
   let accountDb = getAccountDb();
-  try {
-    accountDb.transaction(() => {
-      accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
-      accountDb.mutate('UPDATE auth SET active = 0');
-      accountDb.mutate(
-        "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
-        [JSON.stringify(config)],
-      );
-    });
-  } catch (err) {
-    console.error('Error updating auth table:', err);
-    return { error: 'database-error' };
-  }
+  accountDb.transaction(() => {
+    accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
+    accountDb.mutate('UPDATE auth SET active = 0');
+    accountDb.mutate(
+      "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
+      [JSON.stringify(config)],
+    );
+
+    console.log(accountDb.all('select * from auth'));
+  });
 
   console.log(accountDb.all('select * from auth'));
 

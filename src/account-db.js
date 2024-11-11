@@ -138,14 +138,16 @@ export async function disableOpenID(
       return { error: 'invalid-password' };
     }
 
-    const confirmed =
-      passwordHash && bcrypt.compareSync(loginSettings.password, passwordHash);
+    if (!loginSettings?.password) {
+      return { error: 'invalid-password' };
+    }
 
-    if (!confirmed) {
-      return {
-        error: 'invalid-password',
-        message: 'The provided password is incorrect',
-      };
+    if (passwordHash) {
+      let confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
+
+      if (!confirmed) {
+        return { error: 'invalid-password' };
+      }
     }
   }
 
@@ -154,12 +156,9 @@ export async function disableOpenID(
     return { error };
   }
 
-  let accountDb = getAccountDb();
-  accountDb.transaction(() => {
-    accountDb.mutate('DELETE FROM sessions');
-    accountDb.mutate('DELETE FROM users WHERE user_name <> ?', ['']);
-    accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
-  });
+  getAccountDb().mutate('DELETE FROM sessions');
+  getAccountDb().mutate('DELETE FROM users WHERE user_name <> ?', ['']);
+  getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
 }
 
 export function getSession(token) {
