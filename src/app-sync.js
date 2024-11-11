@@ -246,7 +246,11 @@ app.post('/upload-user-file', async (req, res) => {
         syncVersion: syncFormatVersion,
         name: name,
         encryptMeta: encryptMeta,
-        owner: res.locals.user_id,
+        encryptMeta: encryptMeta,
+        // Ensure user_id exists before setting owner
+        owner: res.locals.user_id || (() => {
+          throw new Error('User ID is required for file creation');
+        })(),
       }),
     );
 

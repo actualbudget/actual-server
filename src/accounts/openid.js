@@ -244,6 +244,7 @@ export async function loginWithOpenIdFinalize(body) {
     return { url: `${return_url}/openid-cb?token=${token}` };
   } catch (err) {
     console.error('OpenID grant failed:', err);
-    return { error: 'openid-grant-failed: ' + err };
+    console.error('OpenID grant failed:', err);
+    return { error: 'openid-grant-failed' };
   }
 }
