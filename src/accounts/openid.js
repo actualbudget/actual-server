@@ -25,6 +25,7 @@ export async function bootstrapOpenId(config) {
   try {
     await setupOpenIdClient(config);
   } catch (err) {
+    console.error('Error setting up OpenID client:', err);
     return { error: 'configuration-error' };
   }
 
