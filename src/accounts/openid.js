@@ -183,8 +183,6 @@ export async function loginWithOpenIdFinalize(body) {
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
     }
-    
-
 
     let userId = null;
     accountDb.transaction(() => {
