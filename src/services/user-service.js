@@ -1,24 +1,33 @@
 import getAccountDb from '../account-db.js';
 
 export function getUserByUsername(userName) {
+  if (!userName || typeof userName !== 'string') {
+    return null;
+  }
   const { id } =
     getAccountDb().first('SELECT id FROM users WHERE user_name = ?', [
       userName,
     ]) || {};
-  return id;
+  return id || null;
 }
 
 export function getUserById(userId) {
+  if (!userId) {
+    return null;
+  }
   const { id } =
-    getAccountDb().first('SELECT id FROM users WHERE id = ?', [userId]) || {};
-  return id;
+    getAccountDb().first('SELECT * FROM users WHERE id = ?', [userId]) || {};
+  return id || null;
 }
 
 export function getFileById(fileId) {
+  if (!fileId) {
+    return null;
+  }
   const { id } =
-    getAccountDb().first('SELECT id FROM files WHERE files.id = ?', [fileId]) ||
+    getAccountDb().first('SELECT * FROM files WHERE files.id = ?', [fileId]) ||
     {};
-  return id;
+  return id || null;
 }
 
 export function validateRole(roleId) {
@@ -206,14 +215,20 @@ export function deleteUserAccessByFileId(userIds, fileId) {
   const CHUNK_SIZE = 999;
   let totalChanges = 0;
 
-  for (let i = 0; i < userIds.length; i += CHUNK_SIZE) {
-    const chunk = userIds.slice(i, i + CHUNK_SIZE);
-    const placeholders = chunk.map(() => '?').join(',');
+  try {
+    getAccountDb().transaction(() => {
+      for (let i = 0; i < userIds.length; i += CHUNK_SIZE) {
+        const chunk = userIds.slice(i, i + CHUNK_SIZE);
+        const placeholders = chunk.map(() => '?').join(',');
 
-    const sql = `DELETE FROM user_access WHERE user_id IN (${placeholders}) AND file_id = ?`;
+        const sql = `DELETE FROM user_access WHERE user_id IN (${placeholders}) AND file_id = ?`;
 
-    const result = getAccountDb().mutate(sql, [...chunk, fileId]);
-    totalChanges += result.changes;
+        const result = getAccountDb().mutate(sql, [...chunk, fileId]);
+        totalChanges += result.changes;
+      }
+    });
+  } catch (error) {
+    throw new Error(`Failed to delete user access: ${error.message}`);
   }
 
   return totalChanges;

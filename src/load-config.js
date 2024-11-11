@@ -108,7 +108,13 @@ const finalConfig = {
     ? process.env.ACTUAL_LOGIN_METHOD.toLowerCase()
     : config.loginMethod,
   multiuser: process.env.ACTUAL_MULTIUSER
-    ? process.env.ACTUAL_MULTIUSER.toLowerCase() === 'true'
+    ? (() => {
+        const value = process.env.ACTUAL_MULTIUSER.toLowerCase();
+        if (!['true', 'false'].includes(value)) {
+          throw new Error('ACTUAL_MULTIUSER must be either "true" or "false"');
+        }
+        return value === 'true';
+      })()
     : config.multiuser,
   trustedProxies: process.env.ACTUAL_TRUSTED_PROXIES
     ? process.env.ACTUAL_TRUSTED_PROXIES.split(',').map((q) => q.trim())
@@ -154,6 +160,22 @@ const finalConfig = {
     const baseConfig = process.env.ACTUAL_OPENID_DISCOVERY_URL
       ? { issuer: process.env.ACTUAL_OPENID_DISCOVERY_URL }
       : {
+          ...(() => {
+            const required = {
+              authorization_endpoint: process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT,
+              token_endpoint: process.env.ACTUAL_OPENID_TOKEN_ENDPOINT,
+              userinfo_endpoint: process.env.ACTUAL_OPENID_USERINFO_ENDPOINT,
+            };
+            const missing = Object.entries(required)
+              .filter(([_, value]) => !value)
+              .map(([key]) => key);
+            if (missing.length > 0) {
+              throw new Error(
+                `Missing required OpenID configuration: ${missing.join(', ')}`
+              );
+            }
+            return {};
+          })(),
           issuer: {
             name: process.env.ACTUAL_OPENID_PROVIDER_NAME,
             authorization_endpoint:

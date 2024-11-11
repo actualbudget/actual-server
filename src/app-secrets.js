@@ -14,9 +14,18 @@ app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
 
 app.post('/', async (req, res) => {
-  const { method } =
-    getAccountDb().first('SELECT method FROM auth WHERE active = 1') || {};
-
+  let method;
+  try {
+    const result = getAccountDb().first('SELECT method FROM auth WHERE active = 1');
+    method = result?.method;
+  } catch (error) {
+    console.error('Failed to fetch auth method:', error);
+    return res.status(500).send({
+      status: 'error',
+      reason: 'database-error',
+      details: 'Failed to validate authentication method'
+    });
+  }
   const { name, value } = req.body;
 
   if (method === 'openid') {
