@@ -133,22 +133,18 @@ export function getUserAccess(fileId, userId, isAdmin) {
 }
 
 export function countUserAccess(fileId, userId) {
-  const { countUserAccess } =
+  const { accessCount } =
     getAccountDb().first(
-      `SELECT SUM(countUserAccess) as countUserAccess FROM
-      (
-        SELECT count(*) as countUserAccess
-        FROM user_access 
-            WHERE user_access.user_id = ? and user_access.file_id = ?
-        UNION ALL
-        SELECT count(*) from files 
-            WHERE files.id = ? and files.owner = ?
-       ) as z
-       `,
-      [userId, fileId, fileId, userId],
+      `SELECT COUNT(*) as accessCount
+       FROM files
+       WHERE files.id = ? AND (files.owner = ? OR EXISTS (
+         SELECT 1 FROM user_access
+         WHERE user_access.user_id = ? AND user_access.file_id = ?)
+       )`,
+      [fileId, userId, userId, fileId],
     ) || {};
 
-  return countUserAccess || 0;
+  return accessCount || 0;
 }
 
 export function checkFilePermission(fileId, userId) {
