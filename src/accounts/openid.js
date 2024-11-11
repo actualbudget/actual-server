@@ -224,7 +224,7 @@ export async function loginWithOpenIdFinalize(body) {
 
     let expiration;
     if (finalConfig.token_expiration === 'openid-provider') {
-      expiration = grant.expires_at ?? TOKEN_EXPIRATION_NEVER;
+      expiration = tokenSet.expires_at ?? TOKEN_EXPIRATION_NEVER;
     } else if (finalConfig.token_expiration === 'never') {
       expiration = TOKEN_EXPIRATION_NEVER;
     } else if (typeof finalConfig.token_expiration === 'number') {
