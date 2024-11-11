@@ -120,7 +120,14 @@ export function deleteUser(userId) {
   ]).changes;
 }
 export function deleteUserAccess(userId) {
-  getAccountDb().mutate('DELETE FROM user_access WHERE user_id = ?', [userId]);
+  try {
+    return getAccountDb().mutate(
+      'DELETE FROM user_access WHERE user_id = ?',
+      [userId],
+    ).changes;
+  } catch (error) {
+    throw new Error(`Failed to delete user access: ${error.message}`);
+  }
 }
 
 export function transferAllFilesFromUser(ownerId, oldUserId) {
