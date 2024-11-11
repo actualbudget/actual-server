@@ -30,10 +30,10 @@ export const up = async function () {
         ADD COLUMN expires_at INTEGER;
 
     ALTER TABLE sessions
-        ADD user_id TEXT;
+        ADD COLUMN user_id TEXT;
 
     ALTER TABLE sessions
-        ADD auth_method TEXT;
+        ADD COLUMN auth_method TEXT;
     COMMIT;        
         `,
   );
