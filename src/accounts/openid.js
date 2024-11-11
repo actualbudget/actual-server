@@ -91,7 +91,8 @@ export async function loginWithOpenIdSetup(returnUrl) {
   try {
     client = await setupOpenIdClient(config);
   } catch (err) {
-    return { error: 'openid-setup-failed: ' + err };
+    console.error('Error setting up OpenID client:', err);
+    return { error: 'openid-setup-failed' };
   }
 
   const state = generators.state();
