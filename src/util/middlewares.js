@@ -31,14 +31,25 @@ async function errorMiddleware(err, req, res, next) {
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
+/**
+ * Middleware to validate session and attach it to response locals
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const validateSessionMiddleware = async (req, res, next) => {
   let session = await validateSession(req, res);
   if (!session) {
+    res.status(401).json({ 
+      status: 'error',
+      reason: 'invalid-session'
+    });
     return;
   }
 
-  res.locals = session;
+  res.locals.session = session;
   next();
+};
 };
 
 const requestLoggerMiddleware = expressWinston.logger({
