@@ -285,7 +285,8 @@ export function isValidRedirectUrl(url) {
     const redirectUrl = new URL(url);
     const serverUrl = new URL(serverHostname);
 
-    if (redirectUrl.hostname === serverUrl.hostname) {
+    // Compare origin (protocol + hostname + port)
+    if (redirectUrl.origin === serverUrl.origin) {
       return true;
     } else {
       return false;
