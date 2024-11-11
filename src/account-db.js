@@ -50,6 +50,9 @@ export function getLoginMethod(req) {
 }
 
 export async function bootstrap(loginSettings) {
+  if (!loginSettings) {
+    return { error: 'invalid-login-settings' };
+  }
   const passEnabled = 'password' in loginSettings;
   const openIdEnabled = 'openId' in loginSettings;
 
