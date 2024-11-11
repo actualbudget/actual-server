@@ -124,10 +124,20 @@ export function transferAllFilesFromUser(ownerId, oldUserId) {
 }
 
 export function updateFileOwner(ownerId, fileId) {
-  getAccountDb().mutate('UPDATE files set owner = ? WHERE id = ?', [
-    ownerId,
-    fileId,
-  ]);
+  if (!ownerId || !fileId) {
+    throw new Error('Invalid parameters');
+  }
+  try {
+    const result = getAccountDb().mutate('UPDATE files set owner = ? WHERE id = ?', [
+      ownerId,
+      fileId,
+    ]);
+    if (result.changes === 0) {
+      throw new Error('File not found');
+    }
+  } catch (error) {
+    throw new Error(`Failed to update file owner: ${error.message}`);
+  }
 }
 
 export function getUserAccess(fileId, userId, isAdmin) {
