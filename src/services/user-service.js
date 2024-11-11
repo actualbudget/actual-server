@@ -130,10 +130,23 @@ export function deleteUserAccess(userId) {
 }
 
 export function transferAllFilesFromUser(ownerId, oldUserId) {
-  getAccountDb().mutate('UPDATE files set owner = ? WHERE owner = ?', [
-    ownerId,
-    oldUserId,
-  ]);
+  if (!ownerId || !oldUserId) {
+    throw new Error('Invalid user IDs');
+  }
+  try {
+    getAccountDb().transaction(() => {
+      const ownerExists = getUserById(ownerId);
+      if (!ownerExists) {
+        throw new Error('New owner not found');
+      }
+      getAccountDb().mutate('UPDATE files set owner = ? WHERE owner = ?', [
+        ownerId,
+        oldUserId,
+      ]);
+    });
+  } catch (error) {
+    throw new Error(`Failed to transfer files: ${error.message}`);
+  }
 }
 
 export function updateFileOwner(ownerId, fileId) {
