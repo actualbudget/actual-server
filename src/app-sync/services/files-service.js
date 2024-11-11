@@ -116,7 +116,7 @@ class FilesService {
         file.encrypt_test,
         file.encrypt_keyid,
         deletedInt,
-        file.userId,
+        file.owner,
       ],
     );
   }
