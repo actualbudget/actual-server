@@ -30,18 +30,19 @@ export async function bootstrapOpenId(config) {
   }
 
   let accountDb = getAccountDb();
-  accountDb.transaction(() => {
-    accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
-    accountDb.mutate('UPDATE auth SET active = 0');
-    accountDb.mutate(
-      "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
-      [JSON.stringify(config)],
-    );
-
-    console.log(accountDb.all('select * from auth'));
-  });
-
-  console.log(accountDb.all('select * from auth'));
+  try {
+    accountDb.transaction(() => {
+      accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
+      accountDb.mutate('UPDATE auth SET active = 0');
+      accountDb.mutate(
+        "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
+        [JSON.stringify(config)],
+      );
+    });
+  } catch (err) {
+    console.error('Error updating auth table:', err);
+    return { error: 'database-error' };
+  }
 
   return {};
 }
@@ -60,7 +61,10 @@ async function setupOpenIdClient(config) {
   const client = new issuer.Client({
     client_id: config.client_id,
     client_secret: config.client_secret,
-    redirect_uri: new URL('/openid/callback', config.server_hostname).toString(),
+    redirect_uri: new URL(
+      '/openid/callback',
+      config.server_hostname,
+    ).toString(),
     validate_id_token: true,
   });
 
@@ -200,7 +204,7 @@ export async function loginWithOpenIdFinalize(body) {
             'ADMIN',
           ],
         );
-  
+
         const userFromPasswordMethod = getUserByUsername('');
         if (userFromPasswordMethod) {
           transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
@@ -211,18 +215,18 @@ export async function loginWithOpenIdFinalize(body) {
             'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
             [identity],
           ) || {};
-  
+
         if (userIdFromDb == null) {
           return { error: 'openid-grant-failed' };
         }
-  
+
         if (!displayName && userInfo.name) {
           accountDb.mutate('UPDATE users set display_name = ? WHERE id = ?', [
             userInfo.name,
             userIdFromDb,
           ]);
         }
-  
+
         userId = userIdFromDb;
       }
     });

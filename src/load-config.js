@@ -162,7 +162,8 @@ const finalConfig = {
       : {
           ...(() => {
             const required = {
-              authorization_endpoint: process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT,
+              authorization_endpoint:
+                process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT,
               token_endpoint: process.env.ACTUAL_OPENID_TOKEN_ENDPOINT,
               userinfo_endpoint: process.env.ACTUAL_OPENID_USERINFO_ENDPOINT,
             };
@@ -171,7 +172,7 @@ const finalConfig = {
               .map(([key]) => key);
             if (missing.length > 0) {
               throw new Error(
-                `Missing required OpenID configuration: ${missing.join(', ')}`
+                `Missing required OpenID configuration: ${missing.join(', ')}`,
               );
             }
             return {};
