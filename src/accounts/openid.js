@@ -30,7 +30,7 @@ export async function bootstrapOpenId(config) {
   }
 
   let accountDb = getAccountDb();
-  //accountDb.transaction(() => {
+  accountDb.transaction(() => {
   accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
   accountDb.mutate('UPDATE auth SET active = 0');
   accountDb.mutate(
@@ -39,7 +39,7 @@ export async function bootstrapOpenId(config) {
   );
 
   console.log(accountDb.all('select * from auth'));
-  //});
+  });
 
   console.log(accountDb.all('select * from auth'));
 
@@ -83,7 +83,8 @@ export async function loginWithOpenIdSetup(body) {
   try {
     config = JSON.parse(config['extra_data']);
   } catch (err) {
-    return { error: 'openid-setup-failed: ' + err };
+    console.error('Error parsing OpenID configuration:', err);
+    return { error: 'openid-setup-failed' };
   }
 
   let client;
@@ -138,13 +139,15 @@ export async function loginWithOpenIdFinalize(body) {
   try {
     config = JSON.parse(config['extra_data']);
   } catch (err) {
-    return { error: 'openid-setup-failed: ' + err };
+    console.error('Error parsing OpenID configuration:', err);
+    return { error: 'openid-setup-failed' };
   }
   let client;
   try {
     client = await setupOpenIdClient(config);
   } catch (err) {
-    return { error: 'openid-setup-failed: ' + err };
+    console.error('Error setting up OpenID client:', err);
+    return { error: 'openid-setup-failed' };
   }
 
   let pendingRequest = accountDb.first(
@@ -159,12 +162,8 @@ export async function loginWithOpenIdFinalize(body) {
   let { code_verifier, return_url } = pendingRequest;
 
   try {
-    let grant = await client.grant({
-      grant_type: 'authorization_code',
-      code: body.code,
-      code_verifier,
-      redirect_uri: client.redirect_uris[0],
-    });
+    const params = { code: body.code, state: body.state };
+    let tokenSet = await client.callback(client.redirect_uris[0], params, { code_verifier });
     const userInfo = await client.userinfo(grant);
     const identity =
       userInfo.preferred_username ??
