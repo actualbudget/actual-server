@@ -4,6 +4,7 @@ import ipaddr from 'ipaddr.js';
 import { getSession } from '../account-db.js';
 
 export const TOKEN_EXPIRATION_NEVER = -1;
+const MS_PER_SECOND = 1000;
 
 /**
  * @param {import('express').Request} req
@@ -30,13 +31,14 @@ export default function validateSession(req, res) {
 
   if (
     session.expires_at !== TOKEN_EXPIRATION_NEVER &&
-    session.expires_at * 1000 <= Date.now()
+    session.expires_at * MS_PER_SECOND <= Date.now()
   ) {
     res.status(401);
     res.send({
       status: 'error',
       reason: 'token-expired',
-      details: 'Token Expired. Login again',
+      details: 'token-expired',
+      message: 'Token expired. Please login again.',
     });
     return null;
   }

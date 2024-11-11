@@ -107,6 +107,10 @@ export function hasPermission(userId, permission) {
 }
 
 export async function enableOpenID(loginSettings) {
+  if (!loginSettings || !loginSettings.openId) {
+    return { error: 'invalid-login-settings' };
+  }
+
   let { error } = (await bootstrapOpenId(loginSettings.openId)) || {};
   if (error) {
     return { error };
@@ -119,12 +123,20 @@ export async function disableOpenID(
   loginSettings,
   checkForOldPassword = false,
 ) {
+  if (!loginSettings || !loginSettings.password) {
+    return { error: 'invalid-login-settings' };
+  }
+
   if (checkForOldPassword) {
     let accountDb = getAccountDb();
     const { extra_data: passwordHash } =
       accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
         'password',
       ]) || {};
+
+    if (!passwordHash) {
+      return { error: 'invalid-password' };
+    }
 
     if (!loginSettings?.password) {
       return { error: 'invalid-password' };

@@ -5,7 +5,10 @@ import {
   validateSessionMiddleware,
 } from './util/middlewares.js';
 import { disableOpenID, enableOpenID, isAdmin } from './account-db.js';
-import { loginWithOpenIdFinalize } from './accounts/openid.js';
+import {
+  isValidRedirectUrl,
+  loginWithOpenIdFinalize,
+} from './accounts/openid.js';
 import * as UserService from './services/user-service.js';
 
 let app = express();
@@ -15,7 +18,7 @@ app.use(requestLoggerMiddleware);
 export { app as handlers };
 
 app.post('/enable', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.user_id)) {
+  if (!isAdmin(res.locals.session.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
@@ -34,7 +37,7 @@ app.post('/enable', validateSessionMiddleware, async (req, res) => {
 });
 
 app.post('/disable', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.user_id)) {
+  if (!isAdmin(res.locals.session.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
@@ -81,9 +84,14 @@ app.get('/config', async (req, res) => {
 
 app.get('/callback', async (req, res) => {
   let { error, url } = await loginWithOpenIdFinalize(req.query);
+
   if (error) {
-    console.error('OpenID Callback Error:', error);
-    res.status(400).send({ status: 'error', reason: 'Invalid request' });
+    res.status(400).send({ status: 'error', reason: error });
+    return;
+  }
+
+  if (!isValidRedirectUrl(url)) {
+    res.status(400).send({ status: 'error', reason: 'Invalid redirect URL' });
     return;
   }
 

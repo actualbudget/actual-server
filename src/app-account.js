@@ -12,7 +12,7 @@ import {
   getUserInfo,
 } from './account-db.js';
 import { changePassword, loginWithPassword } from './accounts/password.js';
-import { loginWithOpenIdSetup } from './accounts/openid.js';
+import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid.js';
 import config from './load-config.js';
 
 let app = express();
@@ -78,7 +78,14 @@ app.post('/login', async (req, res) => {
       break;
     }
     case 'openid': {
-      let { error, url } = await loginWithOpenIdSetup(req.body);
+      if (!isValidRedirectUrl(req.body.return_url)) {
+        res
+          .status(400)
+          .send({ status: 'error', reason: 'Invalid redirect URL' });
+        return;
+      }
+
+      let { error, url } = await loginWithOpenIdSetup(req.body.return_url);
       if (error) {
         res.status(400).send({ status: 'error', reason: error });
         return;
@@ -119,6 +126,10 @@ app.get('/validate', (req, res) => {
   let session = validateSession(req, res);
   if (session) {
     const user = getUserInfo(session.user_id);
+    if (!user) {
+      res.status(400).send({ status: 'error', reason: 'User not found' });
+      return;
+    }
 
     res.send({
       status: 'ok',

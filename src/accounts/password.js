@@ -42,6 +42,10 @@ export function loginWithPassword(password) {
       'password',
     ]) || {};
 
+  if (!passwordHash) {
+    return { error: 'invalid-password' };
+  }
+
   let confirmed = bcrypt.compareSync(password, passwordHash);
 
   if (!confirmed) {

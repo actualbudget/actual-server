@@ -67,8 +67,8 @@ async function setupOpenIdClient(config) {
   return client;
 }
 
-export async function loginWithOpenIdSetup(body) {
-  if (!body.return_url) {
+export async function loginWithOpenIdSetup(returnUrl) {
+  if (!returnUrl) {
     return { error: 'return-url-missing' };
   }
 
@@ -107,7 +107,7 @@ export async function loginWithOpenIdSetup(body) {
   );
   accountDb.mutate(
     'INSERT INTO pending_openid_requests (state, code_verifier, return_url, expiry_time) VALUES (?, ?, ?, ?)',
-    [state, code_verifier, body.return_url, expiry_time],
+    [state, code_verifier, returnUrl, expiry_time],
   );
 
   const url = client.authorizationUrl({
@@ -165,6 +165,7 @@ export async function loginWithOpenIdFinalize(body) {
     const params = { code: body.code, state: body.state };
     let tokenSet = await client.callback(client.redirect_uris[0], params, {
       code_verifier,
+      state: body.state,
     });
     const userInfo = await client.userinfo(tokenSet.access_token);
     const identity =
@@ -246,5 +247,42 @@ export async function loginWithOpenIdFinalize(body) {
     console.error('OpenID grant failed:', err);
     console.error('OpenID grant failed:', err);
     return { error: 'openid-grant-failed' };
+  }
+}
+
+export function getServerHostname() {
+  const auth = getAccountDb().first(
+    'select * from auth WHERE method = ? and active = 1',
+    ['openid'],
+  );
+  if (auth && auth.extra_data) {
+    try {
+      const openIdConfig = JSON.parse(auth.extra_data);
+      return openIdConfig.server_hostname;
+    } catch (error) {
+      console.error('Error parsing OpenID configuration:', error);
+    }
+  }
+  return null;
+}
+
+export function isValidRedirectUrl(url) {
+  const serverHostname = getServerHostname();
+
+  if (!serverHostname) {
+    return false;
+  }
+
+  try {
+    const redirectUrl = new URL(url);
+    const serverUrl = new URL(serverHostname);
+
+    if (redirectUrl.hostname === serverUrl.hostname) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (err) {
+    return false;
   }
 }

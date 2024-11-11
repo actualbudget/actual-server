@@ -35,10 +35,27 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
 };
 
 const setSessionUser = (userId, token = 'valid-token') => {
-  getAccountDb().mutate('UPDATE sessions SET user_id = ? WHERE token = ?', [
-    userId,
-    token,
-  ]);
+  if (!userId) {
+    throw new Error('userId is required');
+  }
+
+  try {
+    const db = getAccountDb();
+    const session = db.get('SELECT token FROM sessions WHERE token = ?', [
+      token,
+    ]);
+    if (!session) {
+      throw new Error(`Session not found for token: ${token}`);
+    }
+
+    getAccountDb().mutate('UPDATE sessions SET user_id = ? WHERE token = ?', [
+      userId,
+      token,
+    ]);
+  } catch (error) {
+    console.error(`Error updating session for user ${userId}:`, error);
+    throw error;
+  }
 };
 
 export default async function setup() {

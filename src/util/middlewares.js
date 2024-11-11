@@ -40,16 +40,15 @@ async function errorMiddleware(err, req, res, next) {
 const validateSessionMiddleware = async (req, res, next) => {
   let session = await validateSession(req, res);
   if (!session) {
-    res.status(401).json({ 
+    res.status(401).json({
       status: 'error',
-      reason: 'invalid-session'
+      reason: 'invalid-session',
     });
     return;
   }
 
   res.locals.session = session;
   next();
-};
 };
 
 const requestLoggerMiddleware = expressWinston.logger({
