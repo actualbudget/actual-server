@@ -156,9 +156,17 @@ export async function disableOpenID(
     return { error };
   }
 
-  getAccountDb().mutate('DELETE FROM sessions');
-  getAccountDb().mutate('DELETE FROM users WHERE user_name <> ?', ['']);
-  getAccountDb().mutate('DELETE FROM auth WHERE method = ?', ['openid']);
+  const accountDb = getAccountDb();
+  accountDb.mutate('BEGIN TRANSACTION');
+  try {
+    accountDb.mutate('DELETE FROM sessions');
+    accountDb.mutate('DELETE FROM users WHERE user_name <> ?', ['']);
+    accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
+    accountDb.mutate('COMMIT');
+  } catch (error) {
+    accountDb.mutate('ROLLBACK');
+    throw error;
+  }
 }
 
 export function getSession(token) {
