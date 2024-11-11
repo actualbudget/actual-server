@@ -1,5 +1,5 @@
 import Dkb_byladem1 from '../dkb_byladem1.js';
-import { mockTransactionAmount, mockTransactions } from '../../services/tests/fixtures.js';
+import { mockTransactionAmount } from '../../services/tests/fixtures.js';
 
 describe('dkb_byladem1', function () {
   describe('#normalizeAccount', function () {
