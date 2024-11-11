@@ -154,6 +154,22 @@ const finalConfig = {
     const baseConfig = process.env.ACTUAL_OPENID_DISCOVERY_URL
       ? { issuer: process.env.ACTUAL_OPENID_DISCOVERY_URL }
       : {
+          ...(() => {
+            const required = {
+              authorization_endpoint: process.env.ACTUAL_OPENID_AUTHORIZATION_ENDPOINT,
+              token_endpoint: process.env.ACTUAL_OPENID_TOKEN_ENDPOINT,
+              userinfo_endpoint: process.env.ACTUAL_OPENID_USERINFO_ENDPOINT,
+            };
+            const missing = Object.entries(required)
+              .filter(([_, value]) => !value)
+              .map(([key]) => key);
+            if (missing.length > 0) {
+              throw new Error(
+                `Missing required OpenID configuration: ${missing.join(', ')}`
+              );
+            }
+            return {};
+          })(),
           issuer: {
             name: process.env.ACTUAL_OPENID_PROVIDER_NAME,
             authorization_endpoint:
