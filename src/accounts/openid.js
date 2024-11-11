@@ -179,6 +179,8 @@ export async function loginWithOpenIdFinalize(body) {
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
     }
+    
+
 
     let userId = null;
     accountDb.transaction(() => {
@@ -186,6 +188,7 @@ export async function loginWithOpenIdFinalize(body) {
         'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
         [''],
       );
+      let userId = null;
       if (countUsersWithUserName === 0) {
         userId = uuid.v4();
         accountDb.mutate(
@@ -197,33 +200,32 @@ export async function loginWithOpenIdFinalize(body) {
             'ADMIN',
           ],
         );
+  
+        const userFromPasswordMethod = getUserByUsername('');
+        if (userFromPasswordMethod) {
+          transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
+        }
+      } else {
+        let { id: userIdFromDb, display_name: displayName } =
+          accountDb.first(
+            'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
+            [identity],
+          ) || {};
+  
+        if (userIdFromDb == null) {
+          return { error: 'openid-grant-failed' };
+        }
+  
+        if (!displayName && userInfo.name) {
+          accountDb.mutate('UPDATE users set display_name = ? WHERE id = ?', [
+            userInfo.name,
+            userIdFromDb,
+          ]);
+        }
+  
+        userId = userIdFromDb;
       }
     });
-
-      const userFromPasswordMethod = getUserByUsername('');
-      if (userFromPasswordMethod) {
-        transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
-      }
-    } else {
-      let { id: userIdFromDb, display_name: displayName } =
-        accountDb.first(
-          'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
-          [identity],
-        ) || {};
-
-      if (userIdFromDb == null) {
-        return { error: 'openid-grant-failed' };
-      }
-
-      if (!displayName && userInfo.name) {
-        accountDb.mutate('UPDATE users set display_name = ? WHERE id = ?', [
-          userInfo.name,
-          userIdFromDb,
-        ]);
-      }
-
-      userId = userIdFromDb;
-    }
 
     const token = uuid.v4();
 
