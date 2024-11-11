@@ -82,7 +82,8 @@ app.get('/config', async (req, res) => {
 app.get('/callback', async (req, res) => {
   let { error, url } = await loginWithOpenIdFinalize(req.query);
   if (error) {
-    res.status(400).send({ error });
+    console.error('OpenID Callback Error:', error);
+    res.status(400).send({ status: 'error', reason: 'Invalid request' });
     return;
   }
 
