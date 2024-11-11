@@ -86,10 +86,17 @@ export function insertUser(userId, userName, displayName, enabled, role) {
 }
 
 export function updateUser(userId, userName, displayName, enabled) {
-  getAccountDb().mutate(
-    'UPDATE users SET user_name = ?, display_name = ?, enabled = ? WHERE id = ?',
-    [userName, displayName, enabled, userId],
-  );
+  if (!userId || !userName) {
+    throw new Error('Invalid user parameters');
+  }
+  try {
+    getAccountDb().mutate(
+      'UPDATE users SET user_name = ?, display_name = ?, enabled = ? WHERE id = ?',
+      [userName, displayName, enabled, userId],
+    );
+  } catch (error) {
+    throw new Error(`Failed to update user: ${error.message}`);
+  }
 }
 
 export function updateUserWithRole(
