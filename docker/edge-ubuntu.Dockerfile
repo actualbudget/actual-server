@@ -15,7 +15,6 @@ RUN curl -L -o /tmp/desktop-client.zip --header "Authorization: Bearer ${GITHUB_
 RUN unzip /tmp/desktop-client.zip -d /public
 
 FROM node:18-bookworm-slim as prod
-RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=actual
 ARG USER_UID=1001
@@ -31,7 +30,6 @@ COPY --from=base /public /public
 COPY package.json app.js ./
 COPY src ./src
 COPY migrations ./migrations
-ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 ENV ACTUAL_WEB_ROOT=/public
 EXPOSE 5006
 CMD ["node", "app.js"]
