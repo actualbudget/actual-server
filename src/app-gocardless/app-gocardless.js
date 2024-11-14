@@ -1,4 +1,3 @@
-import { isAxiosError } from 'axios';
 import express from 'express';
 import path from 'path';
 import { inspect } from 'util';
@@ -237,7 +236,7 @@ app.post(
             error_code: 'NORDIGEN_ERROR',
           });
           break;
-        case isAxiosError(error):
+        case error.isAxiosError:
           console.log(
             'Something went wrong',
             inspect(error.response?.data || error, { depth: null }),
