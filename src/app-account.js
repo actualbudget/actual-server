@@ -40,13 +40,13 @@ app.get('/needs-bootstrap', (req, res) => {
 });
 
 app.post('/bootstrap', async (req, res) => {
-  let { error } = await bootstrap(req.body);
+  let boot = await bootstrap(req.body);
 
-  if (error) {
-    res.status(400).send({ status: 'error', reason: error });
+  if (boot?.error) {
+    res.status(400).send({ status: 'error', reason: boot?.error });
     return;
   }
-  res.send({ status: 'ok' });
+  res.send({ status: 'ok', data: boot });
 });
 
 app.get('/login-methods', (req, res) => {

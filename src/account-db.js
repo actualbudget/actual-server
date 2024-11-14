@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import openDatabase from './db.js';
 import config from './load-config.js';
 import * as bcrypt from 'bcrypt';
-import { bootstrapPassword } from './accounts/password.js';
+import { bootstrapPassword, loginWithPassword } from './accounts/password.js';
 import { bootstrapOpenId } from './accounts/openid.js';
 
 let _accountDb;
@@ -100,7 +100,7 @@ export async function bootstrap(loginSettings) {
     }
 
     accountDb.mutate('COMMIT');
-    return {};
+    return passEnabled ? loginWithPassword(loginSettings.password) : {};
   } catch (error) {
     accountDb.mutate('ROLLBACK');
     throw error;
