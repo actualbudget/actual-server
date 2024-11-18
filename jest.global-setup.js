@@ -2,7 +2,9 @@ import getAccountDb from './src/account-db.js';
 import runMigrations from './src/migrations.js';
 
 const GENERIC_ADMIN_ID = 'genericAdmin';
+const GENERIC_USER_ID = 'genericUser';
 const ADMIN_ROLE_ID = 'ADMIN';
+const BASIC_ROLE_ID = 'BASIC';
 
 const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   const missingParams = [];
@@ -80,6 +82,11 @@ export default async function setup() {
       ['valid-token-admin', NEVER_EXPIRES, 'genericAdmin'],
     );
 
+    await db.mutate(
+      'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
+      ['valid-token-user', NEVER_EXPIRES, 'genericUser'],
+    );
+
     await db.mutate('COMMIT');
   } catch (error) {
     await db.mutate('ROLLBACK');
@@ -88,4 +95,6 @@ export default async function setup() {
 
   setSessionUser('genericAdmin');
   setSessionUser('genericAdmin', 'valid-token-admin');
+
+  createUser(GENERIC_USER_ID, 'user', BASIC_ROLE_ID, 1);
 }

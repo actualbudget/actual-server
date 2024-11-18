@@ -192,6 +192,37 @@ describe('FilesService', () => {
     );
   });
 
+  test('find should return only files accessible to the user', () => {
+    filesService.set(
+      new File({
+        id: crypto.randomBytes(16).toString('hex'),
+        groupId: 'group2',
+        syncVersion: 1,
+        name: 'file2',
+        encryptMeta: '{"key":"value2"}',
+        deleted: false,
+        owner: 'genericAdmin',
+      }),
+    );
+
+    filesService.set(
+      new File({
+        id: crypto.randomBytes(16).toString('hex'),
+        groupId: 'group2',
+        syncVersion: 1,
+        name: 'file2',
+        encryptMeta: '{"key":"value2"}',
+        deleted: false,
+        owner: 'genericUser',
+      }),
+    );
+
+    expect(filesService.find({ userId: 'genericUser' })).toHaveLength(1);
+    expect(
+      filesService.find({ userId: 'genericAdmin' }).length,
+    ).toBeGreaterThan(1);
+  });
+
   test.each([['update-group', null]])(
     'update should modify a single attribute with groupId = $groupId',
     (newGroupId) => {

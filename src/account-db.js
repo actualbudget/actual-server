@@ -108,10 +108,6 @@ export async function bootstrap(loginSettings) {
 }
 
 export function isAdmin(userId) {
-  const user =
-    getAccountDb().first('SELECT owner FROM users WHERE id = ?', [userId]) ||
-    {};
-  if (user?.owner === 1) return true;
   return hasPermission(userId, 'ADMIN');
 }
 

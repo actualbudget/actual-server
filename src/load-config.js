@@ -53,6 +53,7 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
+  loginMethod: 'password',
   // assume local networks are trusted for header authentication
   trustedProxies: [
     '10.0.0.0/8',
@@ -78,7 +79,6 @@ let defaultConfig = {
   projectRoot,
   multiuser: false,
   token_expiration: 'never',
-  loginMethod: 'password',
 };
 
 /** @type {import('./config-types.js').Config} */
