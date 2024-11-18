@@ -124,7 +124,7 @@ describe('FilesService', () => {
   );
 
   test('find should return a list of files', () => {
-    const files = filesService.find();
+    const files = filesService.find({ userId: 'genericAdmin' });
     expect(files.length).toBe(1);
     expect(files[0]).toEqual(
       new File({
@@ -153,11 +153,14 @@ describe('FilesService', () => {
       }),
     );
     // Make sure that the file was inserted
-    const allFiles = filesService.find();
+    const allFiles = filesService.find({ userId: 'genericAdmin' });
     expect(allFiles.length).toBe(2);
 
     // Limit the number of files returned
-    const limitedFiles = filesService.find({ limit: 1 });
+    const limitedFiles = filesService.find({
+      userId: 'genericAdmin',
+      limit: 1,
+    });
     expect(limitedFiles.length).toBe(1);
   });
 

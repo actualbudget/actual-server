@@ -121,8 +121,8 @@ class FilesService {
     );
   }
 
-  find({ userId = null, limit = 1000 } = {}) {
-    const canSeeAll = userId === null || isAdmin(userId);
+  find({ userId, limit = 1000 }) {
+    const canSeeAll = isAdmin(userId);
 
     return (
       canSeeAll
