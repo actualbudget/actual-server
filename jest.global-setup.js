@@ -50,7 +50,7 @@ const setSessionUser = (userId, token = 'valid-token') => {
       throw new Error(`Session not found for token: ${token}`);
     }
 
-    getAccountDb().mutate('UPDATE sessions SET user_id = ? WHERE token = ?', [
+    db.mutate('UPDATE sessions SET user_id = ? WHERE token = ?', [
       userId,
       token,
     ]);
