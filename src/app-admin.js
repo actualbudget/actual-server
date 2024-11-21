@@ -186,7 +186,7 @@ app.get('/access', validateSessionMiddleware, (req, res) => {
     granted: 0,
   };
 
-  if (!isAdmin(res.locals.user_id) && granted === 0) {
+  if (granted === 0 && !isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'forbidden',
