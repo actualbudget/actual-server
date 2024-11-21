@@ -206,7 +206,7 @@ debug(`using data directory ${finalConfig.dataDir}`);
 debug(`using server files directory ${finalConfig.serverFiles}`);
 debug(`using user files directory ${finalConfig.userFiles}`);
 debug(`using web root directory ${finalConfig.webRoot}`);
-debug(`using login method ${finalConfig.loginMethod ?? 'password'}`);
+debug(`using login method ${finalConfig.loginMethod}`);
 debug(`using trusted proxies ${finalConfig.trustedProxies.join(', ')}`);
 
 if (finalConfig.https) {

@@ -263,7 +263,7 @@ export async function loginWithOpenIdFinalize(body) {
       expiration =
         Math.floor(Date.now() / 1000) + finalConfig.token_expiration * 60;
     } else {
-      expiration = TOKEN_EXPIRATION_NEVER;
+      expiration = Math.floor(Date.now() / 1000) + 10 * 60;
     }
 
     accountDb.mutate(

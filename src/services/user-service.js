@@ -58,18 +58,6 @@ export function getFileOwnerId(fileId) {
   return owner;
 }
 
-export function getFileOwnerById(fileId) {
-  const { id, userName, displayName } =
-    getAccountDb().first(
-      `SELECT users.id, users.user_name userName, users.display_name as displayName
-       FROM files
-       JOIN users ON users.id = files.owner
-       WHERE files.id = ?`,
-      [fileId],
-    ) || {};
-  return { id, userName, displayName };
-}
-
 export function getAllUsers() {
   return getAccountDb().all(
     `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(owner,0) as owner, role

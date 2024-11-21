@@ -10,10 +10,10 @@ import {
   getLoginMethod,
   listLoginMethods,
   getUserInfo,
+  getActiveLoginMethod,
 } from './account-db.js';
 import { changePassword, loginWithPassword } from './accounts/password.js';
 import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid.js';
-import config from './load-config.js';
 
 let app = express();
 app.use(express.json());
@@ -34,7 +34,7 @@ app.get('/needs-bootstrap', (req, res) => {
     data: {
       bootstrapped: !needsBootstrap(),
       loginMethods: listLoginMethods(),
-      multiuser: config.multiuser,
+      multiuser: getActiveLoginMethod() === 'openid',
     },
   });
 });

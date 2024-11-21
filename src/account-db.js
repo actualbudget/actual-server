@@ -32,6 +32,13 @@ export function listLoginMethods() {
   }));
 }
 
+export function getActiveLoginMethod() {
+  let accountDb = getAccountDb();
+  let { method } =
+    accountDb.first('SELECT method FROM auth WHERE active = 1') || {};
+  return method;
+}
+
 /*
  * Get the Login Method in the following order
  * req (the frontend can say which method in the case it wants to resort to forcing password auth)
@@ -128,35 +135,30 @@ export async function enableOpenID(loginSettings) {
   getAccountDb().mutate('DELETE FROM sessions');
 }
 
-export async function disableOpenID(
-  loginSettings,
-  checkForOldPassword = false,
-) {
+export async function disableOpenID(loginSettings) {
   if (!loginSettings || !loginSettings.password) {
     return { error: 'invalid-login-settings' };
   }
 
-  if (checkForOldPassword) {
-    let accountDb = getAccountDb();
-    const { extra_data: passwordHash } =
-      accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
-        'password',
-      ]) || {};
+  let accountDb = getAccountDb();
+  const { extra_data: passwordHash } =
+    accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
+      'password',
+    ]) || {};
 
-    if (!passwordHash) {
+  if (!passwordHash) {
+    return { error: 'invalid-password' };
+  }
+
+  if (!loginSettings?.password) {
+    return { error: 'invalid-password' };
+  }
+
+  if (passwordHash) {
+    let confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
+
+    if (!confirmed) {
       return { error: 'invalid-password' };
-    }
-
-    if (!loginSettings?.password) {
-      return { error: 'invalid-password' };
-    }
-
-    if (passwordHash) {
-      let confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
-
-      if (!confirmed) {
-        return { error: 'invalid-password' };
-      }
     }
   }
 

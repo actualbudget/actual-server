@@ -179,9 +179,25 @@ app.delete('/users', validateSessionMiddleware, async (req, res) => {
 app.get('/access', validateSessionMiddleware, (req, res) => {
   const fileId = req.query.fileId;
 
+  const { granted } = UserService.checkFilePermission(
+    fileId,
+    res.locals.user_id,
+  ) || {
+    granted: 0,
+  };
+
+  if (!isAdmin(res.locals.user_id) && granted === 0) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'permission-not-found',
+    });
+    return false;
+  }
+
   const fileIdInDb = UserService.getFileById(fileId);
   if (!fileIdInDb) {
-    res.status(400).send({
+    res.status(404).send({
       status: 'error',
       reason: 'invalid-file-id',
       details: 'File not found at server',
@@ -222,7 +238,7 @@ app.post('/access', (req, res) => {
 
   const fileIdInDb = UserService.getFileById(userAccess.fileId);
   if (!fileIdInDb) {
-    res.status(400).send({
+    res.status(404).send({
       status: 'error',
       reason: 'invalid-file-id',
       details: 'File not found at server',
@@ -276,7 +292,7 @@ app.delete('/access', (req, res) => {
 
   const fileIdInDb = UserService.getFileById(fileId);
   if (!fileIdInDb) {
-    res.status(400).send({
+    res.status(404).send({
       status: 'error',
       reason: 'invalid-file-id',
       details: 'File not found at server',
@@ -321,7 +337,7 @@ app.get('/access/users', validateSessionMiddleware, async (req, res) => {
 
   const fileIdInDb = UserService.getFileById(fileId);
   if (!fileIdInDb) {
-    res.status(400).send({
+    res.status(404).send({
       status: 'error',
       reason: 'invalid-file-id',
       details: 'File not found at server',
@@ -357,7 +373,7 @@ app.post(
 
     const fileIdInDb = UserService.getFileById(newUserOwner.fileId);
     if (!fileIdInDb) {
-      res.status(400).send({
+      res.status(404).send({
         status: 'error',
         reason: 'invalid-file-id',
         details: 'File not found at server',
