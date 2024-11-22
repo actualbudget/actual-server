@@ -190,9 +190,6 @@ export async function loginWithOpenIdFinalize(body) {
     let userId = null;
     try {
       accountDb.transaction(() => {
-        // Lock the users table to prevent race conditions
-        accountDb.mutate('BEGIN EXCLUSIVE TRANSACTION');
-
         let { countUsersWithUserName } = accountDb.first(
           'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
           [''],
