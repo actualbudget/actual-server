@@ -8,8 +8,8 @@ export default {
 
   // It has been reported that valueDate is more accurate than booking date
   // when it is provided
-  normalizeTransaction(transaction, _booked) {
-    transaction.date = transaction.valueDate ?? transaction.bookingDate;
+  normalizeTransaction(transaction, booked) {
+    transaction.bookingDate = transaction.valueDate ?? transaction.bookingDate;
 
     return Fallback.normalizeTransaction(transaction, booked);
   },
