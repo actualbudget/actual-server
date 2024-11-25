@@ -38,8 +38,7 @@ export const up = async function () {
     );
 
     let sessionRow = accountDb.first(
-      'SELECT * FROM sessions WHERE auth_method = ?',
-      ['password'],
+      'SELECT * FROM sessions WHERE auth_method IS NULL',
     );
 
     let token = sessionRow ? sessionRow.token : uuid.v4();
@@ -51,8 +50,8 @@ export const up = async function () {
     );
 
     accountDb.mutate(
-      'UPDATE sessions SET user_id = ?, expires_at = ? WHERE token = ?',
-      [userId, -1, token],
+      'UPDATE sessions SET user_id = ?, expires_at = ?, auth_method = ? WHERE token = ?',
+      [userId, -1, 'password', token],
     );
   });
 };
