@@ -1,6 +1,6 @@
 import { ServerOptions } from 'https';
 
-type LoginMethod = 'password' | 'header';
+type LoginMethod = 'password' | 'header' | 'openid';
 
 export interface Config {
   mode: 'test' | 'development';
@@ -24,4 +24,19 @@ export interface Config {
     syncEncryptedFileSizeLimitMB: number;
     fileSizeLimitMB: number;
   };
+  openId?: {
+    issuer:
+      | string
+      | {
+          name: string;
+          authorization_endpoint: string;
+          token_endpoint: string;
+          userinfo_endpoint: string;
+        };
+    client_id: string;
+    client_secret: string;
+    server_hostname: string;
+  };
+  multiuser: boolean;
+  token_expiration?: 'never' | 'openid-provider' | number;
 }

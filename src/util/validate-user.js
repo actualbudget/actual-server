@@ -1,12 +1,15 @@
-import { getSession } from '../account-db.js';
 import config from '../load-config.js';
 import ipaddr from 'ipaddr.js';
+import { getSession } from '../account-db.js';
+
+export const TOKEN_EXPIRATION_NEVER = -1;
+const MS_PER_SECOND = 1000;
 
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-export default function validateUser(req, res) {
+export default function validateSession(req, res) {
   let { token } = req.body || {};
 
   if (!token) {
@@ -21,6 +24,18 @@ export default function validateUser(req, res) {
       status: 'error',
       reason: 'unauthorized',
       details: 'token-not-found',
+    });
+    return null;
+  }
+
+  if (
+    session.expires_at !== TOKEN_EXPIRATION_NEVER &&
+    session.expires_at * MS_PER_SECOND <= Date.now()
+  ) {
+    res.status(401);
+    res.send({
+      status: 'error',
+      reason: 'token-expired',
     });
     return null;
   }
