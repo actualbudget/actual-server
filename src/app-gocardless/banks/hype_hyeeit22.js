@@ -11,8 +11,6 @@ export default {
   accessValidForDays: 90,
 
   normalizeTransaction(transaction, _booked) {
-    // PREFER valueDate
-    transaction.bookingDate = transaction.valueDate ?? transaction.bookingDate;
 
     /** Online card payments - identified by "crd" transaction code
      *  always start with PAGAMENTO PRESSO + <payee name>
@@ -36,9 +34,10 @@ export default {
       // keep only {payment_info} portion of remittance info
       // NOTE: if {payee_name} contains dashes (unlikely / impossible?), this probably gets bugged!
       let infoIdx =
-        transaction.remittanceInformationUnstructured.indexOf(' - ') + 1;
+        transaction.remittanceInformationUnstructured.indexOf(' - ') + 3;
       transaction.remittanceInformationUnstructured =
-        transaction.remittanceInformationUnstructured.slice(infoIdx).trim();
+        infoIdx == -1 ? transaction.remittanceInformationUnstructured :
+          transaction.remittanceInformationUnstructured.slice(infoIdx).trim();
     }
     /**
      * CONVERT ESCAPED UNICODE TO CODEPOINTS
@@ -72,7 +71,7 @@ export default {
     return {
       ...transaction,
       payeeName: formatPayeeName(transaction),
-      date: transaction.bookingDate || transaction.valueDate,
+      date: transaction.valueDate || transaction.bookingDate,
     };
   },
 };
