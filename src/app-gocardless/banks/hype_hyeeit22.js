@@ -11,7 +11,6 @@ export default {
   accessValidForDays: 90,
 
   normalizeTransaction(transaction, _booked) {
-
     /** Online card payments - identified by "crd" transaction code
      *  always start with PAGAMENTO PRESSO + <payee name>
      */
@@ -36,8 +35,9 @@ export default {
       let infoIdx =
         transaction.remittanceInformationUnstructured.indexOf(' - ') + 3;
       transaction.remittanceInformationUnstructured =
-        infoIdx == -1 ? transaction.remittanceInformationUnstructured :
-          transaction.remittanceInformationUnstructured.slice(infoIdx).trim();
+        infoIdx == -1
+          ? transaction.remittanceInformationUnstructured
+          : transaction.remittanceInformationUnstructured.slice(infoIdx).trim();
     }
     /**
      * CONVERT ESCAPED UNICODE TO CODEPOINTS
