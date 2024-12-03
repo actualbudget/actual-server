@@ -7,5 +7,4 @@ export default {
   institutionIds: ['HANSEATIC_HSTBDEHH'],
 
   accessValidForDays: 89,
-
 };
