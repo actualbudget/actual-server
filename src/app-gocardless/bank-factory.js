@@ -28,6 +28,7 @@ import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-hela
 import SpkWormsAlzeyRiedMalade51wor from './banks/spk-worms-alzey-ried-malade51wor.js';
 import SwedbankHabaLV22 from './banks/swedbank-habalv22.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
+import HanseaticBank from './banks/HANSEATIC_HSTBDEHH.js';
 
 export const banks = [
   AbancaCaglesmm,
@@ -59,6 +60,7 @@ export const banks = [
   SpkWormsAlzeyRiedMalade51wor,
   SwedbankHabaLV22,
   VirginNrnbgb22,
+  HanseaticBank,
 ];
 
 export default (institutionId) =>
