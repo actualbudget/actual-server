@@ -9,6 +9,7 @@ import CBCcregbebb from './banks/cbc_cregbebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
 import EasybankBawaatww from './banks/easybank-bawaatww.js';
 import Fortuneo from './banks/FORTUNEO_FTNOFRP1XXX.js';
+import HanseaticBank from './banks/HANSEATIC_HSTBDEHH.js';
 import IngIngbrobu from './banks/ing-ingbrobu.js';
 import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
@@ -28,7 +29,6 @@ import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-hela
 import SpkWormsAlzeyRiedMalade51wor from './banks/spk-worms-alzey-ried-malade51wor.js';
 import SwedbankHabaLV22 from './banks/swedbank-habalv22.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
-import HanseaticBank from './banks/HANSEATIC_HSTBDEHH.js';
 
 export const banks = [
   AbancaCaglesmm,
@@ -42,6 +42,7 @@ export const banks = [
   DanskeBankDabNO22,
   EasybankBawaatww,
   Fortuneo,
+  HanseaticBank,
   IngIngbrobu,
   IngIngddeff,
   IngPlIngbplpw,
@@ -60,7 +61,6 @@ export const banks = [
   SpkWormsAlzeyRiedMalade51wor,
   SwedbankHabaLV22,
   VirginNrnbgb22,
-  HanseaticBank,
 ];
 
 export default (institutionId) =>
