@@ -7,7 +7,6 @@ RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2;
 RUN yarn workspaces focus --all --production
 
 FROM node:18-bookworm-slim as prod
-RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=actual
 ARG USER_UID=1001
@@ -22,6 +21,5 @@ COPY --from=base /app/node_modules /app/node_modules
 COPY package.json app.js ./
 COPY src ./src
 COPY migrations ./migrations
-ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 EXPOSE 5006
 CMD ["node", "app.js"]

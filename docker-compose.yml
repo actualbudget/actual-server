@@ -20,3 +20,6 @@ services:
       # '/data' is the path Actual will look for its files in by default, so leave that as-is.
       - ./actual-data:/data
     restart: unless-stopped
+    # forward signals to Node.js for faster container shutdown
+    # see https://docs.docker.com/reference/compose-file/services/#init
+    init: true
