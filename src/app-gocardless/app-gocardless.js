@@ -14,7 +14,7 @@ import { handleError } from './util/handle-error.js';
 import { sha256String } from '../util/hash.js';
 import {
   requestLoggerMiddleware,
-  validateUserMiddleware,
+  validateSessionMiddleware,
 } from '../util/middlewares.js';
 
 const app = express();
@@ -26,7 +26,7 @@ app.get('/link', function (req, res) {
 
 export { app as handlers };
 app.use(express.json());
-app.use(validateUserMiddleware);
+app.use(validateSessionMiddleware);
 
 app.post('/status', async (req, res) => {
   res.send({
@@ -201,8 +201,19 @@ app.post(
         });
       }
     } catch (error) {
+      const headers = error.details?.response?.headers ?? {};
+
+      const rateLimitHeaders = Object.fromEntries(
+        Object.entries(headers).filter(([key]) =>
+          key.startsWith('http_x_ratelimit'),
+        ),
+      );
+
       const sendErrorResponse = (data) =>
-        res.send({ status: 'ok', data: { ...data, details: error.details } });
+        res.send({
+          status: 'ok',
+          data: { ...data, details: error.details, rateLimitHeaders },
+        });
 
       switch (true) {
         case error instanceof RequisitionNotLinked:
