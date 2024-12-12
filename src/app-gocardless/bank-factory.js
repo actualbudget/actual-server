@@ -68,6 +68,7 @@ export default (institutionId) =>
   IntegrationBank;
 
 export const BANKS_WITH_LIMITED_HISTORY = [
+  'AGRICOLE_NORMANDIE_AGRIFRPPXXX',
   'BANCA_AIDEXA_AIDXITMM',
   'BANCA_PATRIMONI_SENVITT1',
   'BANCA_SELLA_SELBIT2B',
