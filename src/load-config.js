@@ -54,7 +54,7 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'dataDir' | 'serverFiles' | 'userFiles'>} */
 let defaultConfig = {
   loginMethod: 'password',
-  allowedLoginMethods: ['password', 'header'],
+  allowedLoginMethods: ['password', 'header', 'openid'],
   // assume local networks are trusted
   trustedProxies: [
     '10.0.0.0/8',

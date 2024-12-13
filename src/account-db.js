@@ -53,9 +53,12 @@ export function getLoginMethod(req) {
     return req.body.loginMethod;
   }
 
-  const activeMethod = getActiveLoginMethod();
+  if (config.loginMethod) {
+    return config.loginMethod;
+  }
 
-  return config.loginMethod || activeMethod || 'password';
+  const activeMethod = getActiveLoginMethod();
+  return activeMethod || 'password';
 }
 
 export async function bootstrap(loginSettings) {
