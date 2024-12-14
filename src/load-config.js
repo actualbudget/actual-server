@@ -224,6 +224,11 @@ debug(`using user files directory ${finalConfig.userFiles}`);
 debug(`using web root directory ${finalConfig.webRoot}`);
 debug(`using login method ${finalConfig.loginMethod}`);
 debug(`using trusted proxies ${finalConfig.trustedProxies.join(', ')}`);
+debug(
+  `using trusted auth proxies ${
+    finalConfig.trustedAuthProxies?.join(', ') ?? 'same as trusted proxies'
+  }`,
+);
 
 if (finalConfig.https) {
   debug(`using https key: ${'*'.repeat(finalConfig.https.key.length)}`);
