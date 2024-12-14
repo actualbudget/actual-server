@@ -14,7 +14,6 @@ import {
 } from './account-db.js';
 import { changePassword, loginWithPassword } from './accounts/password.js';
 import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid.js';
-import config from './load-config.js';
 
 let app = express();
 app.use(express.json());
@@ -60,10 +59,6 @@ app.post('/login', async (req, res) => {
   let loginMethod = getLoginMethod(req);
   console.log('Logging in via ' + loginMethod);
   let tokenRes = null;
-  if (!config.allowedLoginMethods.includes(loginMethod)) {
-    res.send({ status: 'error', reason: 'login-method-unsupported' });
-    return;
-  }
   switch (loginMethod) {
     case 'header': {
       let headerVal = req.get('x-actual-password') || '';

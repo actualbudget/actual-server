@@ -48,7 +48,8 @@ export function getActiveLoginMethod() {
 export function getLoginMethod(req) {
   if (
     typeof req !== 'undefined' &&
-    (req.body || { loginMethod: null }).loginMethod
+    (req.body || { loginMethod: null }).loginMethod &&
+    config.allowedLoginMethods.includes(req.body.loginMethod)
   ) {
     return req.body.loginMethod;
   }
