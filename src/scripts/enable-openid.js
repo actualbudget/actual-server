@@ -10,7 +10,7 @@ if (needsBootstrap()) {
     'It looks like you don’t have a password set yet. Password is the fallback authentication method when using OpenID. Execute the command reset-password before using this command!',
   );
 
-  process.exit(-1);
+  process.exit(1);
 } else {
   console.log('Enabling openid based on Environment variables or config.json');
   try {
@@ -19,7 +19,7 @@ if (needsBootstrap()) {
 
     if (loginMethod === 'openid') {
       console.log('OpenID already enabled.');
-      process.exit(1);
+      process.exit(0);
     }
     const { error } = (await enableOpenID(finalConfig)) || {};
 
@@ -28,7 +28,7 @@ if (needsBootstrap()) {
       console.log(
         'Please report this as an issue: https://github.com/actualbudget/actual-server/issues',
       );
-      process.exit(1);
+      process.exit(2);
     }
     console.log('OpenID enabled!');
     console.log(
@@ -39,6 +39,6 @@ if (needsBootstrap()) {
     console.log(
       'Please report this as an issue: https://github.com/actualbudget/actual-server/issues',
     );
-    process.exit(1);
+    process.exit(2);
   }
 }

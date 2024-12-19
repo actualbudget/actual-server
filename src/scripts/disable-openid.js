@@ -6,7 +6,7 @@ import {
 import { promptPassword } from '../util/prompt.js';
 
 if (needsBootstrap()) {
-  console.log('System needs to be bootstrapped first. Please set up the server before managing OpenID.');
+  console.log('System needs to be bootstrapped first. OpenID is not enabled.');
 
   process.exit(1);
 } else {
@@ -17,7 +17,7 @@ if (needsBootstrap()) {
 
     if (loginMethod === 'password') {
       console.log('OpenID already disabled.');
-      process.exit(1);
+      process.exit(0);
     }
 
     const password = await promptPassword();
@@ -28,7 +28,7 @@ if (needsBootstrap()) {
       console.log(
         'Please report this as an issue: https://github.com/actualbudget/actual-server/issues',
       );
-      process.exit(1);
+      process.exit(2);
     }
     console.log('OpenID disabled!');
     console.log(
@@ -39,6 +39,6 @@ if (needsBootstrap()) {
     console.log(
       'Please report this as an issue: https://github.com/actualbudget/actual-server/issues',
     );
-    process.exit(1);
+    process.exit(2);
   }
 }
