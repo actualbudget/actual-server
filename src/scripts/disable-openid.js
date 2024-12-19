@@ -6,7 +6,7 @@ import {
 import { promptPassword } from '../util/prompt.js';
 
 if (needsBootstrap()) {
-  console.log('OpenId already disabled!');
+  console.log('System needs to be bootstrapped first. Please set up the server before managing OpenID.');
 
   process.exit(1);
 } else {
