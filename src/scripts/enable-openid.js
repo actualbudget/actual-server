@@ -25,10 +25,19 @@ if (needsBootstrap()) {
 
     if (error) {
       console.log('Error enabling openid:', error);
-      console.log(
-        'Please report this as an issue: https://github.com/actualbudget/actual-server/issues',
-      );
-      process.exit(2);
+      if (error === 'invalid-login-settings') {
+        console.log(
+          'Error configuring OpenID. Please verify that the configuration file or environment variables are correct.',
+        );
+
+        process.exit(1);
+      } else {
+        console.log(
+          'Please report this as an issue: https://github.com/actualbudget/actual-server/issues',
+        );
+
+        process.exit(2);
+      }
     }
     console.log('OpenID enabled!');
     console.log(
