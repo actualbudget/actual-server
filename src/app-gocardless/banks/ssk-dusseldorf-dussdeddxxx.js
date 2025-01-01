@@ -30,7 +30,7 @@ export default {
       transaction.remittanceInformationUnstructured ??
       transaction.remittanceInformationStructured ??
       transaction.remittanceInformationStructuredArray?.join(' ');
-    
+
     if (transaction.additionalInformation)
       remittanceInformationUnstructured +=
         ' ' + transaction.additionalInformation;
@@ -39,11 +39,11 @@ export default {
       transaction.ultimateCreditor ||
       transaction.creditorName ||
       transaction.debtorName;
-    
+
     transaction.creditorName = usefulCreditorName;
     transaction.remittanceInformationUnstructured =
       remittanceInformationUnstructured;
-    
+
     return {
       ...transaction,
       payeeName: formatPayeeName(transaction),
