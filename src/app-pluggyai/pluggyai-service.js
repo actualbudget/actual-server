@@ -51,6 +51,8 @@ export const pluggyaiService = {
             res.on('end', () => {
               if (res.statusCode === 403) {
                 reject(new Error('Forbidden'));
+              } else if (res.statusCode === 401) {
+                reject(new Error('Unauthorized'));
               } else {
                 try {
                   const results = JSON.parse(data);
@@ -98,6 +100,7 @@ export const pluggyaiService = {
         secretsService.set(SecretName.pluggyai_apiKey, pluggyApiKey);
       } catch (error) {
         console.error(`Error getting apiKey for Pluggy.ai account: ${error}`);
+        throw error;
       }
     }
   },
