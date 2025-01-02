@@ -14,7 +14,7 @@ export default {
       transaction.remittanceInformationStructuredArray?.join(' ');
 
     if (transaction.additionalInformation)
-      remittanceInformationUnstructured = 
+      remittanceInformationUnstructured =
         (remittanceInformationUnstructured ?? '') +
         ' ' +
         transaction.additionalInformation;
