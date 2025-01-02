@@ -7,16 +7,17 @@ export default {
   institutionIds: ['SSK_DUSSELDORF_DUSSDEDDXXX'],
 
   normalizeTransaction(transaction, _booked) {
-
+    // Prioritize unstructured information, falling back to structured formats
     let remittanceInformationUnstructured =
       transaction.remittanceInformationUnstructured ??
       transaction.remittanceInformationStructured ??
       transaction.remittanceInformationStructuredArray?.join(' ');
 
     if (transaction.additionalInformation)
-      remittanceInformationUnstructured = (remittanceInformationUnstructured ?? '') 
-      + ' ' 
-      + transaction.additionalInformation;
+      remittanceInformationUnstructured = 
+        (remittanceInformationUnstructured ?? '')
+        + ' ' 
+        + transaction.additionalInformation;
 
     const usefulCreditorName =
       transaction.ultimateCreditor ||
