@@ -15,9 +15,9 @@ export default {
 
     if (transaction.additionalInformation)
       remittanceInformationUnstructured = 
-        (remittanceInformationUnstructured ?? '')
-        + ' ' 
-        + transaction.additionalInformation;
+        (remittanceInformationUnstructured ?? '') +
+        ' ' +
+        transaction.additionalInformation;
 
     const usefulCreditorName =
       transaction.ultimateCreditor ||
