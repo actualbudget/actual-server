@@ -37,13 +37,6 @@ export default {
     transaction.debtorName = transaction.debtorName || payeeName;
     transaction.creditorName = transaction.creditorName || payeeName;
 
-    // There are anumber of superfluous keywords in the remittanceInformation.
-    // Remove them to aboid clutter in notes.
-    const keywordsToRemove = ['.EA, Betaalpas', ',PAS\\d{3}', 'NR:.+, '];
-    const regex = new RegExp(keywordsToRemove.join('|'), 'g');
-    transaction.remittanceInformationUnstructured =
-      remittanceInformationUnstructured.replace(regex, '').trim();
-
     return {
       ...transaction,
       payeeName: formatPayeeName(transaction),
