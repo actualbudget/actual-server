@@ -24,16 +24,14 @@ export default {
 
   normalizeTransaction(transaction, _booked) {
     // There is no remittanceInformationUnstructured, so we'll make it
-    let remittanceInformationUnstructured =
+    transaction.remittanceInformationUnstructured =
       transaction.remittanceInformationUnstructuredArray.join(', ');
 
     // Remove clutter to extract the payee from remittanceInformationUnstructured ...
     // ... when not otherwise provided.
-    const matches =
-      remittanceInformationUnstructured.match(/(?:Betaalpas|Google Pay)(.+),PAS/);
-    const payeeName = matches
-      ? matches[1].replace(/.+\*/, '').trim()
-      : undefined;
+    const payeeName = transaction.remittanceInformationUnstructuredArray
+      .map((el) => el.match(/^(?:.*\*)?(.+),PAS\d+$/))
+      .find((match) => match)?.[1];
     transaction.debtorName = transaction.debtorName || payeeName;
     transaction.creditorName = transaction.creditorName || payeeName;
 
