@@ -18,7 +18,7 @@ export default {
         payeeName:
           transaction.debtorName ||
           transaction.remittanceInformationUnstructured ||
-          "undefined",
+          'undefined',
         date: transaction.bookingDate || transaction.valueDate,
       };
     }
