@@ -18,7 +18,14 @@ export default {
     if (transaction.transactionId === 'NOTPROVIDED') {
       if (booked) {
         transaction.transactionId = transaction.internalTransactionId;
+
+        //Some corner case transactions have a special field called `proprietaryBankTransactionCode`, this need to be copied to `remittanceInformationUnstructured`
+        if (transaction.proprietaryBankTransactionCode) {
+          transaction.remittanceInformationUnstructured =
+            transaction.proprietaryBankTransactionCode;
+        }
         if (
+          transaction.remittanceInformationUnstructured &&
           transaction.remittanceInformationUnstructured
             .toLowerCase()
             .includes('card no:')
@@ -32,7 +39,12 @@ export default {
         }
       } else {
         transaction.transactionId = null;
+        if (transaction.proprietaryBankTransactionCode) {
+          transaction.remittanceInformationUnstructured =
+            transaction.proprietaryBankTransactionCode;
+        }
         if (
+          transaction.remittanceInformationUnstructured &&
           transaction.remittanceInformationUnstructured
             .toLowerCase()
             .includes('card no:')
