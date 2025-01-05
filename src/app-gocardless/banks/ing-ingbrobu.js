@@ -20,7 +20,10 @@ export default {
         transaction.transactionId = transaction.internalTransactionId;
 
         //Some corner case transactions have a special field called `proprietaryBankTransactionCode`, this need to be copied to `remittanceInformationUnstructured`
-        if (transaction.proprietaryBankTransactionCode) {
+        if (
+          transaction.proprietaryBankTransactionCode &&
+          !transaction.remittanceInformationUnstructured
+        ) {
           transaction.remittanceInformationUnstructured =
             transaction.proprietaryBankTransactionCode;
         }
@@ -39,7 +42,11 @@ export default {
         }
       } else {
         transaction.transactionId = null;
-        if (transaction.proprietaryBankTransactionCode) {
+
+        if (
+          transaction.proprietaryBankTransactionCode &&
+          !transaction.remittanceInformationUnstructured
+        ) {
           transaction.remittanceInformationUnstructured =
             transaction.proprietaryBankTransactionCode;
         }
