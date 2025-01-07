@@ -30,7 +30,7 @@ export default {
     // Remove clutter to extract the payee from remittanceInformationUnstructured ...
     // ... when not otherwise provided.
     const payeeName = transaction.remittanceInformationUnstructuredArray
-      .map((el) => el.match(/^(?:.*\*)?(.+),PAS\d+$/))
+      .map((el) => el.match(/^(?:((Google|Apple) Pay)?.*\*)?(.+),PAS\d+$/))
       .find((match) => match)?.[1];
     transaction.debtorName = transaction.debtorName || payeeName;
     transaction.creditorName = transaction.creditorName || payeeName;
