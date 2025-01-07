@@ -1,4 +1,4 @@
-import IngPlIngbplpw from '../ing-pl-ingbplpw.js';
+import IngPlIngbplpw from '../ing_pl_ingbplpw.js';
 import { mockTransactionAmount } from '../../services/tests/fixtures.js';
 
 describe('IngPlIngbplpw', () => {

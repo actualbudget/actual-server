@@ -1,4 +1,4 @@
-import SandboxfinanceSfin0000 from '../sandboxfinance-sfin0000.js';
+import SandboxfinanceSfin0000 from '../sandboxfinance_sfin0000.js';
 
 describe('SandboxfinanceSfin0000', () => {
   describe('#normalizeAccount', () => {
