@@ -8,8 +8,6 @@ export default {
 
   institutionIds: ['REVOLUT_REVOLT21'],
 
-  accessValidForDays: 90,
-
   normalizeTransaction(transaction, _booked) {
     if (
       transaction.remittanceInformationUnstructuredArray[0].startsWith(

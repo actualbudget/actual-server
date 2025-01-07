@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['NBG_ETHNGRAAXXX'],
 
-  accessValidForDays: 90,
-
   normalizeAccount(account) {
     return {
       account_id: account.id,

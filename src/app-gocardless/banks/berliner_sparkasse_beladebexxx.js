@@ -9,8 +9,6 @@ export default {
 
   institutionIds: ['BERLINER_SPARKASSE_BELADEBEXXX'],
 
-  accessValidForDays: 90,
-
   normalizeAccount(account) {
     return {
       account_id: account.id,
