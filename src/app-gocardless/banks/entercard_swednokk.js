@@ -1,9 +1,6 @@
 import * as d from 'date-fns';
-import {
-  amountToInteger,
-  printIban,
-  sortByBookingDateOrValueDate,
-} from '../utils.js';
+
+import { amountToInteger } from '../utils.js';
 import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -31,10 +28,6 @@ export default {
       payeeName: formatPayeeName(transaction),
       date: d.format(d.parseISO(transaction.valueDate), 'yyyy-MM-dd'),
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
