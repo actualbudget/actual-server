@@ -16,7 +16,7 @@ export default {
     //For deduplication to work better, payeeName needs to be standardized
     //and converted from a pending transaction form ("payeeName":"Card no: xxxxxxxxxxxx1111"') to a booked transaction form ("payeeName":"Card no: Xxxx Xxxx Xxxx 1111")
     if (transaction.transactionId === 'NOTPROVIDED') {
-      //Some corner case transactions have a special field called `proprietaryBankTransactionCode`, this need to be copied to `remittanceInformationUnstructured`
+      //Some corner case transactions have the  `proprietaryBankTransactionCode` field, this need to be copied to `remittanceInformationUnstructured`
       if (
         transaction.proprietaryBankTransactionCode &&
         !transaction.remittanceInformationUnstructured
