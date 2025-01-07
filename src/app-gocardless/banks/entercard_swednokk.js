@@ -12,20 +12,6 @@ export default {
 
   accessValidForDays: 180,
 
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.name, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: `integration-${account.institution_id}`,
-      type: 'checking',
-    };
-  },
-
   normalizeTransaction(transaction, _booked) {
     // GoCardless's Entercard integration returns forex transactions with the
     // foreign amount in `transactionAmount`, but at least the amount actually

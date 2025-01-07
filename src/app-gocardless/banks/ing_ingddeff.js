@@ -11,18 +11,6 @@ export default {
 
   accessValidForDays: 180,
 
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: account.iban.slice(-4),
-      iban: account.iban,
-      name: [account.product, printIban(account)].join(' '),
-      official_name: account.product,
-      type: 'checking',
-    };
-  },
-
   normalizeTransaction(transaction, _booked) {
     const remittanceInformationMatch = /remittanceinformation:(.*)$/.exec(
       transaction.remittanceInformationUnstructured,

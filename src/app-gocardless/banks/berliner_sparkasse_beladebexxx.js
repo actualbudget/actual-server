@@ -11,18 +11,6 @@ export default {
 
   accessValidForDays: 180,
 
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: account.iban.slice(-4),
-      iban: account.iban,
-      name: [account.name, printIban(account)].join(' '),
-      official_name: account.product,
-      type: 'checking',
-    };
-  },
-
   /**
    * Following the GoCardless documentation[0] we should prefer `bookingDate`
    * here, though some of their bank integrations uses the date field

@@ -12,20 +12,6 @@ export default {
 
   accessValidForDays: 180,
 
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.product, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: account.product,
-      type: 'checking',
-    };
-  },
-
   normalizeTransaction(transaction, _booked) {
     const date =
       transaction.bookingDate ||
