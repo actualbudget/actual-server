@@ -9,6 +9,8 @@ export default {
 
   institutionIds: ['SANDBOXFINANCE_SFIN0000'],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

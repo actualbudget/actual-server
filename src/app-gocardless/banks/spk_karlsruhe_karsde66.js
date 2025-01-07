@@ -9,6 +9,8 @@ export default {
 
   institutionIds: ['SPK_KARLSRUHE_KARSDE66XXX'],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

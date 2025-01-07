@@ -9,6 +9,8 @@ export default {
 
   institutionIds: ['BANKINTER_BKBKESMM'],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

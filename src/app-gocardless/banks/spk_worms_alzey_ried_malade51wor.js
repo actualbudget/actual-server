@@ -8,6 +8,8 @@ export default {
 
   institutionIds: ['SPK_WORMS_ALZEY_RIED_MALADE51WOR'],
 
+  accessValidForDays: 180,
+
   normalizeTransaction(transaction, _booked) {
     const date = transaction.bookingDate || transaction.valueDate;
     if (!date) {

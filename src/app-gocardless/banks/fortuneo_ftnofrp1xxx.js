@@ -8,6 +8,8 @@ export default {
 
   institutionIds: ['FORTUNEO_FTNOFRP1XXX'],
 
+  accessValidForDays: 180,
+
   normalizeTransaction(transaction, _booked) {
     const date =
       transaction.bookingDate ||
