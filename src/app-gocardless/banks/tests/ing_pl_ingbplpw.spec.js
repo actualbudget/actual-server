@@ -66,7 +66,7 @@ describe('IngPlIngbplpw', () => {
               "transaction_total_days": "365",
             },
             "mask": "4321",
-            "name": "Current Account for Individuals (Retail) (XXX 4321)",
+            "name": "Current Account for Individuals (Retail) (XXX 4321) PLN",
             "official_name": "Current Account for Individuals (Retail)",
             "type": "checking",
           }
