@@ -10,7 +10,6 @@ export default {
     transaction.remittanceInformationUnstructured = fixupPayee(
       transaction.remittanceInformationUnstructured,
     );
-    console.log(transaction);
 
     return Fallback.normalizeTransaction(transaction, booked);
   },
