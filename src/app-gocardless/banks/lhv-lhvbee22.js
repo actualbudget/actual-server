@@ -22,9 +22,15 @@ export default {
     if (cardTxMatch) {
       transaction = {
         ...transaction,
-        bookingDate: cardTxMatch[2],
         creditorName: cardTxMatch[4].split('\\')[0].trim(),
       };
+
+      if (booked) {
+        transaction = {
+          ...transaction,
+          bookingDate: cardTxMatch[2],
+        };
+      }
     }
 
     return Fallback.normalizeTransaction(transaction, booked);
