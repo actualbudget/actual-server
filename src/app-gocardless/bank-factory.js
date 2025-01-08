@@ -3,6 +3,7 @@ import AbnamroAbnanl2a from './banks/abnamro_abnanl2a.js';
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
 import BancsabadellBsabesbb from './banks/bancsabadell-bsabesbbb.js';
 import BankinterBkbkesmm from './banks/bankinter-bkbkesmm.js';
+import BankOfIrelandB365 from './banks/bank_of_ireland_b365_bofiie2d.js';
 import Belfius from './banks/belfius_gkccbebb.js';
 import Berliner_Sparkasse_beladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 import BnpBeGebabebb from './banks/bnp-be-gebabebb.js';
@@ -31,6 +32,7 @@ import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import SpkWormsAlzeyRiedMalade51wor from './banks/spk-worms-alzey-ried-malade51wor.js';
+import SskDusseldorfDussdeddxxx from './banks/ssk-dusseldorf-dussdeddxxx.js';
 import SwedbankHabaLV22 from './banks/swedbank-habalv22.js';
 import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
 
@@ -40,6 +42,7 @@ export const banks = [
   AmericanExpressAesudef1,
   BancsabadellBsabesbb,
   BankinterBkbkesmm,
+  BankOfIrelandB365,
   Belfius,
   Berliner_Sparkasse_beladebexxx,
   BnpBeGebabebb,
@@ -67,6 +70,7 @@ export const banks = [
   SpkKarlsruhekarsde66,
   SpkMarburgBiedenkopfHeladef1mar,
   SpkWormsAlzeyRiedMalade51wor,
+  SskDusseldorfDussdeddxxx,
   SwedbankHabaLV22,
   VirginNrnbgb22,
 ];
