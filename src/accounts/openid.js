@@ -1,12 +1,20 @@
 import getAccountDb, { clearExpiredSessions } from '../account-db.js';
 import * as uuid from 'uuid';
-import { generators, Issuer } from 'openid-client';
+import * as openIdClient from 'openid-client';
 import finalConfig from '../load-config.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 import {
   getUserByUsername,
   transferAllFilesFromUser,
 } from '../services/user-service.js';
+import { webcrypto } from 'node:crypto';
+import fetch from 'node-fetch';
+
+/* eslint-disable-next-line no-undef */
+if (!globalThis.crypto) {
+  /* eslint-disable-next-line no-undef */
+  globalThis.crypto = webcrypto;
+}
 
 export async function bootstrapOpenId(config) {
   if (!('issuer' in config)) {
@@ -48,25 +56,87 @@ export async function bootstrapOpenId(config) {
 }
 
 async function setupOpenIdClient(config) {
-  let issuer =
-    typeof config.issuer === 'string'
-      ? await Issuer.discover(config.issuer)
-      : new Issuer({
-          issuer: config.issuer.name,
-          authorization_endpoint: config.issuer.authorization_endpoint,
-          token_endpoint: config.issuer.token_endpoint,
-          userinfo_endpoint: config.issuer.userinfo_endpoint,
-        });
+  let discovered;
+  if (typeof config.issuer === 'string') {
+    discovered = await openIdClient.discovery(
+      new URL(config.issuer),
+      config.client_id,
+      config.client_secret,
+    );
+  } else {
+    const serverMetadata = {
+      issuer: config.issuer.name,
+      authorization_endpoint: config.issuer.authorization_endpoint,
+      token_endpoint: config.issuer.token_endpoint,
+      userinfo_endpoint: config.issuer.userinfo_endpoint,
+    };
+    discovered = new openIdClient.Configuration(
+      serverMetadata,
+      config.client_id,
+      config.client_secret,
+    );
+  }
 
-  const client = new issuer.Client({
-    client_id: config.client_id,
-    client_secret: config.client_secret,
-    redirect_uri: new URL(
-      '/openid/callback',
-      config.server_hostname,
-    ).toString(),
-    validate_id_token: true,
-  });
+  const client = {
+    redirect_uris: [
+      new URL('/openid/callback', config.server_hostname).toString(),
+    ],
+    authorizationUrl(params) {
+      const urlObj = openIdClient.buildAuthorizationUrl(discovered, {
+        ...params,
+        redirect_uri: this.redirect_uris[0],
+      });
+      return urlObj.href;
+    },
+    async callback(redirectUri, params, checks) {
+      const currentUrl = new URL(redirectUri);
+      currentUrl.searchParams.set('code', params.code);
+      const tokens = await openIdClient.authorizationCodeGrant(
+        discovered,
+        currentUrl,
+        {
+          pkceCodeVerifier: checks.code_verifier,
+          idTokenExpected: true,
+        },
+      );
+      return {
+        access_token: tokens.access_token,
+        expires_at: tokens.expires_at,
+        claims: () => tokens.claims?.(),
+      };
+    },
+    async grant(grantParams) {
+      const currentUrl = new URL(this.redirect_uris[0]);
+      currentUrl.searchParams.set('code', grantParams.code);
+      currentUrl.searchParams.set('state', grantParams.state);
+      const tokens = await openIdClient.authorizationCodeGrant(
+        discovered,
+        currentUrl,
+        {
+          pkceCodeVerifier: grantParams.code_verifier,
+          expectedState: grantParams.state,
+          idTokenExpected: false,
+        },
+      );
+      return {
+        access_token: tokens.access_token,
+        expires_at: tokens.expires_at,
+        claims: () => tokens.claims?.(),
+      };
+    },
+    async userinfo(accessToken, sub = '') {
+      if (!config.authMethod || config.authMethod === 'openid') {
+        return openIdClient.fetchUserInfo(discovered, accessToken, sub);
+      } else {
+        const response = await fetch('https://api.github.com/user', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        return response.json();
+      }
+    },
+  };
 
   return client;
 }
@@ -102,9 +172,11 @@ export async function loginWithOpenIdSetup(returnUrl) {
     return { error: 'openid-setup-failed' };
   }
 
-  const state = generators.state();
-  const code_verifier = generators.codeVerifier();
-  const code_challenge = generators.codeChallenge(code_verifier);
+  const state = openIdClient.randomState();
+  const code_verifier = openIdClient.randomPKCECodeVerifier();
+  const code_challenge = await openIdClient.calculatePKCECodeChallenge(
+    code_verifier,
+  );
 
   const now_time = Date.now();
   const expiry_time = now_time + 300 * 1000;
@@ -171,7 +243,6 @@ export async function loginWithOpenIdFinalize(body) {
 
   try {
     let tokenSet = null;
-
     if (!config.authMethod || config.authMethod === 'openid') {
       const params = { code: body.code, state: body.state };
       tokenSet = await client.callback(client.redirect_uris[0], params, {
@@ -184,9 +255,12 @@ export async function loginWithOpenIdFinalize(body) {
         code: body.code,
         redirect_uri: client.redirect_uris[0],
         code_verifier,
+        state: body.state,
       });
     }
+
     const userInfo = await client.userinfo(tokenSet.access_token);
+
     const identity =
       userInfo.preferred_username ??
       userInfo.login ??
@@ -207,7 +281,6 @@ export async function loginWithOpenIdFinalize(body) {
         );
         if (countUsersWithUserName === 0) {
           userId = uuid.v4();
-          // Check if user was created by another transaction
           const existingUser = accountDb.first(
             'SELECT id FROM users WHERE user_name = ?',
             [identity],
@@ -256,12 +329,11 @@ export async function loginWithOpenIdFinalize(body) {
       } else if (error.message === 'openid-grant-failed') {
         return { error: 'openid-grant-failed' };
       } else {
-        throw error; // Re-throw other unexpected errors
+        throw error;
       }
     }
 
     const token = uuid.v4();
-
     let expiration;
     if (finalConfig.token_expiration === 'openid-provider') {
       expiration = tokenSet.expires_at ?? TOKEN_EXPIRATION_NEVER;
@@ -314,7 +386,6 @@ export function isValidRedirectUrl(url) {
   try {
     const redirectUrl = new URL(url);
     const serverUrl = new URL(serverHostname);
-
     if (
       redirectUrl.hostname === serverUrl.hostname ||
       redirectUrl.hostname === 'localhost'
