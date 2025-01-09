@@ -1,3 +1,5 @@
+import d from 'date-fns';
+
 import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
@@ -20,15 +22,17 @@ export default {
     );
 
     if (cardTxMatch) {
+      const extractedDate = d.parse(cardTxMatch[2], 'yyyy-MM-dd', new Date());
+
       transaction = {
         ...transaction,
         creditorName: cardTxMatch[4].split('\\')[0].trim(),
       };
 
-      if (booked) {
+      if (booked && d.isValid(extractedDate)) {
         transaction = {
           ...transaction,
-          bookingDate: cardTxMatch[2],
+          bookingDate: d.format(extractedDate, 'yyyy-MM-dd'),
         };
       }
     }

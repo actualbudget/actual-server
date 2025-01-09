@@ -37,6 +37,7 @@ describe('#normalizeTransaction', () => {
     ['regular text', 'Some info'],
     ['partial card text', 'PIRKUMS xxx'],
     ['null value', null],
+    ['invalid date', '(..1234) 2025-13-45 09:32 Merchant\\Address'],
   ])('normalizes non-card transaction with %s', (_, remittanceInfo) => {
     const transaction = {
       ...bookedCardTransaction,
