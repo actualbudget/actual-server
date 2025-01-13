@@ -179,8 +179,10 @@ app.post(
         }
 
         newTrans.remittanceInformationUnstructured = trans.descriptionRaw;
+        const amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
         newTrans.transactionAmount = {
-          amount: account.type === 'BANK' ? trans.amount : -trans.amount,
+          amount:
+            account.type === 'BANK' ? amountInCurrency : -amountInCurrency,
           currency: trans.currencyCode,
         };
         newTrans.transactionId = trans.id;
