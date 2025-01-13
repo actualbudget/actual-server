@@ -175,7 +175,7 @@ app.post(
           trans.paymentData.payer.documentNumber &&
           trans.paymentData.payer.documentNumber.value
         ) {
-          newTrans.payeeName = trans.paymentData.receiver.documentNumber.value;
+          newTrans.payeeName = trans.paymentData.payer.documentNumber.value;
         }
 
         newTrans.remittanceInformationUnstructured = trans.descriptionRaw;
