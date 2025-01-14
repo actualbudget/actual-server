@@ -313,7 +313,6 @@ export const goCardlessService = {
     await goCardlessService.setToken();
 
     const institution = await goCardlessService.getInstitution(institutionId);
-    const bank = BankFactory(institutionId);
 
     let response;
     try {
