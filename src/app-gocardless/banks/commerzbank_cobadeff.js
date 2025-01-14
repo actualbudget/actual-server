@@ -7,8 +7,6 @@ export default {
 
   institutionIds: ['COMMERZBANK_COBADEFF'],
 
-  accessValidForDays: 179,
-
   normalizeTransaction(transaction, _booked) {
     // remittanceInformationUnstructured is limited to 140 chars thus ...
     // ... missing information form remittanceInformationUnstructuredArray ...
