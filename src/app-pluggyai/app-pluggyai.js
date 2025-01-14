@@ -89,7 +89,7 @@ app.post(
       const account = await pluggyaiService.getAccountById(accountId);
 
       let startingBalance = parseInt(
-        Math.trunc(account.balance * 100).toString(),
+        Math.trunc(Math.round(account.balance * 100)).toString(),
       );
       if (account.type === 'CREDIT') {
         startingBalance = -startingBalance;
