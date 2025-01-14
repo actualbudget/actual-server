@@ -179,7 +179,9 @@ app.post(
         }
 
         newTrans.remittanceInformationUnstructured = trans.descriptionRaw;
-        const amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
+        let amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
+        amountInCurrency = Math.round(amountInCurrency * 100) / 100;
+
         newTrans.transactionAmount = {
           amount:
             account.type === 'BANK' ? amountInCurrency : -amountInCurrency,
