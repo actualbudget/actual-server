@@ -1,5 +1,13 @@
 import SskDusseldorfDussdeddxxx from '../ssk_dusseldorf_dussdeddxxx.js';
 
+beforeEach(() => {
+  jest.spyOn(console, 'debug').mockImplementation();
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
 describe('#normalizeTransaction', () => {
   const bookedTransactionOne = {
     transactionId: '2024102900000000-1',
@@ -12,7 +20,7 @@ describe('#normalizeTransaction', () => {
     creditorName: 'a useful creditor name',
     remittanceInformationStructured: 'structured information',
     remittanceInformationUnstructured: 'unstructured information',
-    additionalInformation: 'some aditional information',
+    additionalInformation: 'some additional information',
   };
 
   const bookedTransactionTwo = {
@@ -26,19 +34,19 @@ describe('#normalizeTransaction', () => {
     creditorName: 'a useful creditor name',
     ultimateCreditor: 'ultimate creditor',
     remittanceInformationStructured: 'structured information',
-    additionalInformation: 'some aditional information',
+    additionalInformation: 'some additional information',
   };
 
   it('properly combines remittance information', () => {
     expect(
       SskDusseldorfDussdeddxxx.normalizeTransaction(bookedTransactionOne, true)
         .remittanceInformationUnstructured,
-    ).toEqual('unstructured information some aditional information');
+    ).toEqual('unstructured information some additional information');
 
     expect(
       SskDusseldorfDussdeddxxx.normalizeTransaction(bookedTransactionTwo, true)
         .remittanceInformationUnstructured,
-    ).toEqual('structured information some aditional information');
+    ).toEqual('structured information some additional information');
   });
 
   it('prioritizes creditor names correctly', () => {
@@ -67,6 +75,11 @@ describe('#normalizeTransaction', () => {
   it('returns null for unbooked transactions', () => {
     expect(
       SskDusseldorfDussdeddxxx.normalizeTransaction(unbookedTransaction, false),
-    ).toBeNull;
+    ).toBeNull();
+
+    expect(console.debug).toHaveBeenCalledWith(
+      'Skipping unbooked transaction:',
+      unbookedTransaction.transactionId,
+    );
   });
 });
