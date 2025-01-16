@@ -1,7 +1,8 @@
+import { jest } from '@jest/globals';
 import SskDusseldorfDussdeddxxx from '../ssk_dusseldorf_dussdeddxxx.js';
 
 beforeEach(() => {
-  jest.spyOn(console, 'debug').mockImplementation();
+  jest.spyOn(console, 'debug').mockImplementation(() => {});
 });
 
 afterEach(() => {
