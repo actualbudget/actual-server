@@ -45,12 +45,12 @@ describe('#normalizeTransaction', () => {
     expect(
       SskDusseldorfDussdeddxxx.normalizeTransaction(bookedTransactionOne, true)
         .payeeName,
-    ).toEqual('a useful creditor name');
+    ).toEqual('A Useful Creditor Name');
 
     expect(
       SskDusseldorfDussdeddxxx.normalizeTransaction(bookedTransactionTwo, true)
         .payeeName,
-    ).toEqual('ultimate creditor');
+    ).toEqual('Ultimate Creditor');
   });
 
   const unbookedTransaction = {
