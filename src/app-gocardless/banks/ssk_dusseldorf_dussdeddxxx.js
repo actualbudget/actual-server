@@ -12,6 +12,10 @@ export default {
     // to make the payee and notes field be of any use. It's filled with
     // a placeholder text and wouldn't be corrected on the next sync.
     if (!_booked) {
+      console.debug(
+        'Skipping unbooked transaction:',
+        transaction.transactionId,
+      );
       return null;
     }
 
@@ -22,10 +26,12 @@ export default {
       transaction.remittanceInformationStructuredArray?.join(' ');
 
     if (transaction.additionalInformation)
-      remittanceInformationUnstructured =
-        (remittanceInformationUnstructured ?? '') +
-        ' ' +
-        transaction.additionalInformation;
+      remittanceInformationUnstructured = [
+        remittanceInformationUnstructured,
+        transaction.additionalInformation,
+      ]
+        .filter(Boolean)
+        .join(' ');
 
     const usefulCreditorName =
       transaction.ultimateCreditor ||
