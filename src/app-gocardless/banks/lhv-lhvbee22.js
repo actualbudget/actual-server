@@ -8,8 +8,6 @@ export default {
 
   institutionIds: ['LHV_LHVBEE22'],
 
-  accessValidForDays: 90,
-
   normalizeTransaction(transaction, booked) {
     // extract bookingDate and creditorName for card transactions, e.g.
     // (..1234) 2025-01-02 09:32 CrustumOU\Poordi 3\Tallinn\10156     ESTEST
