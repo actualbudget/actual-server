@@ -8,11 +8,12 @@ import BelfiusGkccbebb from './banks/belfius_gkccbebb.js';
 import BerlinerSparkasseBeladebexxx from './banks/berliner_sparkasse_beladebexxx.js';
 import BnpBeGebabebb from './banks/bnp_be_gebabebb.js';
 import CbcCregbebb from './banks/cbc_cregbebb.js';
+import CommerzbankCobadeff from './banks/commerzbank_cobadeff.js';
 import DanskebankDabno22 from './banks/danskebank_dabno22.js';
+import DirektHeladef1822 from './banks/direkt_heladef1822.js';
 import EasybankBawaatww from './banks/easybank_bawaatww.js';
 import EntercardSwednokk from './banks/entercard_swednokk.js';
 import FortuneoFtnofrp1xxx from './banks/fortuneo_ftnofrp1xxx.js';
-import HanseaticHstbdehh from './banks/hanseatic_hstbdehh.js';
 import HypeHyeeit22 from './banks/hype_hyeeit22.js';
 import IngIngbrobu from './banks/ing_ingbrobu.js';
 import IngIngddeff from './banks/ing_ingddeff.js';
@@ -20,6 +21,7 @@ import IngPlIngbplpw from './banks/ing_pl_ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
 import IsyBankItbbitmm from './banks/isybank_itbbitmm.js';
 import KbcKredbebb from './banks/kbc_kredbebb.js';
+import LhvLhvbee22 from './banks/lhv-lhvbee22.js';
 import MbankRetailBrexplpw from './banks/mbank_retail_brexplpw.js';
 import NationwideNaiagb21 from './banks/nationwide_naiagb21.js';
 import NbgEthngraaxxx from './banks/nbg_ethngraaxxx.js';
@@ -47,17 +49,19 @@ export const banks = [
   BerlinerSparkasseBeladebexxx,
   BnpBeGebabebb,
   CbcCregbebb,
+  CommerzbankCobadeff,
   DanskebankDabno22,
+  DirektHeladef1822,
   EasybankBawaatww,
   EntercardSwednokk,
   FortuneoFtnofrp1xxx,
-  HanseaticHstbdehh,
   HypeHyeeit22,
   IngIngbrobu,
   IngIngddeff,
   IngPlIngbplpw,
   IsyBankItbbitmm,
   KbcKredbebb,
+  LhvLhvbee22,
   MbankRetailBrexplpw,
   NationwideNaiagb21,
   NbgEthngraaxxx,
@@ -86,6 +90,7 @@ export const BANKS_WITH_LIMITED_HISTORY = [
   'BANKINTER_BKBKESMM',
   'BBVA_BBVAESMM',
   'BRED_BREDFRPPXXX',
+  'CAIXA_GERAL_DEPOSITOS_CGDIPTPL',
   'CAIXABANK_CAIXESBB',
   'CARTALIS_CIMTITR1',
   'CESKA_SPORITELNA_LONG_GIBACZPX',
