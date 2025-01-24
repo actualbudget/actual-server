@@ -253,6 +253,12 @@ export type Institution = {
    */
   logo: string;
 
+  /**
+   * The total number of days that a requisition stays valid before requiring
+   * renewal
+   */
+  max_access_valid_for_days: string;
+
   supported_payments?: object;
   supported_features?: string[];
 };
@@ -356,7 +362,11 @@ export type Transaction = {
   /**
    * Account reference, conditional
    */
-  creditorAccount?: string;
+  creditorAccount?:
+    | string
+    | {
+        iban?: string;
+      };
 
   /**
    * BICFI
