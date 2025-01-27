@@ -8,6 +8,10 @@ describe('ssk_dusseldorf_dussdeddxxx', () => {
     consoleSpy = jest.spyOn(console, 'debug');
   });
 
+  afterEach(() => {
+    consoleSpy.mockRestore();
+  });
+
   describe('#normalizeTransaction', () => {
     const bookedTransactionOne = {
       transactionId: '2024102900000000-1',
