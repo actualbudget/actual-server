@@ -216,6 +216,7 @@ function getAccountResponse(results, accountId, startDate) {
       continue;
     }
 
+    newTrans.sortOrder = dateToUse;
     newTrans.date = getDate(transactionDate);
     newTrans.payeeName = trans.payee;
     newTrans.remittanceInformationUnstructured = trans.description;
@@ -231,7 +232,19 @@ function getAccountResponse(results, accountId, startDate) {
     all.push(newTrans);
   }
 
-  return { balances, startingBalance, transactions: { all, booked, pending } };
+  const bookedSorted = booked.sort((a, b) => b.sortOrder - a.sortOrder);
+  const pendingSorted = pending.sort((a, b) => b.sortOrder - a.sortOrder);
+  const allSorted = all.sort((a, b) => b.sortOrder - a.sortOrder);
+
+  return {
+    balances,
+    startingBalance,
+    transactions: {
+      all: allSorted,
+      booked: bookedSorted,
+      pending: pendingSorted,
+    },
+  };
 }
 
 function invalidToken(res) {
