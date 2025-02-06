@@ -1,5 +1,5 @@
 > [!IMPORTANT] 
-> This repository was merged into [actualbudget/actual](https://github.com/actualbudget/actual/tree/master/packages/sync-server) in January and has been placed in a readonly state. For more information please visit our [Discord](https://discord.com/invite/pRYNYr4W5A).
+> This repository was merged into [actualbudget/actual](https://github.com/actualbudget/actual/tree/master/packages/sync-server) in February 2025 and has been placed in a readonly state. For more information please visit our [Discord](https://discord.com/invite/pRYNYr4W5A).
 
 --- 
 
