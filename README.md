@@ -1,7 +1,6 @@
-> [!IMPORTANT] 
-> This repository was merged into [actualbudget/actual](https://github.com/actualbudget/actual/tree/master/packages/sync-server) in February 2025 and has been placed in a readonly state. For more information please visit our [Discord](https://discord.com/invite/pRYNYr4W5A).
+> [!IMPORTANT]
+> This repository will be merged into [actualbudget/actual](https://github.com/actualbudget/actual/tree/master/packages/sync-server) in February 2025 and placed in a readonly state. For more information please see our [Docs](https://actualbudget.org/docs/actual-server-repo-move) or our [Discord](https://discord.com/invite/pRYNYr4W5A).
 
---- 
 
 This is the main project to run [Actual](https://github.com/actualbudget/actual), a local-first personal finance tool. It comes with the latest version of Actual, and a server to persist changes and make data available across all devices.
 
@@ -12,7 +11,7 @@ If you are interested in contributing, or want to know how development works, se
 
 Want to say thanks? Click the ⭐ at the top of the page.
 
-### Documentation 
+### Documentation
 
 We have a wide range of documentation on how to use Actual. This is all available in our [Community Documentation](https://actualbudget.org/docs/), including topics on [installing](https://actualbudget.org/docs/install/), [Budgeting](https://actualbudget.org/docs/budgeting/), [Account Management](https://actualbudget.org/docs/accounts/), [Tips & Tricks](https://actualbudget.org/docs/getting-started/tips-tricks) and some documentation for developers.
 
